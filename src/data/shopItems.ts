@@ -10,8 +10,9 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export const SLOT_NAMES: Record<string, string> = {
   char: 'Karakter',
-  hat: 'Şapka',
+  hat: 'Kafa süsü',
   glasses: 'Gözlük',
-  neck: 'Boyun',
+  item: 'Elindeki',
+  pet: 'Arkadaşı',
   bg: 'Arka plan',
 }

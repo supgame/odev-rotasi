@@ -6,9 +6,15 @@ const rows = [
   ...SPECIES.map((s) => [charItemId(s.id), 'char', s.name, s.price] as const),
   ...ITEMS.map((i) => [i.id, i.slot, i.name, i.price] as const),
 ]
+const ids = rows.map((r) => q(r[0])).join(', ')
 console.log(`-- Avatar kataloğu (scripts/shop-sql.ts ile src/avatar/catalog.ts'den üretildi). Tekrar çalıştırılabilir.
+-- Katalogdan kalkan eşyalar: önce takılı olanları çıkar, alımları sil, sonra eşyayı sil.
+update public.students s set equipped = coalesce((select jsonb_object_agg(k, v) from jsonb_each(s.equipped) e(k, v)
+  where v #>> '{}' in (${ids})), '{}'::jsonb);
+delete from public.purchases where item_id not in (${ids});
+delete from public.shop_items where id not in (${ids});
 alter table public.shop_items drop constraint if exists shop_items_slot_check;
-alter table public.shop_items add constraint shop_items_slot_check check (slot in ('char','hat','glasses','neck','bg'));
+alter table public.shop_items add constraint shop_items_slot_check check (slot in ('char','hat','glasses','item','pet','bg'));
 
 create or replace function public.equip_item(p_token text, p_slot text, p_item_id text)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -17,7 +23,7 @@ declare
   v_equipped jsonb;
 begin
   v_student := odev_private.lock_student(p_token);
-  if p_slot is null or p_slot not in ('char', 'hat', 'glasses', 'neck', 'bg') then
+  if p_slot is null or p_slot not in ('char', 'hat', 'glasses', 'item', 'pet', 'bg') then
     raise exception 'YUVA_GECERSIZ';
   end if;
   if p_item_id is null then

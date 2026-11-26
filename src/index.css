@@ -94,23 +94,24 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 .shop-head { flex-direction: column; text-align: center; gap: .4rem; }
 .stars-pill { display: inline-block; background: #ffd93d; color: #5a4300; font-weight: 800; border-radius: 99px; padding: .2rem .9rem; font-size: 1.2rem; margin: .2rem .4rem .4rem 0; }
 
-.avatar { position: relative; border-radius: 50%; display: grid; place-items: center; overflow: hidden; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.12); flex: none; }
-.avatar.bare { border: 0; box-shadow: none; border-radius: 0; overflow: visible; background: none; }
+.avatar { position: relative; flex: none; }
+.av-bg { position: absolute; inset: 0; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.av-stage { position: absolute; inset: 0; transition: transform .35s ease; }
+.av-img { position: absolute; height: auto; pointer-events: none; user-select: none; }
+.av-item { transform: rotate(-10deg); filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
+.av-pet { filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); animation: petbob 2.2s ease-in-out infinite; }
+@keyframes petbob { 50% { transform: translateY(-5%) rotate(-4deg); } }
+.avatar.happy .av-stage { animation: hop .45s ease-in-out infinite alternate; }
 .avatar-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
-.av-eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.6s infinite; }
-@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
-.av-sparkle { animation: twinkle 1.6s ease-in-out infinite; }
-@keyframes twinkle { 50% { opacity: .2; } }
-.avatar circle, .avatar ellipse { transition: cx .35s ease, cy .35s ease; }
 .pin-head .avatar { margin: 0 auto .4rem; }
 .t-who { display: inline-flex; align-items: center; gap: .4rem; }
-.t-who .avatar { border-width: 2px; }
+.t-who .av-bg { border-width: 2px; }
 .small-note { font-weight: 800; font-size: .9rem; padding: .35rem 0; }
 
 /* soruya bakan avatar */
-.peek-wrap { position: relative; margin-top: 92px; }
+.peek-wrap { position: relative; }
 .peek-wrap .card.question { position: relative; z-index: 1; margin-top: 0; }
-.peeker { position: absolute; top: -82px; left: 50%; margin-left: -66px; z-index: 0; animation: peekin .45s cubic-bezier(.3,1.6,.6,1); }
+.peeker { position: absolute; left: 50%; margin-left: -68px; z-index: 0; animation: peekin .45s cubic-bezier(.3,1.6,.6,1); }
 .peeker.hop { animation: hop .5s ease-in-out infinite alternate; }
 @keyframes peekin { from { transform: translateY(46px); } to { transform: none; } }
 @keyframes hop { to { transform: translateY(-10px); } }
@@ -119,7 +120,7 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 @keyframes nodB { 30% { transform: translateY(5px) rotate(3deg); } 60% { transform: translateY(-2px); } }
 .paw { position: absolute; z-index: 2; top: -7px; width: 22px; height: 15px; border-radius: 10px 10px 6px 6px; border: 2px solid rgba(0,0,0,.2); }
 .paw.l { left: calc(50% - 50px); } .paw.r { left: calc(50% + 28px); }
-@media (prefers-reduced-motion: reduce) { .av-eyes, .peeker, .peek-nod, .avatar.bounce { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .av-pet, .peeker, .peek-nod, .avatar.bounce, .avatar.happy .av-stage { animation: none !important; } }
 .avatar.bounce { animation: bounce 2.4s ease-in-out infinite; }
 @keyframes bounce { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-4px) rotate(-2deg); } 75% { transform: translateY(-2px) rotate(2deg); } }
 

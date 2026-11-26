@@ -1,4 +1,4 @@
-export type Slot = 'char' | 'hat' | 'glasses' | 'neck' | 'bg'
+export type Slot = 'char' | 'hat' | 'glasses' | 'item' | 'pet' | 'bg'
 export type Equipped = Partial<Record<Slot, string>>
 
 export interface Question {

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { errText, type Equipped, type StudentHome } from '../data/types'
-import { Avatar, speciesOf } from '../avatar/Avatar'
-import type { Look, Mood } from '../avatar/Character'
+import { Avatar, pawColor, peekMetrics, speciesOf, type Look, type Mood } from '../avatar/Avatar'
 
 type A = NonNullable<StudentHome['assignment']>
 
 // Avatar kartın üst kenarından soruya bakar. Seçilen şıkkın doğru olup olmadığını BİLMEZ ve belli etmez:
 // her seçimde aynı tepkiyi verir (o yöne bakar, başını sallar).
+const PEEK = 136
+
 export function Quiz({ assignment, onSubmit, onCancel, animal, equipped }: {
   assignment: A; onSubmit: (answers: Record<string, number>) => Promise<void>; onCancel: () => void
   animal: string; equipped: Equipped
@@ -44,6 +45,7 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped }: {
     setNod((v) => v + 1)
   }
   const sp = speciesOf(animal, equipped)
+  const pk = peekMetrics(sp, PEEK, !!equipped.hat)
 
   async function send() {
     if (blanks > 0) {
@@ -69,14 +71,14 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped }: {
         ))}
       </div>
 
-      <div className="peek-wrap">
-        <div className={'peeker' + (busy ? ' hop' : '')} key={'p' + i}>
+      <div className="peek-wrap" style={{ marginTop: pk.room }}>
+        <div className={'peeker' + (busy ? ' hop' : '')} key={'p' + i} style={{ top: -pk.offset }}>
           <div className={'peek-nod' + (nod ? ' n' + (nod % 2) : '')}>
-            <Avatar animal={animal} equipped={{ ...equipped, bg: undefined }} size={132} frame={false} look={look} mood={busy ? 'happy' : mood} />
+            <Avatar animal={animal} equipped={{ ...equipped, bg: undefined }} size={PEEK} frame={false} look={look} mood={busy ? 'happy' : mood} />
           </div>
         </div>
-        <span className="paw l" style={{ background: sp.body }} />
-        <span className="paw r" style={{ background: sp.body }} />
+        <span className="paw l" style={{ background: pawColor(sp) }} />
+        <span className="paw r" style={{ background: pawColor(sp) }} />
       <section className="card question" key={q.id}>
         <p className="q-text big">{q.text}</p>
         <div className={'options ' + (q.type === 'tf' ? 'tf' : '')}>

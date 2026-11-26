@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../data/api'
 import { SLOT_NAMES } from '../data/shopItems'
 import { errText, type ShopItem, type Slot, type StudentHome } from '../data/types'
-import { Avatar, ItemPreview, speciesOf } from '../avatar/Avatar'
+import { Avatar, ItemPreview, canWearGlasses, speciesOf } from '../avatar/Avatar'
 import { charItemId } from '../avatar/catalog'
 
 export function Shop({ home, token, onBack, onChange }: {
@@ -48,6 +48,7 @@ export function Shop({ home, token, onBack, onChange }: {
             <div key={it.id} className={'shop-item' + (worn ? ' worn' : '')}>
               <ItemPreview id={it.id} slot={it.slot} animal={home.me.animal} equipped={eq} />
               <b>{it.name}</b>
+              {it.slot === 'glasses' && !canWearGlasses(speciesOf(home.me.animal, eq)) && <span className="hint">Bu karakterde görünmez</span>}
               {it.slot === 'char' && worn ? (
                 <span className="muted small-note">Şu an bu</span>
               ) : owned ? (
