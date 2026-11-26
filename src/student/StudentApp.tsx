@@ -53,6 +53,8 @@ export function StudentApp() {
     return (
       <Quiz
         assignment={home.assignment}
+        animal={home.me.animal}
+        equipped={home.me.equipped}
         onCancel={() => setScreen('home')}
         onSubmit={async (answers) => {
           const r = await api.submit(token!, home.assignment!.id, answers)
@@ -99,7 +101,7 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
           <div className="name-grid">
             {list.filter((s) => s.grade === g).map((s) => (
               <button key={s.id} className="name-card" onClick={() => onPick(s)}>
-                <span className="name-emoji">{s.animal}</span>
+                <Avatar animal={s.animal} size={64} />
                 <span>{s.display_name}</span>
               </button>
             ))}
@@ -139,7 +141,7 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
     <div className="page narrow">
       <button className="link" onClick={onBack}>← Ben değilim</button>
       <div className="pin-head">
-        <span className="name-emoji big">{student.animal}</span>
+        <Avatar animal={student.animal} size={110} bounce />
         <h2>{student.display_name}</h2>
         <p>{title}</p>
         <p className="hint pin-hint">

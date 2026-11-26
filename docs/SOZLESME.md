@@ -14,12 +14,12 @@ Tek sabit link (WhatsApp grubuna sabitlenir). Cuma öğretmen seti yükler, link
 - `classes(id uuid, name text, code text unique, teacher_id uuid -> auth.users, goal_target int default 300, goal_reward text)`
 - `students(id uuid, class_id, display_name text, animal text, grade int check 3|4, pin text null, stars_bonus int default 0, equipped jsonb default '{}', created_at)`
   - `pin` null ise öğrenci ilk girişte kendi PIN'ini koyar.
-  - `equipped`: `{ "hat": "item_id", "glasses": "...", "neck": "...", "bg": "..." }`
+  - `equipped`: `{ "char": "char_<tür>", "hat": "item_id", "glasses": "...", "neck": "...", "bg": "..." }` — `char` yoksa `animal` (tür id’si, eski kayıtlarda emoji) gösterilir.
 - `assignments(id uuid, class_id, grade int, title text, opens_at timestamptz, closes_at timestamptz, questions jsonb, created_at)`
   - `questions`: `[{ "id": "q1", "type": "mc" | "tf", "text": "...", "options": ["..",".."], "answer": 0, "explanation": "..." }]`
   - `tf` için options `["Doğru","Yanlış"]`.
 - `submissions(id uuid, assignment_id, student_id, answers jsonb, correct int, total int, stars_earned int, source text 'online'|'kagit', created_at, unique(assignment_id, student_id))`
-- `shop_items(id text pk, slot text 'hat'|'glasses'|'neck'|'bg', name text, price int)` — tohum veri.
+- `shop_items(id text pk, slot text 'char'|'hat'|'glasses'|'neck'|'bg', name text, price int)` — `src/avatar/catalog.ts`'den üretilir (0003). Fiyatı 0 olan karakterler bedava alınır.
 - `purchases(student_id, item_id, created_at, pk(student_id,item_id))`
 - `student_sessions(token text pk, student_id, created_at, expires_at)` — 60 gün.
 - `login_attempts(student_id, at timestamptz)` — 10 dakikada 5 yanlış PIN'den sonra kilit.

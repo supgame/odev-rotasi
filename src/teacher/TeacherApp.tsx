@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Avatar } from '../avatar/Avatar'
+import { SPECIES } from '../avatar/catalog'
 import { api } from '../data/api'
 import { resetDemo } from '../data/mock'
 import { errText, type TAssignment, type TClass, type TStudent, type TSubmission } from '../data/types'
 import { parseQuestions, questionsToText } from './questionText'
 
 type Tab = 'odev' | 'sonuc' | 'ogrenci' | 'sinif'
-const ANIMALS = ['🦁', '🐱', '🐶', '🦊', '🐼', '🐰', '🐯', '🐨', '🐸', '🐵', '🐻', '🐷', '🐮', '🐧', '🦉', '🐢', '🐙', '🦄', '🐝', '🐞']
+// Öğretmenin verdiği başlangıç karakteri (öğrenci dükkandan başkasını da alabilir).
+const ANIMALS = SPECIES
 
 export function TeacherApp() {
   const [inn, setIn] = useState<boolean | null>(null)
@@ -209,7 +212,7 @@ function Results() {
                 const sub = subs.find((x) => x.student_id === s.id)
                 return (
                   <tr key={s.id}>
-                    <td>{s.animal} {s.display_name}</td>
+                    <td><span className="t-who"><Avatar animal={s.animal} size={34} /> {s.display_name}</span></td>
                     <td>{sub ? (sub.source === 'kagit' ? '📄 Kâğıttan' : '📱 Online') : '— yapmadı'}</td>
                     <td>{sub ? `${sub.correct}/${sub.total}` : ''}</td>
                     <td>{sub ? `+${sub.stars_earned}` : ''}</td>
@@ -252,7 +255,7 @@ function Results() {
 function Students() {
   const [list, setList] = useState<TStudent[]>([])
   const [show, setShow] = useState(false)
-  const [n, setN] = useState({ display_name: '', animal: ANIMALS[0], grade: 3 as 3 | 4 })
+  const [n, setN] = useState({ display_name: '', animal: ANIMALS[0].id, grade: 3 as 3 | 4 })
   const load = useCallback(() => { api.tStudents().then(setList) }, [])
   useEffect(load, [load])
   return (
@@ -264,7 +267,7 @@ function Students() {
         <tbody>
           {list.map((s) => (
             <tr key={s.id}>
-              <td>{s.animal} {s.display_name}</td>
+              <td><span className="t-who"><Avatar animal={s.animal} size={34} /> {s.display_name}</span></td>
               <td>{s.grade}</td>
               <td className="mono">{s.pin === null ? <i className="muted">henüz yok</i> : show ? s.pin : '••••'}</td>
               <td>{s.stars}</td>
@@ -280,7 +283,8 @@ function Students() {
       <div className="row">
         <input placeholder="Ad" value={n.display_name} onChange={(e) => setN({ ...n, display_name: e.target.value })} />
         <select value={n.grade} onChange={(e) => setN({ ...n, grade: Number(e.target.value) as 3 | 4 })}><option value={3}>3. sınıf</option><option value={4}>4. sınıf</option></select>
-        <select value={n.animal} onChange={(e) => setN({ ...n, animal: e.target.value })}>{ANIMALS.map((a) => <option key={a}>{a}</option>)}</select>
+        <select value={n.animal} onChange={(e) => setN({ ...n, animal: e.target.value })}>{ANIMALS.map((a) => <option key={a.id} value={a.id}>{a.emoji} {a.name}</option>)}</select>
+        <Avatar animal={n.animal} size={44} />
         <button className="btn" disabled={!n.display_name.trim()} onClick={async () => { await api.tAddStudent({ ...n, display_name: n.display_name.trim() }); setN({ ...n, display_name: '' }); load() }}>Ekle</button>
       </div>
     </section>

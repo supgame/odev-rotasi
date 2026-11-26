@@ -1,0 +1,1 @@
+[gelistirme/taslak/odev_rotasi_taslak.png](/home/Edrow/ChatGPT/odev-rotasi/gelistirme/taslak/odev_rotasi_taslak.png)

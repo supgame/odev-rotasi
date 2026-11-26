@@ -8,3 +8,5 @@ Birleştirilmiş 3-4. sınıf için hafta sonu tekrar ödevi. Tek sabit link (Wh
 - Veri/RPC sözleşmesi: `docs/SOZLESME.md`. Soru yazma biçimi: `src/teacher/questionText.ts`.
 
 Durum (26 Kas 2026): Supabase projesi kuruldu (0001 + 0002 migration, `seed_sinif.sql` ile DOGANLI sınıfı, yeni kayıt kapalı, tek öğretmen kullanıcısı). Öğrenci akışı canlı veritabanıyla denendi, test verisi silindi. Öğretmen paneli canlıda henüz denenmedi (öğretmen şifresi kullanıcıda). Yayın (GitHub Pages) yok.
+
+Avatarlar (26 Kas 2026): kendi SVG karakter motoru, emoji yok. 80 karakter (10'u bedava) + 72 eşya (şapka, gözlük, boyun, arka plan); tek kaynak `src/avatar/catalog.ts`. Hepsini görmek için `#/galeri`. Soru çözerken avatar kartın üstünden bakar, şıkkın doğruluğunu belli etmez. Yeni karakter/eşya: `catalog.ts`'e ekle (+ eşyaysa `items.tsx`'e çizim), sonra `node scripts/shop-sql.ts > supabase/migrations/000X_....sql` ve SQL Editor'da çalıştır.
