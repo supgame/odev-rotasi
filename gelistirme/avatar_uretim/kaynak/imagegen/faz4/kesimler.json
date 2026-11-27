@@ -1,0 +1,133 @@
+{
+  "01.png": {
+    "cells": [
+      "fox",
+      "cat",
+      "dog",
+      "bear",
+      "rabbit",
+      "panda",
+      "frog",
+      "lion",
+      "chick"
+    ]
+  },
+  "02.png": {
+    "cells": [
+      "pig",
+      "tiger",
+      "monkey",
+      "mouse",
+      "hamster",
+      "cow",
+      "owl",
+      "penguin",
+      "chicken"
+    ]
+  },
+  "03.png": {
+    "cells": [
+      "duck",
+      "koala",
+      "wolf",
+      "raccoon",
+      "horse",
+      "zebra",
+      "polar",
+      "boar",
+      "blackcat"
+    ]
+  },
+  "04.png": {
+    "cells": [
+      "poodle",
+      "hedgehog",
+      "chipmunk",
+      "turtle",
+      "snail",
+      "bee",
+      "ladybug",
+      "butterfly",
+      "fish"
+    ]
+  },
+  "05.png": {
+    "cells": [
+      "blowfish",
+      "crab",
+      "goat",
+      "ewe",
+      "rooster",
+      "parrot",
+      "flamingo",
+      "dove",
+      "swan"
+    ]
+  },
+  "06.png": {
+    "cells": [
+      "eagle",
+      "octopus",
+      "dolphin",
+      "whale",
+      "seal",
+      "otter",
+      "beaver",
+      "skunk",
+      "badger"
+    ],
+    "alpha_floor": 190
+  },
+  "07.png": {
+    "cells": [
+      "sloth",
+      "kangaroo",
+      "llama",
+      "camel",
+      "deer",
+      "moose",
+      "bat",
+      "giraffe",
+      "elephant"
+    ]
+  },
+  "08.png": {
+    "cells": [
+      "hippo",
+      "rhino",
+      "gorilla",
+      "orangutan",
+      "leopard",
+      "bison",
+      "croc",
+      "lizard",
+      "shark"
+    ]
+  },
+  "09.png": {
+    "cells": [
+      "peacock",
+      "jelly",
+      "dodo",
+      "mammoth",
+      "trex",
+      "sauropod",
+      "unicorn",
+      "dragon",
+      "phoenix"
+    ]
+  },
+  "10.png": {
+    "cells": [
+      "robot",
+      "alien",
+      "invader",
+      "ghost",
+      "pumpkin",
+      "snowman",
+      "sun",
+      "moon",
+      null
+    ]
+  }
+}

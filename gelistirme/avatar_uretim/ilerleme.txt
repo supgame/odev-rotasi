@@ -1,0 +1,4 @@
+faz 1 bitti rc=0 08:34
+faz 2 bitti rc=0 08:48
+faz 3 bitti rc=0 09:01
+faz 4 bitti rc=0 09:08

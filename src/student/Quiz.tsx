@@ -6,7 +6,7 @@ type A = NonNullable<StudentHome['assignment']>
 
 // Avatar kartın üst kenarından soruya bakar. Seçilen şıkkın doğru olup olmadığını BİLMEZ ve belli etmez:
 // her seçimde aynı tepkiyi verir (o yöne bakar, başını sallar).
-const PEEK = 136
+const PEEK = 190
 
 export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }: {
   assignment: A; onSubmit: (answers: Record<string, number>) => Promise<void>; onCancel: () => void

@@ -101,12 +101,12 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 .av-free { position: absolute; inset: 0; }
 .av-kid { position: absolute; left: 3%; width: 94%; height: auto; pointer-events: none; user-select: none; }
 .av-free .av-kid { left: 0; top: 0; width: 100%; }
-.av-pet { position: absolute; left: -12%; bottom: -6%; width: 42%; height: auto; z-index: 1; pointer-events: none;
+.av-pet { position: absolute; left: -16%; bottom: -8%; width: 52%; height: auto; z-index: 1; pointer-events: none;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); animation: petbob 2.2s ease-in-out infinite; }
 .pet-preview { width: 84px; height: 84px; border-radius: 50%; background: #fff6e0; display: grid; place-items: center; }
 .pet-preview img { width: 70%; height: auto; }
-.pet-preview.body { overflow: hidden; align-items: end; background: #e9f3ff; }
-.pet-preview.body { border-radius: 18px; }
+.pet-preview.body { overflow: hidden; display: block; position: relative; background: #e9f3ff; border-radius: 18px; }
+.pet-preview.body .avatar { position: absolute; left: 50%; top: -52px; transform: translateX(-50%); }
 @keyframes petbob { 50% { transform: translateY(-5%) rotate(-4deg); } }
 .avatar.happy .av-stage { animation: hop .45s ease-in-out infinite alternate; }
 .pin-head .avatar { margin: 0 auto .4rem; }
@@ -117,7 +117,7 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 /* soruya bakan avatar */
 .peek-wrap { position: relative; }
 .peek-wrap .card.question { position: relative; z-index: 1; margin-top: 0; }
-.peeker { position: absolute; left: 50%; margin-left: -68px; z-index: 0; animation: peekin .45s cubic-bezier(.3,1.6,.6,1); }
+.peeker { position: absolute; left: 50%; margin-left: -95px; z-index: 0; animation: peekin .45s cubic-bezier(.3,1.6,.6,1); }
 .peeker.hop { animation: hop .5s ease-in-out infinite alternate; }
 @keyframes peekin { from { transform: translateY(46px); } to { transform: none; } }
 @keyframes hop { to { transform: translateY(-10px); } }

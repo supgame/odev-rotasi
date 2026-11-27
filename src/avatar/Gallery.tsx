@@ -26,7 +26,7 @@ export function Gallery() {
           </div>
         </section>
       ))}
-      <p className="hint">Çocuk: Avataaars, Pablo Stanley (avataaars.com, ticari dahil serbest), DiceBear ile. Hayvanlar: Microsoft Fluent Emoji (MIT).</p>
+      <p className="hint">Çocuk ve eşyalar: Ödev Rotası için ImageGen ile çizildi (katmanlı, public/av). Hayvanlar aynı çizgide.</p>
     </div>
   )
 }

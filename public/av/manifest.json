@@ -1,0 +1,1849 @@
+{
+  "version": 2,
+  "canvas": 512,
+  "palette": {
+    "skin_light": {
+      "name": "Açık",
+      "hex": "f6d4b4"
+    },
+    "skin_wheat": {
+      "name": "Buğday",
+      "hex": "ddb18a"
+    },
+    "skin_brown": {
+      "name": "Esmer",
+      "hex": "b77c56"
+    },
+    "skin_tan": {
+      "name": "Bronz",
+      "hex": "8d563b"
+    },
+    "skin_dark": {
+      "name": "Koyu",
+      "hex": "59372c"
+    },
+    "hcolor_black": {
+      "name": "Siyah",
+      "hex": "2c1b18"
+    },
+    "hcolor_dark_brown": {
+      "name": "Koyu kahve",
+      "hex": "493027"
+    },
+    "hcolor_brown": {
+      "name": "Kahve",
+      "hex": "74472e"
+    },
+    "hcolor_auburn": {
+      "name": "Kızıl kahve",
+      "hex": "8e402b"
+    },
+    "hcolor_blonde": {
+      "name": "Sarı",
+      "hex": "d6ad56"
+    },
+    "hcolor_golden_blonde": {
+      "name": "Altın sarısı",
+      "hex": "edc66c"
+    },
+    "hcolor_red": {
+      "name": "Kızıl",
+      "hex": "bd4537"
+    },
+    "hcolor_platinum": {
+      "name": "Platin",
+      "hex": "e8dfc5"
+    },
+    "hcolor_silver": {
+      "name": "Gümüş",
+      "hex": "a9adb4"
+    },
+    "hcolor_pink": {
+      "name": "Pembe",
+      "hex": "e783aa"
+    },
+    "hcolor_blue": {
+      "name": "Mavi",
+      "hex": "478acb"
+    },
+    "hcolor_purple": {
+      "name": "Mor",
+      "hex": "885bc0"
+    },
+    "hcolor_green": {
+      "name": "Yeşil",
+      "hex": "53a978"
+    },
+    "hcolor_crimson": {
+      "name": "Kırmızı",
+      "hex": "d83a4f"
+    },
+    "hcolor_turquoise": {
+      "name": "Turkuaz",
+      "hex": "40b9b5"
+    },
+    "ccolor_blue": {
+      "name": "Mavi",
+      "hex": "5199e4"
+    },
+    "ccolor_red": {
+      "name": "Kırmızı",
+      "hex": "ff5c5c"
+    },
+    "ccolor_gray": {
+      "name": "Gri",
+      "hex": "929598"
+    },
+    "ccolor_navy": {
+      "name": "Lacivert",
+      "hex": "25557c"
+    },
+    "ccolor_white": {
+      "name": "Beyaz",
+      "hex": "ffffff"
+    },
+    "ccolor_black": {
+      "name": "Siyah",
+      "hex": "262e33"
+    },
+    "ccolor_sky": {
+      "name": "Açık mavi",
+      "hex": "65c9ff"
+    },
+    "ccolor_mint": {
+      "name": "Nane yeşili",
+      "hex": "a7ffc4"
+    },
+    "ccolor_pink": {
+      "name": "Pembe",
+      "hex": "ffafb9"
+    },
+    "ccolor_lemon": {
+      "name": "Limon",
+      "hex": "ffffb1"
+    },
+    "ccolor_ice": {
+      "name": "Buz mavisi",
+      "hex": "b1e2ff"
+    },
+    "ccolor_smoke": {
+      "name": "Duman",
+      "hex": "3c4f5c"
+    },
+    "ccolor_fuchsia": {
+      "name": "Fuşya",
+      "hex": "ff488e"
+    },
+    "ccolor_green": {
+      "name": "Yeşil",
+      "hex": "3fa34d"
+    },
+    "ccolor_purple": {
+      "name": "Mor",
+      "hex": "8e5bd8"
+    },
+    "ccolor_orange": {
+      "name": "Turuncu",
+      "hex": "ff9f43"
+    },
+    "ccolor_gold": {
+      "name": "Altın",
+      "hex": "e8b923"
+    }
+  },
+  "slots": {
+    "skin": {
+      "items": [
+        {
+          "id": "skin_light",
+          "name": "Açık",
+          "price": 0,
+          "color": "f6d4b4"
+        },
+        {
+          "id": "skin_wheat",
+          "name": "Buğday",
+          "price": 0,
+          "color": "ddb18a"
+        },
+        {
+          "id": "skin_brown",
+          "name": "Esmer",
+          "price": 0,
+          "color": "b77c56"
+        },
+        {
+          "id": "skin_tan",
+          "name": "Bronz",
+          "price": 0,
+          "color": "8d563b"
+        },
+        {
+          "id": "skin_dark",
+          "name": "Koyu",
+          "price": 0,
+          "color": "59372c"
+        }
+      ]
+    },
+    "hair": {
+      "items": [
+        {
+          "id": "hair_short",
+          "name": "Kısa düz",
+          "price": 0,
+          "layers": {
+            "front": "hair/short_front.webp",
+            "frontUnderHat": "hair/short_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/short_front_mask.webp",
+            "frontUnderHat": "hair/short_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 49.2634,
+            "frontUnderHat": 35.0829
+          }
+        },
+        {
+          "id": "hair_ponytail",
+          "name": "At kuyruğu",
+          "price": 0,
+          "layers": {
+            "back": "hair/ponytail_back.webp",
+            "front": "hair/ponytail_front.webp",
+            "backUnderHat": "hair/ponytail_back_hat.webp",
+            "frontUnderHat": "hair/ponytail_front_hat.webp"
+          },
+          "mask": {
+            "back": "hair/ponytail_back_mask.webp",
+            "front": "hair/ponytail_front_mask.webp",
+            "backUnderHat": "hair/ponytail_back_hat_mask.webp",
+            "frontUnderHat": "hair/ponytail_front_hat_mask.webp"
+          },
+          "ref": {
+            "back": 48.9021,
+            "front": 56.2769,
+            "backUnderHat": 48.9021,
+            "frontUnderHat": 38.5097
+          }
+        },
+        {
+          "id": "hair_curly",
+          "name": "Kısa kıvırcık",
+          "price": 10,
+          "layers": {
+            "front": "hair/curly_front.webp",
+            "frontUnderHat": "hair/curly_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/curly_front_mask.webp",
+            "frontUnderHat": "hair/curly_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 74.783,
+            "frontUnderHat": 50.4912
+          }
+        },
+        {
+          "id": "hair_afro",
+          "name": "Afro",
+          "price": 10,
+          "layers": {
+            "front": "hair/afro_front.webp",
+            "frontUnderHat": "hair/afro_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/afro_front_mask.webp",
+            "frontUnderHat": "hair/afro_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 67.3015,
+            "frontUnderHat": 34.218
+          }
+        },
+        {
+          "id": "hair_straight_long",
+          "name": "Uzun düz",
+          "price": 10,
+          "layers": {
+            "front": "hair/straight_long_front.webp",
+            "frontUnderHat": "hair/straight_long_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/straight_long_front_mask.webp",
+            "frontUnderHat": "hair/straight_long_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 75.9414,
+            "frontUnderHat": 70.8861
+          }
+        },
+        {
+          "id": "hair_bob",
+          "name": "Omuz boyu küt",
+          "price": 10,
+          "layers": {
+            "front": "hair/bob_front.webp",
+            "frontUnderHat": "hair/bob_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/bob_front_mask.webp",
+            "frontUnderHat": "hair/bob_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 75.4913,
+            "frontUnderHat": 63.2632
+          }
+        },
+        {
+          "id": "hair_bun",
+          "name": "Tepede topuz",
+          "price": 10,
+          "layers": {
+            "front": "hair/bun_front.webp",
+            "frontUnderHat": "hair/bun_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/bun_front_mask.webp",
+            "frontUnderHat": "hair/bun_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 67.2256,
+            "frontUnderHat": 37.1956
+          }
+        },
+        {
+          "id": "hair_braids",
+          "name": "İki örgü",
+          "price": 10,
+          "layers": {
+            "front": "hair/braids_front.webp",
+            "frontUnderHat": "hair/braids_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/braids_front_mask.webp",
+            "frontUnderHat": "hair/braids_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 75.2019,
+            "frontUnderHat": 73.0112
+          }
+        },
+        {
+          "id": "hair_space_buns",
+          "name": "İki yan topuz",
+          "price": 10,
+          "layers": {
+            "front": "hair/space_buns_front.webp",
+            "frontUnderHat": "hair/space_buns_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/space_buns_front_mask.webp",
+            "frontUnderHat": "hair/space_buns_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 79.3065,
+            "frontUnderHat": 42.2014
+          }
+        },
+        {
+          "id": "hair_wavy_long",
+          "name": "Uzun dalgalı",
+          "price": 10,
+          "layers": {
+            "front": "hair/wavy_long_front.webp",
+            "frontUnderHat": "hair/wavy_long_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/wavy_long_front_mask.webp",
+            "frontUnderHat": "hair/wavy_long_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 82.4071,
+            "frontUnderHat": 78.2315
+          }
+        },
+        {
+          "id": "hair_bangs_long",
+          "name": "Kahküllü uzun",
+          "price": 10,
+          "layers": {
+            "front": "hair/bangs_long_front.webp",
+            "frontUnderHat": "hair/bangs_long_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/bangs_long_front_mask.webp",
+            "frontUnderHat": "hair/bangs_long_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 82.1807,
+            "frontUnderHat": 73.2094
+          }
+        },
+        {
+          "id": "hair_spiky",
+          "name": "Dikenli kirpi saç",
+          "price": 10,
+          "layers": {
+            "front": "hair/spiky_front.webp",
+            "frontUnderHat": "hair/spiky_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/spiky_front_mask.webp",
+            "frontUnderHat": "hair/spiky_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 71.9758,
+            "frontUnderHat": 38.2567
+          }
+        },
+        {
+          "id": "hair_side_part",
+          "name": "Yandan ayrık düzgün",
+          "price": 10,
+          "layers": {
+            "front": "hair/side_part_front.webp",
+            "frontUnderHat": "hair/side_part_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/side_part_front_mask.webp",
+            "frontUnderHat": "hair/side_part_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 73.0211,
+            "frontUnderHat": 37.0763
+          }
+        },
+        {
+          "id": "hair_headscarf",
+          "name": "Başörtüsü",
+          "price": 10,
+          "layers": {
+            "front": "hair/headscarf_front.webp",
+            "frontUnderHat": "hair/headscarf_front_hat.webp",
+            "back": null,
+            "backUnderHat": null
+          },
+          "mask": {
+            "front": "hair/headscarf_front_mask.webp",
+            "frontUnderHat": "hair/headscarf_front_hat_mask.webp"
+          },
+          "ref": {
+            "front": 86.1197,
+            "frontUnderHat": 80.6685
+          }
+        }
+      ]
+    },
+    "hcolor": {
+      "items": [
+        {
+          "id": "hcolor_black",
+          "name": "Siyah",
+          "price": 0,
+          "color": "2c1b18"
+        },
+        {
+          "id": "hcolor_dark_brown",
+          "name": "Koyu kahve",
+          "price": 0,
+          "color": "493027"
+        },
+        {
+          "id": "hcolor_brown",
+          "name": "Kahve",
+          "price": 0,
+          "color": "74472e"
+        },
+        {
+          "id": "hcolor_auburn",
+          "name": "Kızıl kahve",
+          "price": 0,
+          "color": "8e402b"
+        },
+        {
+          "id": "hcolor_blonde",
+          "name": "Sarı",
+          "price": 0,
+          "color": "d6ad56"
+        },
+        {
+          "id": "hcolor_golden_blonde",
+          "name": "Altın sarısı",
+          "price": 0,
+          "color": "edc66c"
+        },
+        {
+          "id": "hcolor_red",
+          "name": "Kızıl",
+          "price": 10,
+          "color": "bd4537"
+        },
+        {
+          "id": "hcolor_platinum",
+          "name": "Platin",
+          "price": 10,
+          "color": "e8dfc5"
+        },
+        {
+          "id": "hcolor_silver",
+          "name": "Gümüş",
+          "price": 15,
+          "color": "a9adb4"
+        },
+        {
+          "id": "hcolor_pink",
+          "name": "Pembe",
+          "price": 20,
+          "color": "e783aa"
+        },
+        {
+          "id": "hcolor_blue",
+          "name": "Mavi",
+          "price": 20,
+          "color": "478acb"
+        },
+        {
+          "id": "hcolor_purple",
+          "name": "Mor",
+          "price": 20,
+          "color": "885bc0"
+        },
+        {
+          "id": "hcolor_green",
+          "name": "Yeşil",
+          "price": 25,
+          "color": "53a978"
+        },
+        {
+          "id": "hcolor_crimson",
+          "name": "Kırmızı",
+          "price": 25,
+          "color": "d83a4f"
+        },
+        {
+          "id": "hcolor_turquoise",
+          "name": "Turkuaz",
+          "price": 25,
+          "color": "40b9b5"
+        }
+      ]
+    },
+    "hat": {
+      "items": [
+        {
+          "id": "hat_cap_red",
+          "name": "Kırmızı beyzbol şapkası",
+          "price": 15,
+          "layer": "hat/cap.webp",
+          "back": null,
+          "mask": "hat/cap_mask.webp",
+          "ref": 71.7435,
+          "color": "d83a3a"
+        },
+        {
+          "id": "hat_cap_blue",
+          "name": "Mavi beyzbol şapkası",
+          "price": 15,
+          "layer": "hat/cap.webp",
+          "back": null,
+          "mask": "hat/cap_mask.webp",
+          "ref": 71.7435,
+          "color": "448acd"
+        },
+        {
+          "id": "hat_cap_green",
+          "name": "Yeşil beyzbol şapkası",
+          "price": 15,
+          "layer": "hat/cap.webp",
+          "back": null,
+          "mask": "hat/cap_mask.webp",
+          "ref": 71.7435,
+          "color": "579765"
+        },
+        {
+          "id": "hat_cap_black",
+          "name": "Siyah beyzbol şapkası",
+          "price": 15,
+          "layer": "hat/cap.webp",
+          "back": null,
+          "mask": "hat/cap_mask.webp",
+          "ref": 71.7435,
+          "color": "352e39"
+        },
+        {
+          "id": "hat_pom_red",
+          "name": "Kırmızı ponponlu bere",
+          "price": 15,
+          "layer": "hat/pom.webp",
+          "back": null,
+          "mask": "hat/pom_mask.webp",
+          "ref": 107.2459,
+          "color": "d83a3a"
+        },
+        {
+          "id": "hat_pom_purple",
+          "name": "Mor ponponlu bere",
+          "price": 15,
+          "layer": "hat/pom.webp",
+          "back": null,
+          "mask": "hat/pom_mask.webp",
+          "ref": 107.2459,
+          "color": "8655b0"
+        },
+        {
+          "id": "hat_pom_navy",
+          "name": "Lacivert ponponlu bere",
+          "price": 15,
+          "layer": "hat/pom.webp",
+          "back": null,
+          "mask": "hat/pom_mask.webp",
+          "ref": 107.2459,
+          "color": "304779"
+        },
+        {
+          "id": "hat_pom_cream",
+          "name": "Krem ponponlu bere",
+          "price": 15,
+          "layer": "hat/pom.webp",
+          "back": null,
+          "mask": "hat/pom_mask.webp",
+          "ref": 107.2459,
+          "color": "d8c29d"
+        },
+        {
+          "id": "hat_earflap_blue",
+          "name": "Mavi kulaklıklı kış beresi",
+          "price": 20,
+          "layer": "hat/earflap.webp",
+          "back": null,
+          "mask": "hat/earflap_mask.webp",
+          "ref": 80.7435,
+          "color": "448acd"
+        },
+        {
+          "id": "hat_earflap_green",
+          "name": "Yeşil kulaklıklı kış beresi",
+          "price": 20,
+          "layer": "hat/earflap.webp",
+          "back": null,
+          "mask": "hat/earflap_mask.webp",
+          "ref": 80.7435,
+          "color": "579765"
+        },
+        {
+          "id": "hat_earflap_cream",
+          "name": "Krem kulaklıklı kış beresi",
+          "price": 20,
+          "layer": "hat/earflap.webp",
+          "back": null,
+          "mask": "hat/earflap_mask.webp",
+          "ref": 80.7435,
+          "color": "d8c29d"
+        },
+        {
+          "id": "hat_cat_black",
+          "name": "Siyah kedi kulaklı bere",
+          "price": 30,
+          "layer": "hat/cat.webp",
+          "back": null,
+          "mask": "hat/cat_mask.webp",
+          "ref": 99.6878,
+          "color": "352e39"
+        },
+        {
+          "id": "hat_cat_pink",
+          "name": "Pembe kedi kulaklı bere",
+          "price": 30,
+          "layer": "hat/cat.webp",
+          "back": null,
+          "mask": "hat/cat_mask.webp",
+          "ref": 99.6878,
+          "color": "e27da4"
+        },
+        {
+          "id": "hat_cat_purple",
+          "name": "Mor kedi kulaklı bere",
+          "price": 30,
+          "layer": "hat/cat.webp",
+          "back": null,
+          "mask": "hat/cat_mask.webp",
+          "ref": 99.6878,
+          "color": "8655b0"
+        },
+        {
+          "id": "hat_bucket_turquoise",
+          "name": "Turkuaz kova şapka",
+          "price": 20,
+          "layer": "hat/bucket.webp",
+          "back": null,
+          "mask": "hat/bucket_mask.webp",
+          "ref": 106.4632,
+          "color": "39b3a7"
+        },
+        {
+          "id": "hat_bucket_cream",
+          "name": "Krem kova şapka",
+          "price": 20,
+          "layer": "hat/bucket.webp",
+          "back": null,
+          "mask": "hat/bucket_mask.webp",
+          "ref": 106.4632,
+          "color": "d8c29d"
+        },
+        {
+          "id": "hat_bucket_pink",
+          "name": "Pembe kova şapka",
+          "price": 20,
+          "layer": "hat/bucket.webp",
+          "back": null,
+          "mask": "hat/bucket_mask.webp",
+          "ref": 106.4632,
+          "color": "e27da4"
+        },
+        {
+          "id": "hat_bucket_navy",
+          "name": "Lacivert kova şapka",
+          "price": 20,
+          "layer": "hat/bucket.webp",
+          "back": null,
+          "mask": "hat/bucket_mask.webp",
+          "ref": 106.4632,
+          "color": "304779"
+        },
+        {
+          "id": "hat_cowboy_brown",
+          "name": "Kahverengi kovboy şapkası",
+          "price": 35,
+          "layer": "hat/cowboy.webp",
+          "back": null,
+          "mask": "hat/cowboy_mask.webp",
+          "ref": 80.4995,
+          "color": "855538"
+        },
+        {
+          "id": "hat_cowboy_cream",
+          "name": "Krem kovboy şapkası",
+          "price": 35,
+          "layer": "hat/cowboy.webp",
+          "back": null,
+          "mask": "hat/cowboy_mask.webp",
+          "ref": 80.4995,
+          "color": "d8c29d"
+        },
+        {
+          "id": "hat_cowboy_black",
+          "name": "Siyah kovboy şapkası",
+          "price": 35,
+          "layer": "hat/cowboy.webp",
+          "back": null,
+          "mask": "hat/cowboy_mask.webp",
+          "ref": 80.4995,
+          "color": "352e39"
+        },
+        {
+          "id": "hat_wizard_purple",
+          "name": "Mor yıldızlı sihirbaz şapkası",
+          "price": 40,
+          "layer": "hat/wizard.webp",
+          "back": null,
+          "mask": "hat/wizard_mask.webp",
+          "ref": 91.1362,
+          "color": "8655b0"
+        },
+        {
+          "id": "hat_wizard_navy",
+          "name": "Lacivert yıldızlı sihirbaz şapkası",
+          "price": 40,
+          "layer": "hat/wizard.webp",
+          "back": null,
+          "mask": "hat/wizard_mask.webp",
+          "ref": 91.1362,
+          "color": "304779"
+        },
+        {
+          "id": "hat_wizard_green",
+          "name": "Yeşil yıldızlı sihirbaz şapkası",
+          "price": 40,
+          "layer": "hat/wizard.webp",
+          "back": null,
+          "mask": "hat/wizard_mask.webp",
+          "ref": 91.1362,
+          "color": "579765"
+        },
+        {
+          "id": "hat_pirate",
+          "name": "Korsan şapkası",
+          "price": 40,
+          "layer": "hat/pirate.webp",
+          "back": null
+        },
+        {
+          "id": "hat_crown",
+          "name": "Altın taç",
+          "price": 60,
+          "layer": "hat/crown.webp",
+          "back": null
+        },
+        {
+          "id": "hat_pilot",
+          "name": "Gözlüklü pilot başlığı",
+          "price": 50,
+          "layer": "hat/pilot.webp",
+          "back": null
+        },
+        {
+          "id": "hat_bear_brown",
+          "name": "Kahverengi ayı kulaklı taç",
+          "price": 30,
+          "layer": "hat/bear.webp",
+          "back": null,
+          "mask": "hat/bear_mask.webp",
+          "ref": 128.5341,
+          "color": "855538"
+        },
+        {
+          "id": "hat_bear_pink",
+          "name": "Pembe ayı kulaklı taç",
+          "price": 30,
+          "layer": "hat/bear.webp",
+          "back": null,
+          "mask": "hat/bear_mask.webp",
+          "ref": 128.5341,
+          "color": "e27da4"
+        },
+        {
+          "id": "hat_bear_cream",
+          "name": "Krem ayı kulaklı taç",
+          "price": 30,
+          "layer": "hat/bear.webp",
+          "back": null,
+          "mask": "hat/bear_mask.webp",
+          "ref": 128.5341,
+          "color": "d8c29d"
+        }
+      ]
+    },
+    "glasses": {
+      "items": [
+        {
+          "id": "glasses_round_plum",
+          "name": "Mürdüm yuvarlak gözlük",
+          "price": 10,
+          "layer": "glasses/round.webp",
+          "mask": "glasses/round_mask.webp",
+          "ref": 64.0209,
+          "color": "89465d"
+        },
+        {
+          "id": "glasses_round_black",
+          "name": "Siyah yuvarlak gözlük",
+          "price": 10,
+          "layer": "glasses/round.webp",
+          "mask": "glasses/round_mask.webp",
+          "ref": 64.0209,
+          "color": "352e39"
+        },
+        {
+          "id": "glasses_round_gold",
+          "name": "Altın rengi yuvarlak gözlük",
+          "price": 10,
+          "layer": "glasses/round.webp",
+          "mask": "glasses/round_mask.webp",
+          "ref": 64.0209,
+          "color": "cc9951"
+        },
+        {
+          "id": "glasses_square_navy",
+          "name": "Lacivert kalın kare gözlük",
+          "price": 15,
+          "layer": "glasses/square.webp",
+          "mask": "glasses/square_mask.webp",
+          "ref": 97.9798,
+          "color": "304779"
+        },
+        {
+          "id": "glasses_square_black",
+          "name": "Siyah kalın kare gözlük",
+          "price": 15,
+          "layer": "glasses/square.webp",
+          "mask": "glasses/square_mask.webp",
+          "ref": 97.9798,
+          "color": "352e39"
+        },
+        {
+          "id": "glasses_square_turquoise",
+          "name": "Turkuaz kalın kare gözlük",
+          "price": 15,
+          "layer": "glasses/square.webp",
+          "mask": "glasses/square_mask.webp",
+          "ref": 97.9798,
+          "color": "39b3a7"
+        },
+        {
+          "id": "glasses_aviator_gold",
+          "name": "Altın rengi pilot gözlüğü",
+          "price": 25,
+          "layer": "glasses/aviator.webp",
+          "mask": "glasses/aviator_mask.webp",
+          "ref": 101.9923,
+          "color": "cc9951"
+        },
+        {
+          "id": "glasses_aviator_black",
+          "name": "Siyah pilot gözlüğü",
+          "price": 25,
+          "layer": "glasses/aviator.webp",
+          "mask": "glasses/aviator_mask.webp",
+          "ref": 101.9923,
+          "color": "352e39"
+        },
+        {
+          "id": "glasses_sunglasses_black",
+          "name": "Siyah güneş gözlüğü",
+          "price": 20,
+          "layer": "glasses/sunglasses.webp",
+          "mask": "glasses/sunglasses_mask.webp",
+          "ref": 99.1662,
+          "color": "352e39"
+        },
+        {
+          "id": "glasses_sunglasses_turquoise",
+          "name": "Turkuaz güneş gözlüğü",
+          "price": 20,
+          "layer": "glasses/sunglasses.webp",
+          "mask": "glasses/sunglasses_mask.webp",
+          "ref": 99.1662,
+          "color": "39b3a7"
+        },
+        {
+          "id": "glasses_sunglasses_red",
+          "name": "Kırmızı güneş gözlüğü",
+          "price": 20,
+          "layer": "glasses/sunglasses.webp",
+          "mask": "glasses/sunglasses_mask.webp",
+          "ref": 99.1662,
+          "color": "d83a3a"
+        },
+        {
+          "id": "glasses_heart_pink",
+          "name": "Pembe kalp gözlük",
+          "price": 25,
+          "layer": "glasses/heart.webp",
+          "mask": "glasses/heart_mask.webp",
+          "ref": 77.0081,
+          "color": "e27da4"
+        },
+        {
+          "id": "glasses_heart_red",
+          "name": "Kırmızı kalp gözlük",
+          "price": 25,
+          "layer": "glasses/heart.webp",
+          "mask": "glasses/heart_mask.webp",
+          "ref": 77.0081,
+          "color": "d83a3a"
+        },
+        {
+          "id": "glasses_star_gold",
+          "name": "Altın rengi yıldız gözlük",
+          "price": 35,
+          "layer": "glasses/star.webp",
+          "mask": "glasses/star_mask.webp",
+          "ref": 85.491,
+          "color": "cc9951"
+        },
+        {
+          "id": "glasses_star_purple",
+          "name": "Mor yıldız gözlük",
+          "price": 35,
+          "layer": "glasses/star.webp",
+          "mask": "glasses/star_mask.webp",
+          "ref": 85.491,
+          "color": "8655b0"
+        },
+        {
+          "id": "glasses_eyepatch",
+          "name": "Korsan bandı",
+          "price": 25,
+          "layer": "glasses/eyepatch.webp"
+        }
+      ]
+    },
+    "clothes": {
+      "items": [
+        {
+          "id": "clothes_tshirt",
+          "name": "Düz tişört",
+          "price": 0,
+          "tintable": true,
+          "layer": "clothes/tshirt.webp",
+          "mask": "clothes/tshirt_mask.webp",
+          "ref": 61.1198
+        },
+        {
+          "id": "clothes_hoodie",
+          "name": "Kapüşonlu",
+          "price": 0,
+          "tintable": true,
+          "layer": "clothes/hoodie.webp",
+          "mask": "clothes/hoodie_mask.webp",
+          "ref": 101.1902
+        },
+        {
+          "id": "clothes_tracksuit",
+          "name": "Fermuarlı eşofman üstü",
+          "price": 15,
+          "tintable": true,
+          "layer": "clothes/tracksuit.webp",
+          "mask": "clothes/tracksuit_mask.webp",
+          "ref": 61.7002
+        },
+        {
+          "id": "clothes_collared_sweater",
+          "name": "Yakalı kazak",
+          "price": 15,
+          "tintable": true,
+          "layer": "clothes/collared_sweater.webp",
+          "mask": "clothes/collared_sweater_mask.webp",
+          "ref": 76.0507
+        },
+        {
+          "id": "clothes_blazer",
+          "name": "Ceket ve gömlek",
+          "price": 25,
+          "tintable": true,
+          "layer": "clothes/blazer.webp",
+          "mask": "clothes/blazer_mask.webp",
+          "ref": 50.0334
+        },
+        {
+          "id": "clothes_overalls",
+          "name": "Salopet",
+          "price": 15,
+          "tintable": false,
+          "layer": "clothes/overalls.webp"
+        },
+        {
+          "id": "clothes_striped_tee",
+          "name": "Çizgili tişört",
+          "price": 10,
+          "tintable": false,
+          "layer": "clothes/striped_tee.webp"
+        },
+        {
+          "id": "clothes_football",
+          "name": "Futbol forması",
+          "price": 25,
+          "tintable": true,
+          "layer": "clothes/football.webp",
+          "mask": "clothes/football_mask.webp",
+          "ref": 49.6387
+        },
+        {
+          "id": "clothes_astronaut",
+          "name": "Astronot giysisi",
+          "price": 60,
+          "tintable": false,
+          "layer": "clothes/astronaut.webp"
+        },
+        {
+          "id": "clothes_knight",
+          "name": "Şövalye zırhı",
+          "price": 55,
+          "tintable": false,
+          "layer": "clothes/knight.webp"
+        },
+        {
+          "id": "clothes_superhero",
+          "name": "Pelerinli süper kahraman",
+          "price": 50,
+          "tintable": true,
+          "layer": "clothes/superhero.webp",
+          "mask": "clothes/superhero_mask.webp",
+          "ref": 56.8182
+        },
+        {
+          "id": "clothes_doctor",
+          "name": "Doktor önlüğü",
+          "price": 35,
+          "tintable": false,
+          "layer": "clothes/doctor.webp"
+        },
+        {
+          "id": "clothes_dinosaur",
+          "name": "Dinozor kapüşonlu",
+          "price": 45,
+          "tintable": false,
+          "layer": "clothes/dinosaur.webp"
+        },
+        {
+          "id": "clothes_winter_coat",
+          "name": "Kış montu",
+          "price": 20,
+          "tintable": true,
+          "layer": "clothes/winter_coat.webp",
+          "mask": "clothes/winter_coat_mask.webp",
+          "ref": 64.9358
+        }
+      ]
+    },
+    "face": {
+      "items": [
+        {
+          "id": "face_smile",
+          "name": "Gülümseme",
+          "price": 0,
+          "layer": null
+        },
+        {
+          "id": "face_bigsmile",
+          "name": "Kocaman gülüş",
+          "price": 10,
+          "layer": "face/bigsmile.webp",
+          "mask": "face/bigsmile_mask.webp",
+          "ref": 177.1927
+        },
+        {
+          "id": "face_wink",
+          "name": "Göz kırpma",
+          "price": 10,
+          "layer": "face/wink.webp",
+          "mask": "face/wink_mask.webp",
+          "ref": 164.4168
+        },
+        {
+          "id": "face_tongue",
+          "name": "Dil çıkarma",
+          "price": 15,
+          "layer": "face/tongue.webp",
+          "mask": "face/tongue_mask.webp",
+          "ref": 180.216
+        },
+        {
+          "id": "face_surprised",
+          "name": "Şaşkın",
+          "price": 15,
+          "layer": "face/surprised.webp",
+          "mask": "face/surprised_mask.webp",
+          "ref": 167.1491
+        },
+        {
+          "id": "face_hearts",
+          "name": "Kalp gözler",
+          "price": 30,
+          "layer": "face/hearts.webp",
+          "mask": "face/hearts_mask.webp",
+          "ref": 167.0069
+        },
+        {
+          "id": "face_stars",
+          "name": "Yıldız gözler",
+          "price": 35,
+          "layer": "face/stars.webp",
+          "mask": "face/stars_mask.webp",
+          "ref": 161.2533
+        },
+        {
+          "id": "face_smirk",
+          "name": "Havalı yarım gülüş",
+          "price": 15,
+          "layer": "face/smirk.webp",
+          "mask": "face/smirk_mask.webp",
+          "ref": 170.6282
+        },
+        {
+          "id": "face_happy_closed",
+          "name": "Mutlu kapalı gözler",
+          "price": 15,
+          "layer": "face/happy_closed.webp",
+          "mask": "face/happy_closed_mask.webp",
+          "ref": 166.4953
+        }
+      ]
+    },
+    "ccolor": {
+      "items": [
+        {
+          "id": "ccolor_blue",
+          "name": "Mavi",
+          "price": 0,
+          "color": "5199e4"
+        },
+        {
+          "id": "ccolor_red",
+          "name": "Kırmızı",
+          "price": 0,
+          "color": "ff5c5c"
+        },
+        {
+          "id": "ccolor_gray",
+          "name": "Gri",
+          "price": 0,
+          "color": "929598"
+        },
+        {
+          "id": "ccolor_navy",
+          "name": "Lacivert",
+          "price": 0,
+          "color": "25557c"
+        },
+        {
+          "id": "ccolor_white",
+          "name": "Beyaz",
+          "price": 0,
+          "color": "ffffff"
+        },
+        {
+          "id": "ccolor_black",
+          "name": "Siyah",
+          "price": 0,
+          "color": "262e33"
+        },
+        {
+          "id": "ccolor_sky",
+          "name": "Açık mavi",
+          "price": 10,
+          "color": "65c9ff"
+        },
+        {
+          "id": "ccolor_mint",
+          "name": "Nane yeşili",
+          "price": 10,
+          "color": "a7ffc4"
+        },
+        {
+          "id": "ccolor_pink",
+          "name": "Pembe",
+          "price": 10,
+          "color": "ffafb9"
+        },
+        {
+          "id": "ccolor_lemon",
+          "name": "Limon",
+          "price": 10,
+          "color": "ffffb1"
+        },
+        {
+          "id": "ccolor_ice",
+          "name": "Buz mavisi",
+          "price": 10,
+          "color": "b1e2ff"
+        },
+        {
+          "id": "ccolor_smoke",
+          "name": "Duman",
+          "price": 10,
+          "color": "3c4f5c"
+        },
+        {
+          "id": "ccolor_fuchsia",
+          "name": "Fuşya",
+          "price": 15,
+          "color": "ff488e"
+        },
+        {
+          "id": "ccolor_green",
+          "name": "Yeşil",
+          "price": 15,
+          "color": "3fa34d"
+        },
+        {
+          "id": "ccolor_purple",
+          "name": "Mor",
+          "price": 15,
+          "color": "8e5bd8"
+        },
+        {
+          "id": "ccolor_orange",
+          "name": "Turuncu",
+          "price": 15,
+          "color": "ff9f43"
+        },
+        {
+          "id": "ccolor_gold",
+          "name": "Altın",
+          "price": 30,
+          "color": "e8b923"
+        }
+      ]
+    },
+    "pet": {
+      "items": [
+        {
+          "id": "pet_fox",
+          "name": "Tilki",
+          "price": 0,
+          "image": "pet/fox.webp"
+        },
+        {
+          "id": "pet_cat",
+          "name": "Kedi",
+          "price": 0,
+          "image": "pet/cat.webp"
+        },
+        {
+          "id": "pet_dog",
+          "name": "Köpek",
+          "price": 0,
+          "image": "pet/dog.webp"
+        },
+        {
+          "id": "pet_bear",
+          "name": "Ayı",
+          "price": 0,
+          "image": "pet/bear.webp"
+        },
+        {
+          "id": "pet_rabbit",
+          "name": "Tavşan",
+          "price": 0,
+          "image": "pet/rabbit.webp"
+        },
+        {
+          "id": "pet_panda",
+          "name": "Panda",
+          "price": 0,
+          "image": "pet/panda.webp"
+        },
+        {
+          "id": "pet_frog",
+          "name": "Kurbağa",
+          "price": 0,
+          "image": "pet/frog.webp"
+        },
+        {
+          "id": "pet_lion",
+          "name": "Aslan",
+          "price": 0,
+          "image": "pet/lion.webp"
+        },
+        {
+          "id": "pet_chick",
+          "name": "Civciv",
+          "price": 0,
+          "image": "pet/chick.webp"
+        },
+        {
+          "id": "pet_pig",
+          "name": "Domuz",
+          "price": 0,
+          "image": "pet/pig.webp"
+        },
+        {
+          "id": "pet_tiger",
+          "name": "Kaplan",
+          "price": 15,
+          "image": "pet/tiger.webp"
+        },
+        {
+          "id": "pet_monkey",
+          "name": "Maymun",
+          "price": 15,
+          "image": "pet/monkey.webp"
+        },
+        {
+          "id": "pet_mouse",
+          "name": "Fare",
+          "price": 15,
+          "image": "pet/mouse.webp"
+        },
+        {
+          "id": "pet_hamster",
+          "name": "Hamster",
+          "price": 15,
+          "image": "pet/hamster.webp"
+        },
+        {
+          "id": "pet_cow",
+          "name": "İnek",
+          "price": 15,
+          "image": "pet/cow.webp"
+        },
+        {
+          "id": "pet_owl",
+          "name": "Baykuş",
+          "price": 15,
+          "image": "pet/owl.webp"
+        },
+        {
+          "id": "pet_penguin",
+          "name": "Penguen",
+          "price": 15,
+          "image": "pet/penguin.webp"
+        },
+        {
+          "id": "pet_chicken",
+          "name": "Tavuk",
+          "price": 15,
+          "image": "pet/chicken.webp"
+        },
+        {
+          "id": "pet_duck",
+          "name": "Ördek",
+          "price": 15,
+          "image": "pet/duck.webp"
+        },
+        {
+          "id": "pet_koala",
+          "name": "Koala",
+          "price": 20,
+          "image": "pet/koala.webp"
+        },
+        {
+          "id": "pet_wolf",
+          "name": "Kurt",
+          "price": 20,
+          "image": "pet/wolf.webp"
+        },
+        {
+          "id": "pet_raccoon",
+          "name": "Rakun",
+          "price": 20,
+          "image": "pet/raccoon.webp"
+        },
+        {
+          "id": "pet_horse",
+          "name": "At",
+          "price": 20,
+          "image": "pet/horse.webp"
+        },
+        {
+          "id": "pet_zebra",
+          "name": "Zebra",
+          "price": 20,
+          "image": "pet/zebra.webp"
+        },
+        {
+          "id": "pet_polar",
+          "name": "Kutup ayısı",
+          "price": 20,
+          "image": "pet/polar.webp"
+        },
+        {
+          "id": "pet_boar",
+          "name": "Yaban domuzu",
+          "price": 20,
+          "image": "pet/boar.webp"
+        },
+        {
+          "id": "pet_blackcat",
+          "name": "Kara kedi",
+          "price": 20,
+          "image": "pet/blackcat.webp"
+        },
+        {
+          "id": "pet_poodle",
+          "name": "Kaniş",
+          "price": 20,
+          "image": "pet/poodle.webp"
+        },
+        {
+          "id": "pet_hedgehog",
+          "name": "Kirpi",
+          "price": 20,
+          "image": "pet/hedgehog.webp"
+        },
+        {
+          "id": "pet_chipmunk",
+          "name": "Sincap",
+          "price": 20,
+          "image": "pet/chipmunk.webp"
+        },
+        {
+          "id": "pet_turtle",
+          "name": "Kaplumbağa",
+          "price": 20,
+          "image": "pet/turtle.webp"
+        },
+        {
+          "id": "pet_snail",
+          "name": "Salyangoz",
+          "price": 20,
+          "image": "pet/snail.webp"
+        },
+        {
+          "id": "pet_bee",
+          "name": "Arı",
+          "price": 20,
+          "image": "pet/bee.webp"
+        },
+        {
+          "id": "pet_ladybug",
+          "name": "Uğur böceği",
+          "price": 20,
+          "image": "pet/ladybug.webp"
+        },
+        {
+          "id": "pet_butterfly",
+          "name": "Kelebek",
+          "price": 20,
+          "image": "pet/butterfly.webp"
+        },
+        {
+          "id": "pet_fish",
+          "name": "Tropik balık",
+          "price": 20,
+          "image": "pet/fish.webp"
+        },
+        {
+          "id": "pet_blowfish",
+          "name": "Balon balığı",
+          "price": 20,
+          "image": "pet/blowfish.webp"
+        },
+        {
+          "id": "pet_crab",
+          "name": "Yengeç",
+          "price": 20,
+          "image": "pet/crab.webp"
+        },
+        {
+          "id": "pet_goat",
+          "name": "Keçi",
+          "price": 20,
+          "image": "pet/goat.webp"
+        },
+        {
+          "id": "pet_ewe",
+          "name": "Kuzu",
+          "price": 20,
+          "image": "pet/ewe.webp"
+        },
+        {
+          "id": "pet_rooster",
+          "name": "Horoz",
+          "price": 20,
+          "image": "pet/rooster.webp"
+        },
+        {
+          "id": "pet_parrot",
+          "name": "Papağan",
+          "price": 25,
+          "image": "pet/parrot.webp"
+        },
+        {
+          "id": "pet_flamingo",
+          "name": "Flamingo",
+          "price": 25,
+          "image": "pet/flamingo.webp"
+        },
+        {
+          "id": "pet_dove",
+          "name": "Güvercin",
+          "price": 25,
+          "image": "pet/dove.webp"
+        },
+        {
+          "id": "pet_swan",
+          "name": "Kuğu",
+          "price": 25,
+          "image": "pet/swan.webp"
+        },
+        {
+          "id": "pet_eagle",
+          "name": "Kartal",
+          "price": 25,
+          "image": "pet/eagle.webp"
+        },
+        {
+          "id": "pet_octopus",
+          "name": "Ahtapot",
+          "price": 25,
+          "image": "pet/octopus.webp"
+        },
+        {
+          "id": "pet_dolphin",
+          "name": "Yunus",
+          "price": 25,
+          "image": "pet/dolphin.webp"
+        },
+        {
+          "id": "pet_whale",
+          "name": "Balina",
+          "price": 25,
+          "image": "pet/whale.webp"
+        },
+        {
+          "id": "pet_seal",
+          "name": "Fok",
+          "price": 25,
+          "image": "pet/seal.webp"
+        },
+        {
+          "id": "pet_otter",
+          "name": "Su samuru",
+          "price": 25,
+          "image": "pet/otter.webp"
+        },
+        {
+          "id": "pet_beaver",
+          "name": "Kunduz",
+          "price": 25,
+          "image": "pet/beaver.webp"
+        },
+        {
+          "id": "pet_skunk",
+          "name": "Kokarca",
+          "price": 25,
+          "image": "pet/skunk.webp"
+        },
+        {
+          "id": "pet_badger",
+          "name": "Porsuk",
+          "price": 25,
+          "image": "pet/badger.webp"
+        },
+        {
+          "id": "pet_sloth",
+          "name": "Tembel hayvan",
+          "price": 25,
+          "image": "pet/sloth.webp"
+        },
+        {
+          "id": "pet_kangaroo",
+          "name": "Kanguru",
+          "price": 25,
+          "image": "pet/kangaroo.webp"
+        },
+        {
+          "id": "pet_llama",
+          "name": "Lama",
+          "price": 25,
+          "image": "pet/llama.webp"
+        },
+        {
+          "id": "pet_camel",
+          "name": "Deve",
+          "price": 25,
+          "image": "pet/camel.webp"
+        },
+        {
+          "id": "pet_deer",
+          "name": "Geyik",
+          "price": 25,
+          "image": "pet/deer.webp"
+        },
+        {
+          "id": "pet_moose",
+          "name": "Sığın",
+          "price": 30,
+          "image": "pet/moose.webp"
+        },
+        {
+          "id": "pet_bat",
+          "name": "Yarasa",
+          "price": 30,
+          "image": "pet/bat.webp"
+        },
+        {
+          "id": "pet_giraffe",
+          "name": "Zürafa",
+          "price": 30,
+          "image": "pet/giraffe.webp"
+        },
+        {
+          "id": "pet_elephant",
+          "name": "Fil",
+          "price": 30,
+          "image": "pet/elephant.webp"
+        },
+        {
+          "id": "pet_hippo",
+          "name": "Su aygırı",
+          "price": 30,
+          "image": "pet/hippo.webp"
+        },
+        {
+          "id": "pet_rhino",
+          "name": "Gergedan",
+          "price": 30,
+          "image": "pet/rhino.webp"
+        },
+        {
+          "id": "pet_gorilla",
+          "name": "Goril",
+          "price": 30,
+          "image": "pet/gorilla.webp"
+        },
+        {
+          "id": "pet_orangutan",
+          "name": "Orangutan",
+          "price": 30,
+          "image": "pet/orangutan.webp"
+        },
+        {
+          "id": "pet_leopard",
+          "name": "Leopar",
+          "price": 30,
+          "image": "pet/leopard.webp"
+        },
+        {
+          "id": "pet_bison",
+          "name": "Bizon",
+          "price": 30,
+          "image": "pet/bison.webp"
+        },
+        {
+          "id": "pet_croc",
+          "name": "Timsah",
+          "price": 30,
+          "image": "pet/croc.webp"
+        },
+        {
+          "id": "pet_lizard",
+          "name": "Kertenkele",
+          "price": 30,
+          "image": "pet/lizard.webp"
+        },
+        {
+          "id": "pet_shark",
+          "name": "Köpekbalığı",
+          "price": 35,
+          "image": "pet/shark.webp"
+        },
+        {
+          "id": "pet_peacock",
+          "name": "Tavus kuşu",
+          "price": 35,
+          "image": "pet/peacock.webp"
+        },
+        {
+          "id": "pet_jelly",
+          "name": "Denizanası",
+          "price": 35,
+          "image": "pet/jelly.webp"
+        },
+        {
+          "id": "pet_dodo",
+          "name": "Dodo",
+          "price": 40,
+          "image": "pet/dodo.webp"
+        },
+        {
+          "id": "pet_mammoth",
+          "name": "Mamut",
+          "price": 45,
+          "image": "pet/mammoth.webp"
+        },
+        {
+          "id": "pet_trex",
+          "name": "T-Rex",
+          "price": 45,
+          "image": "pet/trex.webp"
+        },
+        {
+          "id": "pet_sauropod",
+          "name": "Uzun boyunlu dinozor",
+          "price": 45,
+          "image": "pet/sauropod.webp"
+        },
+        {
+          "id": "pet_unicorn",
+          "name": "Unicorn",
+          "price": 50,
+          "image": "pet/unicorn.webp"
+        },
+        {
+          "id": "pet_dragon",
+          "name": "Ejderha",
+          "price": 55,
+          "image": "pet/dragon.webp"
+        },
+        {
+          "id": "pet_phoenix",
+          "name": "Anka kuşu",
+          "price": 60,
+          "image": "pet/phoenix.webp"
+        },
+        {
+          "id": "pet_robot",
+          "name": "Robot",
+          "price": 40,
+          "image": "pet/robot.webp"
+        },
+        {
+          "id": "pet_alien",
+          "name": "Uzaylı",
+          "price": 40,
+          "image": "pet/alien.webp"
+        },
+        {
+          "id": "pet_invader",
+          "name": "Uzay canavarı",
+          "price": 40,
+          "image": "pet/invader.webp"
+        },
+        {
+          "id": "pet_ghost",
+          "name": "Hayalet",
+          "price": 35,
+          "image": "pet/ghost.webp"
+        },
+        {
+          "id": "pet_pumpkin",
+          "name": "Balkabağı",
+          "price": 30,
+          "image": "pet/pumpkin.webp"
+        },
+        {
+          "id": "pet_snowman",
+          "name": "Kardan adam",
+          "price": 35,
+          "image": "pet/snowman.webp"
+        },
+        {
+          "id": "pet_sun",
+          "name": "Güneş",
+          "price": 45,
+          "image": "pet/sun.webp"
+        },
+        {
+          "id": "pet_moon",
+          "name": "Dolunay",
+          "price": 45,
+          "image": "pet/moon.webp"
+        }
+      ]
+    }
+  },
+  "base": {
+    "layer": "base/base.webp",
+    "skinMask": "base/base_mask.webp",
+    "skinRef": 163.7334
+  },
+  "order": [
+    "hairBack",
+    "base",
+    "face",
+    "clothes",
+    "hairFront",
+    "hat",
+    "glasses"
+  ],
+  "notes": "Faz 1 saç katmanları: şapka takıldığında frontUnderHat ve varsa backUnderHat kullanılır. Tüm şapkalar ortak şapka bölgesinde hizalanır. Başörtüsü kumaş katmanıdır ve şapkanın altında kalır. Ten ve saç katmanlarında gri ton ile maske kullanılır; ref değerleri yayımlanan katmanlardan hesaplanır."
+}
