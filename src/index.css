@@ -133,8 +133,6 @@ label.check { flex-direction: row; align-items: center; font-weight: 400; }
 
 .me-card { display: flex; gap: 1.3rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.2rem; }
 .me-card .row { margin: .5rem 0 0; }
-.shop-head { flex-direction: column; text-align: center; gap: .5rem; }
-.shop-head p { max-width: 40ch; font-size: .92rem; }
 .stars-pill { display: inline-flex; align-items: center; gap: .35rem; background: var(--card); color: var(--ink); font-weight: 600; border: 1.5px solid var(--line-strong); border-radius: 10px; padding: .4rem .75rem; font-size: 1rem; font-variant-numeric: tabular-nums; }
 .stars-pill::before { content: ''; width: 1em; height: 1em; background: var(--star); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 
@@ -255,10 +253,6 @@ label.check { flex-direction: row; align-items: center; font-weight: 400; }
 .tabs button:hover { color: var(--ink); }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
 .toast { text-align: center; font-weight: 500; background: var(--ok-soft); color: var(--ok); border-radius: 10px; padding: .5rem; }
-.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .7rem; }
-.shop-item { display: flex; flex-direction: column; align-items: center; gap: .45rem; background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: .9rem .5rem .8rem; text-align: center; font-size: .95rem; }
-.shop-item b { font-weight: 500; }
-.shop-item.worn { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
 
 /* öğretmen */
 .t { font-size: 15px; }
@@ -290,9 +284,57 @@ input.mini { width: 70px; padding: .25rem .4rem; }
 .g-cell.on { border-color: var(--accent-2); }
 .g-cell small { color: var(--muted); }
 
-/* dükkan: çok sekme → çip; fiyat butonu sakin, "Tak" kırmızı */
-.tabs.chips { border-bottom: 0; gap: .4rem; }
-.tabs.chips button { border: 1.5px solid var(--line); border-radius: 10px; padding: .35rem .8rem; margin: 0; background: var(--card); color: var(--ink); }
-.tabs.chips button.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .btn.price { display: inline-flex; align-items: center; gap: .3rem; }
 .btn.price::before { content: ''; width: .95em; height: .95em; background: var(--star); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+/* dükkan: solda ayna (avatar), sağda gruplu kategori + eşya ızgarası */
+.page.shop { max-width: 1040px; }
+.shop-layout { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; align-items: start; }
+.shop-layout > * { min-width: 0; }
+.shop-mirror { position: sticky; top: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: .8rem;
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 20px; padding: 1.4rem 1.1rem 1.2rem; }
+.shop-mirror h1 { font-size: 1.6rem; margin: 0; }
+.shop-mirror p { font-size: .88rem; line-height: 1.45; }
+.shop-mirror .toast { margin-top: .6rem; }
+
+.shop-nav { display: flex; flex-direction: column; gap: .7rem; padding-bottom: 1rem; border-bottom: 1.5px solid var(--line); }
+.shop-nav-group { display: flex; gap: .8rem; align-items: baseline; }
+.shop-nav-label { flex: none; width: 5.5rem; font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.shop-nav-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+.shop-nav-row button { border: 1.5px solid transparent; background: none; border-radius: 9px; padding: .3rem .7rem; font-size: .95rem; color: var(--ink); }
+.shop-nav-row button:hover { background: var(--card); border-color: var(--line); }
+.shop-nav-row button.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+.shop-slot-head { display: flex; align-items: baseline; justify-content: space-between; margin: 1.3rem 0 .8rem; }
+.shop-slot-head h2 { font-size: 1.5rem; font-weight: 800; margin: 0; }
+.shop-slot-head span { font-size: .88rem; }
+
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .8rem; }
+.shop-item { position: relative; display: flex; flex-direction: column; background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: .5rem; transition: border-color .15s, transform .15s; }
+.shop-item:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+.si-thumb { aspect-ratio: 1; border-radius: 11px; background: color-mix(in srgb, var(--line) 45%, var(--bg)); display: grid; place-items: center; overflow: hidden; }
+.si-thumb .pet-preview { background: none; width: 80%; height: 80%; }
+.si-thumb .pet-preview img { width: 78%; }
+.si-thumb .pet-preview.body { width: 100%; height: 100%; border-radius: 0; background: none; }
+.si-name { font-size: .92rem; font-weight: 500; line-height: 1.3; margin: .6rem .3rem .5rem; min-height: 2.6em; }
+.si-foot { margin: auto .3rem .3rem; display: flex; }
+.si-foot .btn { flex: 1; }
+.si-note { flex: 1; text-align: center; font-size: .85rem; color: var(--ok); font-weight: 600; padding: .35rem 0; }
+.si-flag { position: absolute; top: .9rem; left: .9rem; z-index: 4; background: var(--ok); color: #fff; font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border-radius: 6px; padding: .12rem .45rem; }
+.shop-item.worn { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok); }
+.shop-item.locked .si-thumb { opacity: .55; }
+.shop-item.locked .si-name { color: var(--muted); }
+.btn.price { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; }
+.btn.price::before { content: ''; width: .95em; height: .95em; background: var(--star); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+@media (max-width: 760px) {
+  .shop-layout { grid-template-columns: 1fr; gap: 1rem; }
+  .shop-mirror { position: static; flex-direction: row; text-align: left; padding: .9rem; gap: 1rem; }
+  .shop-mirror h1 { font-size: 1.35rem; }
+  .shop-nav-group { flex-direction: column; align-items: stretch; gap: .3rem; }
+  .shop-nav-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 0 18px; }
+  .shop-nav-row button { flex: none; background: var(--card); border-color: var(--line); }
+  .shop-grid { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+}
+.si-thumb > .avatar { scale: 1.3; }
+@media (max-width: 760px) { .si-thumb > .avatar { scale: 1.1; } }
