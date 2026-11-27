@@ -283,3 +283,16 @@ Kep, balıkçı, kovboy, korsan ve sihirbaz şapkalarıyla Afro, kıvırcık, to
 - `clothes/winter-coat-sleeve.webp` için `clothes/winter_coat.webp` çizgi ve kumaş referansı, `pose/dog-cradle.webp` boyama stili referansı. İstem, kol sınırına kırpılabilecek orta gri yumuşak kapitone kumaş, üç-dört geniş kavisli dikiş kanalı, kapama ve fermuar içermeyen opak orta bölge.
 - `clothes/dinosaur-card.webp` için `clothes/dinosaur.webp` düzenleme hedefi, `clothes/superhero.webp` stil referansı. İstem, 75 px kartta omuzlara inik kapüşonun dışına taşan iri koyu yeşil plakalar ve gövdeden daha güçlü ayrılan kapüşon. Önden görünüm ve açık yeşil karın paneli korunur.
 - `clothes/superhero-card.webp` için `clothes/superhero.webp` düzenleme hedefi, `clothes/dinosaur.webp` stil referansı. İstem, 75 px kartta kolların yanına doğru açılan geniş bordo pelerin panelleri ve büyük, basit altın baklava toka. Kömür gri gövde ve önden açık yaka korunur.
+
+## Hayvan duruşları ve papağan teması
+
+Yerleşik ImageGen'de her hayvanın mevcut `public/av/pet/` WebP'si düzenleme hedefi, köpek WebP'si çizgi ve boyama referansı olarak verildi. Tam gövde, şeffaf alfa, sıcak ince kontur ve küçük boyda okunur siluet istendi.
+
+- **Aslan** güçlü yuvarlak yelesiyle dört pati üzerinde dik durur ve ağzı kapalı gülümser.
+- **Kaplan** ön patilerini uzatarak öne çömelir, iri çizgili kuyruğunu kaldırır ve ağzı açık gülümser.
+- **Leopar** ön patileri çapraz uzanır, yana bakar ve kuyruğunu kanca biçiminde kıvırır. Halkalı benekleri büyütüldü.
+- **Kurt** oturur, gözlerini kapatır ve başını yana ve yukarı kaldırarak ulur.
+
+Dört çizimin 512 px ana kopyası `kaynak/pet_poz/` altında. Mevcut faz 4 kırpma yordamıyla en uzun kenar 460 px, taban çizgisi y=486 olacak şekilde hizalandı. `paketle.py --phase 4`, varsa bu ana kopyaları seçer ve mevcut katalog yollarına 256 px WebP yazar.
+
+Papağan `pet/parrot.webp` ve `pose/dog-cradle.webp` referanslarından ayrı çizildi. İstemde soldaki tünek ucuna bakan kırmızı mavi papağanın iki ayağının da sola uzatılan işaret parmağına sarılması, elin soğuk gri, ayakların sıcak kahverengi çizilmesi istendi. Birlikte çizildikleri için pençe ve parmak birbirini doğru sırada örtüyor. Birleşik çizim alfa sınırına kırpıldı ve 210 px enle 512 px tuvalde x=242'ye, bilek alt kenarda bitişecek biçimde yerleştirildi. Sağ alttaki nötr gri el piksellerinden ten maskesi çıkarıldı. Paketleme `pose/parrot-grip.webp` ve maskesini üretir, kodlanmış görselden boyama referansını hesaplar. Tünek yalnız kucak pozunda kullanılır. Omuz temas noktaları 256 px hayvan tuvalinde pati veya pençenin kumaşa değdiği yere göre belirlenir.

@@ -132,6 +132,7 @@ export const MANIFEST = M as unknown as {
     blink: { layer: string; mask: string; ref: number }
     eyes?: { layer: string; open: string; iris: { layer: string; mask: string; ref: number }; ownEyes: string[] }
     hands?: { layer: string; mask: string; ref: number }
+    parrotGrip?: { layer: string; mask: string; ref: number }
     hairBackDx?: Record<string, number>
   }
 }

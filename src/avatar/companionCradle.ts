@@ -92,7 +92,7 @@ const FABRIC: Partial<Record<string, Box>> = {
   'clothes/winter_coat.webp': [0, 0, 512, 512],
 }
 
-function sleeveParts(sleeves: [Sleeve, Sleeve], garment: Part | null): Part[] {
+function sleeveParts(sleeves: Sleeve[], garment: Part | null): Part[] {
   const crop = garment && FABRIC[garment.src]
   if (!garment || !crop) return []
   const cloth: Part = garment.src === 'clothes/winter_coat.webp'
@@ -111,6 +111,14 @@ const HUG_WRISTS: [Sleeve, Sleeve] = [
 ]
 
 export const hugSleeves = (garment: Part | null) => sleeveParts(HUG_WRISTS, garment)
+
+// Papağan katmanında bilek sağ alt köşeye doğru uzanır.
+const PARROT_WRIST: Sleeve = {
+  clip: 'M477 613 Q504 622 531 607 L565 640 H498 Q492 625 477 613 Z',
+  center: [520, 625], width: 88, length: 60, angle: 141,
+}
+
+export const parrotGripSleeve = (garment: Part | null) => sleeveParts([PARROT_WRIST], garment)
 
 function atHead(part: Part): Part {
   const scale = 0.95

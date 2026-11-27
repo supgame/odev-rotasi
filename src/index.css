@@ -389,7 +389,7 @@ label.check input { width: 20px; height: 20px; accent-color: var(--purple); }
 .av-pet.pose-peek { z-index: 0; filter: none; animation: none; }
 .av-pet.pose-head { z-index: 2; animation: none; filter: drop-shadow(0 1px 1px #3a241e65); }
 .av-pet.pose-hug, .av-pet.pose-shoulder { animation: none; filter: drop-shadow(1px 2px 2px #39241b7a); }
-.av-pet.av-perched-bird { filter: none; }
+.av-pet.av-perched { filter: none; }
 .av-perch-shadow {
   position: absolute; width: 9%; height: 2.4%; transform: translate(-78%, -18%) rotate(20deg);
   background: radial-gradient(ellipse, #39241b80, transparent 72%); pointer-events: none;

@@ -290,22 +290,27 @@ def package_phase3(manifest: dict) -> None:
 def package_phase4(manifest: dict) -> None:
     from faz4_katalog import species
 
-    pets = species()
-    for stem, _, _ in pets:
-        path = SOURCE / "pet" / f"{stem}.png"
+    items = []
+    for stem, name, price in species():
+        replacement = SOURCE / "pet_poz" / f"{stem}.png"
+        path = replacement if replacement.is_file() else SOURCE / "pet" / f"{stem}.png"
         with Image.open(path) as master:
             if master.size != (512, 512) or master.mode != "RGBA":
                 raise ValueError(f"Expected a 512×512 RGBA master: {path}")
             if master.getchannel("A").getextrema() != (0, 255):
                 raise ValueError(f"Missing transparency or opaque artwork: {path}")
-
-    items = []
-    for stem, name, price in pets:
-        with Image.open(SOURCE / "pet" / f"{stem}.png") as master:
             layer = master.resize((256, 256), Image.Resampling.LANCZOS)
         relative, _, _ = _save_layer(f"pet/{stem}.webp", layer)
         items.append({"id": f"pet_{stem}", "name": name, "price": price, "image": relative})
     manifest.setdefault("slots", {}).setdefault("pet", {})["items"] = items
+
+    grip = SOURCE / "pet_poz" / "parrot_grip.png"
+    layer, mask, ref = _save_layer(
+        "pose/parrot-grip.webp",
+        _rgba_at_512(grip),
+        _mask_at_512(grip.with_name("parrot_grip_mask.png")),
+    )
+    manifest.setdefault("variants", {})["parrotGrip"] = {"layer": layer, "mask": mask, "ref": ref}
 
 
 def main() -> None:

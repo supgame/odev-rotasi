@@ -4,7 +4,7 @@ import type { Equipped } from '../data/types'
 import { BG } from './bg'
 import { ITEMS, MANIFEST, SPECIES, fx, type CatalogItem, type ItemSlot, type Raw, type Species } from './catalog'
 import { compose, composed, type Part } from './render'
-import { cradleFor, cradleParts, hugSleeves, type CradleShape } from './companionCradle'
+import { cradleFor, cradleParts, hugSleeves, parrotGripSleeve, type CradleShape } from './companionCradle'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -245,13 +245,17 @@ const POSES: Record<string, { x: number; bottom: number; width: number; kid: num
   head: { x: 0.50, bottom: 0.31, width: 0.30, kid: 0, gaze: 0, ey: -1 },
 }
 
-// Kumaşa basan pençe, kuş çiziminin 256 px tuvalindeki konumuyla sabitlenir.
-const BIRD_PERCH: Partial<Record<string, { x: number; y: number; width: number; faceChild?: boolean }>> = {
+// Omza değen pençe veya pati, hayvanın 256 px tuvalindeki konumuyla sabitlenir.
+const SHOULDER_CONTACT: Partial<Record<string, { x: number; y: number; width: number; angle?: number; faceChild?: boolean }>> = {
   owl: { x: 120, y: 230, width: 0.30, faceChild: true },
   parrot: { x: 91, y: 224, width: 0.30 },
   dove: { x: 148, y: 229, width: 0.29, faceChild: true },
   chick: { x: 104, y: 232, width: 0.26, faceChild: true },
   eagle: { x: 142, y: 233, width: 0.32, faceChild: true },
+  lion: { x: 117, y: 239, width: 0.27, angle: 7 },
+  tiger: { x: 120, y: 241, width: 0.27, angle: 8 },
+  leopard: { x: 211, y: 239, width: 0.31, angle: 8 },
+  wolf: { x: 74, y: 239, width: 0.27, angle: 8 },
 }
 
 // 512 px kıyafet katmanında omuz çizgisi (x=368). Kapüşon ve zırh daha yukarıda.
@@ -273,6 +277,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const pose = p ? poseOf(eq, p.id) : 'side'
   const pz = POSES[pose]
   const cradle = p && pose === 'hug' ? cradleFor(p.id) : undefined
+  const fingerPerch = p?.id === 'parrot' && pose === 'hug' ? V?.parrotGrip : undefined
   const live = !cradle && (alive ?? size >= 100)
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
@@ -284,10 +289,14 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const uriIris = useComp(split ? L.iris : [], px)
   const uriUp = useComp(split ? L.upper : [], px)
   const uriBlink = useComp(live ? L.blink : [], px)
-  const hands = !cradle && p && pose === 'hug' && V?.hands
+  const hands = !cradle && !fingerPerch && p && pose === 'hug' && V?.hands
     ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }, ...hugSleeves(L.garment)]
     : []
   const uriHands = useComp(hands, px)
+  const uriGrip = useComp(fingerPerch ? [
+    { src: fingerPerch.layer, mask: fingerPerch.mask, ref: fingerPerch.ref, color: L.skin },
+    ...parrotGripSleeve(L.garment),
+  ] : [], px)
   const root = useRef<HTMLDivElement>(null)
   const [tap, setTap] = useState(0)
   const timer = useRef<number | undefined>(undefined)
@@ -364,7 +373,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     const m = `url(${import.meta.env?.BASE_URL ?? '/'}av/${V.eyes.open})`
     eyeBox.maskImage = m; eyeBox.WebkitMaskImage = m; eyeBox.maskSize = '100% 100%'; eyeBox.WebkitMaskSize = '100% 100%'
   }
-  const perch = p && pose === 'shoulder' ? BIRD_PERCH[p.id] : undefined
+  const perch = p && pose === 'shoulder' ? SHOULDER_CONTACT[p.id] : undefined
   const perchX = kidLeft + 368 / 512 * scale
   const perchY = kidTop + ((SHOULDER_Y[currentId(eq, 'clothes', sd) ?? ''] ?? 364) + 3) / 512 * scale
   const petWidth = perch?.width ?? (p?.id === 'giraffe' ? 0.51 : pz.width)
@@ -376,13 +385,13 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     top: (perchY - perch.y / 256 * petWidth) * size,
     width: petWidth * size,
     transformOrigin: `${perch.x / 2.56}% ${perch.y / 2.56}%`,
-    transform: `rotate(12deg)${perch.faceChild ? ' scaleX(-1)' : ''}`,
+    transform: `rotate(${perch.angle ?? 12}deg)${perch.faceChild ? ' scaleX(-1)' : ''}`,
   } : {
     left: (petX - petWidth / 2) * size, top: (pz.bottom - petWidth * 0.95) * size, width: petWidth * size,
     ...(peek ? { transform: 'rotate(24deg)', transformOrigin: '50% 95%' } : {}),
   }
   const petImg = p && (
-    <img key={'pet' + (tap ? 'x' + tap : '')} className={`av-pet pose-${pose}${perch ? ' av-perched-bird' : ''}`}
+    <img key={'pet' + (tap ? 'x' + tap : '')} className={`av-pet pose-${pose}${perch ? ' av-perched' : ''}`}
       src={fx(p.id)} alt={p.name} title={p.name} draggable={false} style={petStyle} />
   )
   const cls = ['avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '', live ? 'alive' : '', tap ? 'tap' : '', p ? 'with-pet' : '', p && `scene-${pose}`].filter(Boolean).join(' ')
@@ -417,7 +426,9 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
               </div>
             </div>
             {perch && <span className="av-perch-shadow" aria-hidden="true" style={{ left: perchX * size, top: perchY * size }} />}
-            {pose !== 'peek' && petImg}
+            {pose !== 'peek' && !uriGrip && petImg}
+            {uriGrip && <img className="av-kid av-hands" src={uriGrip} alt="Parmağa tutunan papağan" draggable={false}
+              style={{ left: 0, top: 0, width: '100%' }} />}
             {uriHands && <img className="av-kid av-hands" src={uriHands} alt="" draggable={false}
               style={{ left: size * 0.10, top: size * 0.10, width: size * 0.90 }} />}
           </div>

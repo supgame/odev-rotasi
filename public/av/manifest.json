@@ -1976,6 +1976,11 @@
       "square": -7,
       "heart": -10,
       "wide": -5
+    },
+    "parrotGrip": {
+      "layer": "pose/parrot-grip.webp",
+      "mask": "pose/parrot-grip_mask.webp",
+      "ref": 136.8906
     }
   }
 }
