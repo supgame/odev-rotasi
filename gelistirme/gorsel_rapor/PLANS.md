@@ -26,4 +26,7 @@ Yerleşik ImageGen aracı, şeffaf PNG ve ikinci ekran görüntüsü referansıy
 - [x] Yanak ve çene hatlarını belirginleştir. Küçük yüz kartlarında oyuncunun saç, şapka ve gözlüğünü göster.
 - [x] 360 × 640 ve 1440 × 900 yerel Chrome demolarında parçaları tek tek dene, geri al, tak ve yenile. Yerel PostgreSQL kurulumunu ve geçişi kontrol et.
 
-Sıradaki aşama uzun kollu kucak çizimleri, kep altında Afro hacmi ve dinozor kapüşonu ile pelerinin okunurluğu.
+## Kıyafet ve hayvan arkadaşları
+
+- [x] Kucak pozlarında uzun kolları giysiye uydur. Kep altında Afro hacmini, küçük kartlarda dinozor kapüşonu ile pelerinin okunurluğunu artır.
+- [x] Papağanın kucak pozunu parmağa bağla. Aslan, kaplan, leopar, kurt, kara kedi ve kanişe ayırt edici duruşlar ver.

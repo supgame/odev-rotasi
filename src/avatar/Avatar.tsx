@@ -256,6 +256,8 @@ const SHOULDER_CONTACT: Partial<Record<string, { x: number; y: number; width: nu
   tiger: { x: 120, y: 241, width: 0.27, angle: 8 },
   leopard: { x: 211, y: 239, width: 0.31, angle: 8 },
   wolf: { x: 74, y: 239, width: 0.27, angle: 8 },
+  blackcat: { x: 135, y: 240, width: 0.28, angle: 7, faceChild: true },
+  poodle: { x: 78, y: 240, width: 0.28, angle: 7 },
 }
 
 // 512 px kıyafet katmanında omuz çizgisi (x=368). Kapüşon ve zırh daha yukarıda.

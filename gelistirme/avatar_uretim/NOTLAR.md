@@ -292,7 +292,9 @@ Yerleşik ImageGen'de her hayvanın mevcut `public/av/pet/` WebP'si düzenleme h
 - **Kaplan** ön patilerini uzatarak öne çömelir, iri çizgili kuyruğunu kaldırır ve ağzı açık gülümser.
 - **Leopar** ön patileri çapraz uzanır, yana bakar ve kuyruğunu kanca biçiminde kıvırır. Halkalı benekleri büyütüldü.
 - **Kurt** oturur, gözlerini kapatır ve başını yana ve yukarı kaldırarak ulur.
+- **Kara kedi** yeşil gözlerini korur, ayağa kalkıp bir ön patisini ileri uzatır ve kuyruğunu dik tutar. Tekir WebP'si oturan siluet için karşılaştırma referansıydı.
+- **Kaniş** sekerek bir ön patisini yukarı kaldırır. Uzun sarkık kulakları, ayak bileğindeki bukleler ve yuvarlak kuyruk ucu silueti belirler. Kuzu ve köpek WebP'leri karşılaştırma referansıydı.
 
-Dört çizimin 512 px ana kopyası `kaynak/pet_poz/` altında. Mevcut faz 4 kırpma yordamıyla en uzun kenar 460 px, taban çizgisi y=486 olacak şekilde hizalandı. `paketle.py --phase 4`, varsa bu ana kopyaları seçer ve mevcut katalog yollarına 256 px WebP yazar.
+Bu çizimlerin 512 px ana kopyaları `kaynak/pet_poz/` altında. Mevcut faz 4 kırpma yordamıyla en uzun kenar 460 px, taban çizgisi y=486 olacak şekilde hizalandı. `paketle.py --phase 4`, varsa bu ana kopyaları seçer ve mevcut katalog yollarına 256 px WebP yazar.
 
 Papağan `pet/parrot.webp` ve `pose/dog-cradle.webp` referanslarından ayrı çizildi. İstemde soldaki tünek ucuna bakan kırmızı mavi papağanın iki ayağının da sola uzatılan işaret parmağına sarılması, elin soğuk gri, ayakların sıcak kahverengi çizilmesi istendi. Birlikte çizildikleri için pençe ve parmak birbirini doğru sırada örtüyor. Birleşik çizim alfa sınırına kırpıldı ve 210 px enle 512 px tuvalde x=242'ye, bilek alt kenarda bitişecek biçimde yerleştirildi. Sağ alttaki nötr gri el piksellerinden ten maskesi çıkarıldı. Paketleme `pose/parrot-grip.webp` ve maskesini üretir, kodlanmış görselden boyama referansını hesaplar. Tünek yalnız kucak pozunda kullanılır. Omuz temas noktaları 256 px hayvan tuvalinde pati veya pençenin kumaşa değdiği yere göre belirlenir.
