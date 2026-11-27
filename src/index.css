@@ -424,6 +424,8 @@ label.check input { width: 20px; height: 20px; accent-color: var(--purple); }
 .av-product-hat img { width: 170px; height: 170px; translate: 0 35px; }
 .av-product-glasses img { width: 168px; height: 168px; translate: 0 10px; }
 .av-product-clothes img { width: 154px; height: 154px; translate: 0 -48px; }
+.av-product-costume { min-height: 0; aspect-ratio: 1; }
+.av-product-costume img { width: 100%; height: 100%; }
 .av-background-preview { width: 100%; height: 100%; min-height: 82px; border-radius: inherit; }
 @keyframes petbob { 50% { transform: translateY(-5%) rotate(-4deg); } }
 .avatar.happy .av-stage { animation: hop .45s ease-in-out infinite alternate; }

@@ -1,11 +1,10 @@
 // Avatar = ImageGen katmanları (saç arkası, temel, ifade, kıyafet, saç önü, şapka, gözlük) canvas'ta birleşir + yanında hayvan + arka plan.
-// Şapka takılıyken saçın "şapka altı" katmanı kullanılır; tüm şapkalar ortak şapka bölgesine hizalı üretildi.
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { Equipped } from '../data/types'
 import { BG } from './bg'
 import { ITEMS, MANIFEST, SPECIES, fx, type CatalogItem, type ItemSlot, type Raw, type Species } from './catalog'
 import { compose, composed, type Part } from './render'
-import { cradleFor, cradleParts, type CradleShape } from './companionCradle'
+import { cradleFor, cradleParts, hugSleeves, type CradleShape } from './companionCradle'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -97,19 +96,28 @@ const floorHat = (p: Part | null): Part | null => {
   return p
 }
 
+const BRIMMED_HATS = new Set(['hat/cap.webp', 'hat/bucket.webp', 'hat/cowboy.webp', 'hat/pirate.webp', 'hat/wizard.webp'])
+const VOLUME_HAIR: Partial<Record<string, number>> = {
+  hair_afro: 0.76, hair_bun: 0.78, hair_spiky: 0.84, hair_space_buns: 0.92, hair_curly: 0.96,
+}
+const AFRO_CAP = { scale: 1.12, dy: -8 }
+
 function clothesPart(cl: Raw | undefined, color: CatalogItem | undefined) {
   const layer = part(cl, null, cl?.tintable === false ? undefined : color?.raw.color)
   return layer && color?.id === 'ccolor_gold' && layer.mask ? { ...layer, metallic: true } : layer
 }
 
-interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string }
+interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string; garment: Part | null }
 
 /** Katmanları sıraya koyar. Canlı avatar için ayrıca: alt (gözler boş), kayan iris, kırpma, üst (kıyafet, saç önü, şapka, gözlük). */
 function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): Layers {
   const skin = pick(eq, 'skin', seed)?.raw.color as string | undefined
-  const hair = pick(eq, 'hair', seed)?.raw
+  const hairItem = pick(eq, 'hair', seed)
+  const hair = hairItem?.raw
   const hcol = pick(eq, 'hcolor', seed)?.raw.color as string | undefined
   const hat = pick(eq, 'hat', seed)?.raw
+  const volume = hat && BRIMMED_HATS.has(hat.layer ?? '') ? VOLUME_HAIR[hairItem?.id ?? ''] : undefined
+  const underHat = hat && !volume
   const gl = pick(eq, 'glasses', seed)?.raw
   const clothes = pick(eq, 'clothes', seed)
   const ccol = pick(eq, 'ccolor', seed)
@@ -123,7 +131,7 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   const cheek = pick(eq, 'cheek', seed)?.raw.key as string | undefined
   const b = MANIFEST.base
   const sub = (t: string) => t.replace('{shape}', shape).replace('{ears}', ears)
-  const back = part(hair, hat ? 'backUnderHat' : 'back', hcol)
+  const back = part(hair, underHat ? 'backUnderHat' : 'back', hcol)
   const dx = V?.hairBackDx?.[shape] ?? 0 // dar yüzde at kuyruğu yanağa yaklaşsın
   const brow = part(pick(eq, 'brow', seed)?.raw, null)
   const nose = part(pick(eq, 'nose', seed)?.raw, null)
@@ -138,7 +146,7 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   const P = (x: Part | null | undefined) => (x && x.src ? [x] : [])
   const backHair = [
     ...P(back && dx ? { ...back, dx } : back),
-    ...P(part(hair, hat ? 'fillUnderHat' : 'fill', hcol)), // yüzün arkasındaki saç (dar yüzde boşluk kalmasın)
+    ...P(part(hair, underHat ? 'fillUnderHat' : 'fill', hcol)), // yüzün arkasındaki saç (dar yüzde boşluk kalmasın)
   ]
   const head = [
     { src: V ? sub(V.base) : b.layer, mask: V ? sub(V.mask) : b.skinMask, ref: b.skinRef, color: skin },
@@ -168,9 +176,12 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
     ...P(mouthLayer),
   ]
   const glasses = part(gl, null, gl?.color)
+  const hairFront = part(hair, underHat ? 'frontUnderHat' : 'front', hcol)
+  const headwear = floorHat(part(hat, null, hat?.color))
   const front = [
-    ...P(part(hair, hat ? 'frontUnderHat' : 'front', hcol)),
-    ...P(floorHat(part(hat, null, hat?.color))),
+    // Saç uçlarının yerini koruyarak tepeyi siperin içine al, şakaklardaki bukleler dışarıda kalsın.
+    ...P(hairFront && volume ? { ...hairFront, scaleY: volume, dy: -12 * (1 - volume) } : hairFront),
+    ...P(headwear?.src === 'hat/cap.webp' && hairItem?.id === 'hair_afro' ? { ...headwear, ...AFRO_CAP } : headwear),
     ...P(glasses && { ...glasses, scale: 0.92, dy: -4 }),
   ]
   const garment = clothesPart(clothes?.raw, ccol)
@@ -190,6 +201,7 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
     upper,
     moving,
     skin,
+    garment,
   }
 }
 
@@ -273,7 +285,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const uriUp = useComp(split ? L.upper : [], px)
   const uriBlink = useComp(live ? L.blink : [], px)
   const hands = !cradle && p && pose === 'hug' && V?.hands
-    ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }]
+    ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }, ...hugSleeves(L.garment)]
     : []
   const uriHands = useComp(hands, px)
   const root = useRef<HTMLDivElement>(null)
@@ -335,7 +347,10 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const wideHair = hairId === 'hair_afro' || hairId === 'hair_headscarf'
   const broadPet = p && (SIDE_PETS.has(p.id) || BULKY_PETS.has(p.id))
   const scale = p ? (pose === 'head' || wideHair || broadPet ? 1.03 : 1.16) : (wideHair || hatName === 'wizard' ? 1.29 : 1.48)
-  const crownTop = (HAT_TOP[hatName] ?? HAIR_TOP[hairId] ?? 88) / 512 * scale
+  const hatTop = hairId === 'hair_afro' && hatName === 'cap'
+    ? 256 + (HAT_TOP.cap - 256) * AFRO_CAP.scale + AFRO_CAP.dy
+    : HAT_TOP[hatName]
+  const crownTop = (hatTop ?? HAIR_TOP[hairId] ?? 88) / 512 * scale
   const kidTop = p
     ? Math.max(pose === 'hug' ? -0.015 : 0, (pose === 'head' ? pz.bottom - 0.014 : 0.055) - crownTop)
     : Math.max(-0.15, 0.045 - crownTop)
@@ -413,7 +428,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   )
 }
 
-function ProductLayer({ layer, kind }: { layer: Part; kind: 'hat' | 'clothes' | 'glasses' }) {
+function ProductLayer({ layer, kind }: { layer: Part; kind: 'hat' | 'clothes' | 'glasses' | 'costume' }) {
   const src = useComp([layer], 320)
   const base = BASE_URL + 'av/' + layer.src
   return <div className={`av-product av-product-${kind}`}>
@@ -437,6 +452,12 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
     const color = slot === 'ccolor' ? ITEM.get(id) : equipped.ccolor ? ITEM.get(equipped.ccolor) : ITEM.get('ccolor_blue')
     const garment = slot === 'ccolor' ? ITEM.get('clothes_tshirt')?.raw : raw
     const layer = clothesPart(garment, color)
+    if (layer && id === 'clothes_dinosaur') {
+      return <ProductLayer layer={{ src: 'clothes/dinosaur-card.webp' }} kind="costume" />
+    }
+    if (layer && id === 'clothes_superhero') {
+      return <ProductLayer layer={{ ...layer, src: 'clothes/superhero-card.webp', mask: 'clothes/superhero-card-mask.webp', ref: 58 }} kind="costume" />
+    }
     if (layer) return <ProductLayer layer={layer} kind="clothes" />
   }
   if (slot === 'pose') {

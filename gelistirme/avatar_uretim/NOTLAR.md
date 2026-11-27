@@ -269,3 +269,17 @@ Sekiz düzenlemenin tamamında pilot taban düzenleme hedefi olarak verildi ve `
 - `heart`, ilk aday — Give the child slightly fuller cheekbones and cheeks that gently narrow toward a modest small round chin. Keep the very bottom rounded, like a small U-shaped arc with a soft transition from each side.
 - `heart`, seçilen aday — Keep the child's cheeks softly full alongside the outer corners of the eyes. Give the lower jaw gently tapered upper sides that curve into a small, smooth oval chin with the bottom fully rounded. The base of the chin should follow a smooth bowl-shaped arc, with no tip and no corners. Preserve natural room around the smile.
 - `wide` — Give the child a slightly wider and shorter lower face with full cheeks. Use one visible, broad convex arc curving gently down at the center of the chin and smoothly up into the cheeks. Keep the compact shape subtle, cute and natural.
+
+## Kucak pozunda uzun kol ve küçük kıyafet kartları
+
+Tavşan, kedi ve köpek pozlarında manşet çizgileri 640 px poz tuvalinde. Kısa kollular mevcut kol katmanını kullanır. Uzun kollularda omuz ve gövde seçilen giysiden, bileğe kadar olan kumaş da aynı giysinin opak kol bölgesinden gelir. Kış montunun kapitone kumaşı ayrı bir ImageGen katmanından alınır ve mont rengiyle boyanır. Ortak kucak pozunda manşet bilek parçasının alt ucuna eklenir.
+
+Kep, balıkçı, kovboy, korsan ve sihirbaz şapkalarıyla Afro, kıvırcık, topuz, çift topuz ve dikenli saçların yanları tam saç katmanından geliyor. Üstteki saç hattı saç modeline göre şapkanın içine doğru ayarlanır. Afro için kep genişletilir.
+
+### Yerleşik ImageGen
+
+Şeffaf çıktı için mevcut WebP'ler referans verildi. Kıyafet kartları alfa sınırına kırpılıp 512 px kareye ortalandı. Pelerin kartındaki doygun kırmızı ve altın maske dışında kalır. Mont kumaşının yalnız opak ortası 256 px WebP olarak paketlendi.
+
+- `clothes/winter-coat-sleeve.webp` için `clothes/winter_coat.webp` çizgi ve kumaş referansı, `pose/dog-cradle.webp` boyama stili referansı. İstem, kol sınırına kırpılabilecek orta gri yumuşak kapitone kumaş, üç-dört geniş kavisli dikiş kanalı, kapama ve fermuar içermeyen opak orta bölge.
+- `clothes/dinosaur-card.webp` için `clothes/dinosaur.webp` düzenleme hedefi, `clothes/superhero.webp` stil referansı. İstem, 75 px kartta omuzlara inik kapüşonun dışına taşan iri koyu yeşil plakalar ve gövdeden daha güçlü ayrılan kapüşon. Önden görünüm ve açık yeşil karın paneli korunur.
+- `clothes/superhero-card.webp` için `clothes/superhero.webp` düzenleme hedefi, `clothes/dinosaur.webp` stil referansı. İstem, 75 px kartta kolların yanına doğru açılan geniş bordo pelerin panelleri ve büyük, basit altın baklava toka. Kömür gri gövde ve önden açık yaka korunur.

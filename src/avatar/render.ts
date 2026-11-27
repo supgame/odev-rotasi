@@ -2,6 +2,8 @@
 // Boyama sözleşmesi (gelistirme/avatar_uretim/BRIEF.md ile birebir aynı):
 //   lum = 0.2126R + 0.7152G + 0.0722B ; dyed = clamp(color * lum / ref) ; out = rgb*(1-m) + dyed*m   (m = maske/255)
 
+export type Box = [x: number, y: number, width: number, height: number]
+
 export interface Part {
   src: string // public/av altına göre yol
   mask?: string
@@ -11,7 +13,8 @@ export interface Part {
   dy?: number
   scale?: number
   scaleY?: number
-  clip?: string // poz katmanının 640 × 640 tuvalindeki kesim çizgisi
+  clip?: string | string[] // pozun 640 px tuvalinde kesim çizgilerinin ortak alanı
+  fabric?: { crop: Box; center: [number, number]; width: number; length: number; angle: number }
   sourceRows?: [number, number] // 512 px kaynak tuvalinde görünen dikey aralık
   sourceColumns?: [number, number] // aynı tuvalde görünen yatay aralık
   metallic?: boolean
@@ -102,17 +105,24 @@ export function compose(parts: Part[], n: number): Promise<string> {
       c.width = c.height = n
       const x = c.getContext('2d')!
       x.imageSmoothingQuality = 'high'
+      const dyes = new Map<string, HTMLCanvasElement>()
       for (const { pt, im, mk } of loaded) {
         const size = n * (pt.scale ?? 1)
         const height = pt.scaleY === undefined ? size : n * pt.scaleY
         const ox = (n - size) / 2 + ((pt.dx ?? 0) * n) / 512
         const oy = (n - height) / 2 + ((pt.dy ?? 0) * n) / 512
-        const layer = pt.color ? tinted(im, mk, pt, n) : im
-        const clipped = pt.clip || pt.sourceRows || pt.sourceColumns
+        let layer: CanvasImageSource = im
+        if (pt.color) {
+          const dyeKey = [pt.src, pt.mask, pt.ref, pt.color, pt.metallic, pt.iris].join('|')
+          const dyed = dyes.get(dyeKey) ?? tinted(im, mk, pt, n)
+          dyes.set(dyeKey, dyed)
+          layer = dyed
+        }
+        const clipped = pt.clip || pt.sourceRows || pt.sourceColumns || pt.fabric
         if (clipped) x.save()
-        if (pt.clip) {
+        for (const curve of typeof pt.clip === 'string' ? [pt.clip] : pt.clip ?? []) {
           const path = new Path2D()
-          path.addPath(new Path2D(pt.clip), new DOMMatrix().scale(n / 640))
+          path.addPath(new Path2D(curve), new DOMMatrix().scale(n / 640))
           x.clip(path)
         }
         if (pt.sourceRows || pt.sourceColumns) {
@@ -122,8 +132,18 @@ export function compose(parts: Part[], n: number): Promise<string> {
           x.rect(ox + left * size / 512, oy + top * height / 512, (right - left) * size / 512, (bottom - top) * height / 512)
           x.clip()
         }
-        x.drawImage(layer, ox, oy, size, height)
-        if (pt.stronger) x.drawImage(layer, ox, oy, size, height)
+        if (pt.fabric) {
+          const { crop: [left, top, w, h], center: [cx, cy], width, length, angle } = pt.fabric
+          const sourcePixel = (pt.color ? n : im.naturalWidth) / 512
+          x.scale(n / 640, n / 640)
+          x.translate(cx, cy)
+          x.rotate(angle * Math.PI / 180)
+          x.drawImage(layer, left * sourcePixel, top * sourcePixel, w * sourcePixel, h * sourcePixel,
+            -width / 2, -length / 2, width, length)
+        } else {
+          x.drawImage(layer, ox, oy, size, height)
+          if (pt.stronger) x.drawImage(layer, ox, oy, size, height)
+        }
         if (clipped) x.restore()
       }
       const uri = c.toDataURL('image/webp', 0.92)

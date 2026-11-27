@@ -1,5 +1,7 @@
+import type { CradleShape } from './companionCradle'
+
 // Kesimler, 640 px köpek pozunda pati ve kolların sınırlarını izler.
-export const dogCradleShape = {
+export const dogCradleShape: Omit<CradleShape, 'src'> = {
   body: 'M0 355 H240 Q252 358 260 369 L258 377 Q302 421 348 399 L409 386 H640 V640 H0 Z',
   contact: [
     // Köpeğin başı. Sol kenarda çocuğun eski yanağını ve boynunu dışarıda bırak.
@@ -32,4 +34,8 @@ export const dogCradleShape = {
     'M125 357 H474 L519 439 L523 510 L456 574 Q447 593 452 608',
     'Q449 629 393 635 Q324 650 232 637 Q172 630 171 606 L178 550 L126 552 Z',
   ].join(' '),
-} as const
+  sleeves: [
+    { clip: 'M166 506 Q197 479 241 494 Q246 501 244 519 Q272 517 315 521 Q350 523 378 498 Q396 509 407 533 Q371 553 324 570 Q230 605 192 590 Q169 579 164 541 Z', center: [286, 538], width: 156, length: 272, angle: -108 },
+    { clip: 'M475 486 Q493 500 499 539 Q509 574 481 592 Q455 607 423 607 Q435 580 426 561 Q427 550 437 539 Q452 526 451 514 Z', center: [468, 554], width: 132, length: 132, angle: 56 },
+  ],
+}
