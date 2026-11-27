@@ -1,17 +1,18 @@
-// Basit CSS konfeti: kütüphane yok.
-const COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#c77dff', '#ff8c42']
+// Basit CSS konfeti (kütüphane yok): kalın çizgili kâğıtlar + altın yıldızlar.
+const COLORS = ['#ff5f5f', '#ffcb3d', '#36c86c', '#34a0ff', '#7a5cff', '#ff93c6']
 
-export function Confetti() {
+export function Confetti({ n = 46 }: { n?: number }) {
   return (
     <div className="confetti" aria-hidden>
-      {Array.from({ length: 40 }, (_, i) => (
+      {Array.from({ length: n }, (_, i) => (
         <i
           key={i}
+          className={i % 5 === 0 ? 'st' : ''}
           style={{
             left: (i * 37) % 100 + '%',
-            background: COLORS[i % COLORS.length],
-            animationDelay: ((i * 53) % 100) / 100 + 's',
-            animationDuration: 1.8 + ((i * 29) % 10) / 10 + 's',
+            background: i % 5 === 0 ? '#ffcb3d' : COLORS[i % COLORS.length],
+            animationDelay: ((i * 53) % 100) / 120 + 's',
+            animationDuration: 2 + ((i * 29) % 10) / 8 + 's',
             transform: `rotate(${(i * 47) % 360}deg)`,
           }}
         />

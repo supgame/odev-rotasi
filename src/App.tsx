@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { StudentApp } from './student/StudentApp'
 import { TeacherApp } from './teacher/TeacherApp'
 import { Gallery } from './avatar/Gallery'
+import { World } from './ui/World'
 
 // Tek sabit link: kök = öğrenci, #/ogretmen = öğretmen paneli.
 export default function App() {
@@ -11,6 +12,11 @@ export default function App() {
     addEventListener('hashchange', f)
     return () => removeEventListener('hashchange', f)
   }, [])
-  if (hash.startsWith('#/galeri')) return <Gallery />
-  return hash.startsWith('#/ogretmen') ? <TeacherApp /> : <StudentApp key={hash} />
+  const teacher = hash.startsWith('#/ogretmen')
+  return (
+    <>
+      <World calm={teacher} />
+      {hash.startsWith('#/galeri') ? <Gallery /> : teacher ? <TeacherApp /> : <StudentApp key={hash} />}
+    </>
+  )
 }

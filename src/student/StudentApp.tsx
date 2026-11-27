@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, CLASS_CODE } from '../data/api'
 import { errText, type RosterStudent, type StudentHome, type SubmitResult } from '../data/types'
 import { Avatar } from '../avatar/Avatar'
+import { Icon, Logo, StarCount } from '../ui/Icon'
 import { Quiz } from './Quiz'
 import { Shop } from './Shop'
 import { Confetti } from './Confetti'
@@ -20,6 +21,7 @@ export function StudentApp() {
   const [chosen, setChosen] = useState<RosterStudent | null>(null)
   const [home, setHome] = useState<StudentHome | null>(null)
   const [result, setResult] = useState<SubmitResult | null>(null)
+  const [fresh, setFresh] = useState(false) // sonuç ekranı az önce mi gönderildi (konfeti + sayaç)
   const [err, setErr] = useState('')
 
   const logout = useCallback(() => {
@@ -37,6 +39,7 @@ export function StudentApp() {
   }, [token, logout])
 
   useEffect(() => { if (token) refresh() }, [token, refresh])
+  useEffect(() => { window.scrollTo(0, 0) }, [screen])
 
   if (screen === 'pick') return <PickName onPick={(s) => { setChosen(s); setScreen('pin') }} />
   if (screen === 'pin' && chosen)
@@ -47,7 +50,7 @@ export function StudentApp() {
         onDone={(t) => { setToken(t); setTok(t); setScreen('home') }}
       />
     )
-  if (!home) return <div className="center muted">{err || 'Yükleniyor…'}</div>
+  if (!home) return <Loading text={err} />
 
   if (screen === 'quiz' && home.assignment)
     return (
@@ -59,14 +62,14 @@ export function StudentApp() {
         onCancel={() => setScreen('home')}
         onSubmit={async (answers) => {
           const r = await api.submit(token!, home.assignment!.id, answers)
-          setResult(r)
+          setResult(r); setFresh(true)
           setScreen('result')
           refresh()
         }}
       />
     )
   if (screen === 'result' && result && home.assignment)
-    return <ResultScreen result={result} assignment={home.assignment} onHome={() => setScreen('home')} onShop={() => setScreen('shop')} />
+    return <ResultScreen result={result} fresh={fresh} home={home} onHome={() => setScreen('home')} onShop={() => setScreen('shop')} />
   if (screen === 'shop')
     return <Shop home={home} token={token!} onBack={() => { refresh(); setScreen('home') }} onChange={refresh} />
 
@@ -74,12 +77,28 @@ export function StudentApp() {
     <HomeScreen
       home={home}
       onStart={() => setScreen('quiz')}
-      onShowResult={() => { setResult(home.my_result); setScreen('result') }}
+      onShowResult={() => { setResult(home.my_result); setFresh(false); setScreen('result') }}
       onShop={() => setScreen('shop')}
       onLogout={logout}
     />
   )
 }
+
+function Loading({ text }: { text?: string }) {
+  return <div className="center">{text ? <p className="panel err">{text}</p> : <span className="loading">Yükleniyor…</span>}</div>
+}
+
+/** 1-3 yıldız: hepsi doğru 3, yarısı ve fazlası 2, bitirdiysen 1. */
+function rating(correct: number, total: number) {
+  if (total > 0 && correct === total) return 3
+  return total > 0 && correct / total >= 0.5 ? 2 : 1
+}
+function MiniStars({ n, size = 16 }: { n: number; size?: number }) {
+  return <span className="mini-stars">{[0, 1, 2].map((i) => <Icon key={i} name="star" size={size} className={i < n ? '' : 'off'} />)}</span>
+}
+
+// ---------- 1) Oyuncu seç ----------
+const CARD_COLORS = ['#a9e2ff', '#ffd1e6', '#c8f2b8', '#ffe7a3', '#d9ccff', '#ffd0bd']
 
 function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
   const [list, setList] = useState<RosterStudent[] | null>(null)
@@ -88,22 +107,23 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
   useEffect(() => {
     api.roster(CLASS_CODE).then((r) => { setList(r.students); setCls(r.className) }).catch((e) => setErr(errText(e)))
   }, [])
-  if (err) return <div className="center err">{err}</div>
-  if (!list) return <div className="center muted">Yükleniyor…</div>
+  if (err) return <Loading text={err} />
+  if (!list) return <Loading />
   return (
     <div className="page">
-      <header className="hero">
-        <div className="logo">Ödev <i>Rotası</i></div>
-        <p>{cls} · Kendi adını bul ve dokun.</p>
+      <header className="title-screen">
+        <Logo />
+        <div><span className="chip tag"><Icon name="flag" size={20} />{cls}</span></div>
+        <h1 className="choose pop">Oyuncunu seç!</h1>
       </header>
       {[3, 4].map((g) => (
-        <section key={g}>
-          <h2 className="grade-title">{g}. sınıf</h2>
+        <section key={g} className={'panel team g' + g}>
+          <span className="ribbon">{g}. sınıf</span>
           <div className="name-grid">
-            {list.filter((s) => s.grade === g).map((s) => (
-              <button key={s.id} className="name-card" onClick={() => onPick(s)}>
-                <Avatar animal={s.animal} seed={s.id} size={64} />
-                <span>{s.display_name}</span>
+            {list.filter((s) => s.grade === g).map((s, k) => (
+              <button key={s.id} className="player-card" style={{ ['--pc' as string]: CARD_COLORS[(k + g) % CARD_COLORS.length] }} onClick={() => onPick(s)}>
+                <span className="pc-stage"><Avatar animal={s.animal} seed={s.id} size={74} /></span>
+                <span className="pc-name">{s.display_name}</span>
               </button>
             ))}
           </div>
@@ -113,171 +133,305 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
   )
 }
 
+// ---------- 2) Şifre ----------
 function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack: () => void; onDone: (t: string) => void }) {
   const first = !student.has_pin
-  const [pin, setPin] = useState('')
+  const [pin, setPinState] = useState('')
+  const pinRef = useRef('') // hızlı dokunuşlarda (aynı karede iki tuş) rakam kaybolmasın
+  const setPin = (v: string) => { pinRef.current = v; setPinState(v) }
   const [firstPin, setFirstPin] = useState<string | null>(null)
   const [err, setErr] = useState('')
+  const [shake, setShake] = useState(0)
   const [busy, setBusy] = useState(false)
 
   const title = first
     ? firstPin === null ? 'Kendine 4 rakamlı bir şifre seç' : 'Şifreni bir daha gir'
     : 'Şifreni gir'
 
+  function fail(m: string) { setErr(m); setPin(''); setShake((n) => n + 1) }
   async function full(p: string) {
     if (first && firstPin === null) { setFirstPin(p); setPin(''); return }
-    if (first && firstPin !== p) { setErr('İki şifre aynı değil. Baştan seç.'); setFirstPin(null); setPin(''); return }
+    if (first && firstPin !== p) { setFirstPin(null); fail('İki şifre aynı değil. Baştan seç.'); return }
     setBusy(true)
-    try { onDone(await api.login(CLASS_CODE, student.id, p)) } catch (e) { setErr(errText(e)); setPin('') } finally { setBusy(false) }
+    try { onDone(await api.login(CLASS_CODE, student.id, p)) } catch (e) { fail(errText(e)) } finally { setBusy(false) }
   }
   function press(d: string) {
     if (busy) return
     setErr('')
-    const p = (pin + d).slice(0, 4)
+    if (pinRef.current.length >= 4) return
+    const p = pinRef.current + d
     setPin(p)
-    if (p.length === 4) full(p)
+    if (p.length === 4) window.setTimeout(() => full(p), 160) // son yıldız görünsün
   }
+  // klavyeyle de girilebilsin (bilgisayardan açan olursa)
+  useEffect(() => {
+    const f = (e: KeyboardEvent) => {
+      if (/^\d$/.test(e.key)) press(e.key)
+      else if (e.key === 'Backspace') setPin(pinRef.current.slice(0, -1))
+    }
+    addEventListener('keydown', f)
+    return () => removeEventListener('keydown', f)
+  })
 
   return (
     <div className="page narrow">
-      <button className="link" onClick={onBack}>← Ben değilim</button>
-      <div className="pin-head">
-        <Avatar animal={student.animal} seed={student.id} size={110} bounce />
+      <div className="hud">
+        <button className="icon-btn" onClick={onBack} aria-label="Ben değilim"><Icon name="back" size={26} /></button>
+        <span className="grow" />
+      </div>
+      <section className={'panel pin-panel' + (shake ? ' shake' : '')} key={shake}>
+        <span className="ribbon gold" style={{ left: '50%', transform: 'translateX(-50%)' }}><Icon name="lock" size={22} />Giriş</span>
+        <Avatar animal={student.animal} seed={student.id} size={112} bounce />
         <h2>{student.display_name}</h2>
-        <p>{title}</p>
+        <p className="say">{title}</p>
         <p className="hint pin-hint">
           {first ? (firstPin === null ? 'Bu şifreyi başka yerde kullanma. Unutursan öğretmenine sor.' : 'Aynı şifreyi tekrar yaz.') : 'Unuttuysan öğretmenine sor.'}
         </p>
-      </div>
-      <div className="pin-dots">{[0, 1, 2, 3].map((i) => <span key={i} className={i < pin.length ? 'on' : ''} />)}</div>
-      <p className="err center-text pin-err">{err}</p>
-      <div className="pinpad">
-        {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map((k, i) =>
-          k === '' ? <span key={i} /> : (
-            <button key={i} onClick={() => (k === '⌫' ? setPin(pin.slice(0, -1)) : press(k))}>{k}</button>
-          ),
-        )}
-      </div>
+        <div className="pin-slots">
+          {[0, 1, 2, 3].map((i) => <span key={i} className={i < pin.length ? 'on' : ''}>{i < pin.length && <Icon name="star" size={34} />}</span>)}
+        </div>
+        <p className="err pin-err">{err}</p>
+        <div className="pinpad">
+          {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) =>
+            k === '' ? <span key={i} /> : k === 'del' ? (
+              <button key={i} className="del" onClick={() => setPin(pinRef.current.slice(0, -1))} aria-label="Sil"><Icon name="backspace" size={34} /></button>
+            ) : (
+              <button key={i} onClick={() => press(k)}>{k}</button>
+            ),
+          )}
+        </div>
+      </section>
     </div>
   )
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+// ---------- 3) Ana sayfa ----------
+function left(iso: string) {
+  const ms = Date.parse(iso) - Date.now()
+  if (ms <= 0) return 'Süre bitti'
+  const h = Math.floor(ms / 3600e3), d = Math.floor(h / 24)
+  if (d >= 1) return `${d} gün ${h % 24} saat kaldı`
+  if (h >= 1) return `${h} saat kaldı`
+  return `${Math.max(1, Math.floor(ms / 60e3))} dakika kaldı`
 }
 
 function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
   home: StudentHome; onStart: () => void; onShowResult: () => void; onShop: () => void; onLogout: () => void
 }) {
-  const g = home.goal
+  const { me, assignment: a, my_result: r, goal: g } = home
   const pct = Math.min(100, Math.round((g.current / Math.max(1, g.target)) * 100))
+  const say = a && !r ? <>Selam <b>{me.display_name}</b>! Yeni görev seni bekliyor.</>
+    : a && r ? <>Bu haftanın görevi tamam! Yıldızlarını harcamaya ne dersin?</>
+    : <>Selam <b>{me.display_name}</b>! Cuma yeni görev gelecek.</>
   return (
     <div className="page">
-      <div className="topbar">
-        <span className="logo small">Ödev <i>Rotası</i></span>
-        <button className="link" onClick={onLogout}>Ben değilim</button>
+      <div className="hud">
+        <span className="hud-me"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={40} pet={false} alive={false} /><b>{me.display_name}</b></span>
+        <span className="grow" />
+        <StarCount n={me.stars} />
+        <button className="icon-btn pink" onClick={onShop} aria-label="Dükkan"><Icon name="bag" size={30} /></button>
       </div>
 
-      <section className="me-card">
-        <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={120} bounce />
-        <div>
-          <h1>Selam {home.me.display_name}!</h1>
-          <div className="row">
-            <span className="stars-pill">{home.me.stars} yıldız</span>
-            <button className="btn ghost small" onClick={onShop}>Dükkan →</button>
-          </div>
-        </div>
+      <section className="hero">
+        <div className="island"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={150} bounce /></div>
+        <p className="bubble">{say}</p>
       </section>
 
-      <section className="card task">
-        {home.assignment ? (
-          home.my_result ? (
-            <>
-              <p className="eyebrow">Bu haftanın ödevi · bitti</p>
-              <h2><span className="done-mark">✓</span>{home.assignment.title}</h2>
-              <p>{home.my_result.total} sorudan {home.my_result.correct} doğru, +{home.my_result.stars_earned} yıldız kazandın.</p>
-              <button className="btn ghost" onClick={onShowResult}>Cevaplarıma bak</button>
-            </>
-          ) : (
-            <>
-              <p className="eyebrow">Bu haftanın ödevi</p>
-              <h2>{home.assignment.title}</h2>
-              <p>{home.assignment.questions.length} soru · Son gün: {fmtDate(home.assignment.closes_at)}</p>
-              <button className="btn big" onClick={onStart}>Başla!</button>
-            </>
-          )
+      <section className={'panel quest' + (a && r ? ' done' : '')}>
+        {a ? r ? (
+          <>
+            <span className="ribbon green"><Icon name="check" size={20} />Görev tamam</span>
+            <h2>{a.title}</h2>
+            <div className="done-row">
+              <MiniStars n={rating(r.correct, r.total)} size={30} />
+              <span>{r.total} sorudan <b>{r.correct}</b> doğru · <b>+{r.stars_earned}</b> yıldız</span>
+            </div>
+            <button className="btn blue wide" onClick={onShowResult}><Icon name="eye" size={26} />Cevaplarıma bak</button>
+          </>
         ) : (
           <>
-            <p className="eyebrow">Bu hafta</p>
-            <h2>Şu an açık ödev yok</h2>
-            <p>Cuma günü yeni ödev gelecek. O zamana kadar avatarını süsleyebilirsin.</p>
+            <span className="ribbon gold"><Icon name="target" size={22} />Bu haftanın görevi</span>
+            <h2>{a.title}</h2>
+            <div className="chips">
+              <span className="chip"><Icon name="pencil" size={20} />{a.questions.length} soru</span>
+              <span className="chip"><Icon name="clock" size={20} />{left(a.closes_at)}</span>
+              <span className="chip"><Icon name="star" size={20} />+{10 + a.questions.length} yıldıza kadar</span>
+            </div>
+            <button className="btn big pulse" onClick={onStart}><Icon name="play" size={30} />Başla!</button>
+          </>
+        ) : (
+          <>
+            <span className="ribbon blue"><Icon name="clock" size={22} />Bu hafta</span>
+            <h2>Şu an açık görev yok</h2>
+            <p className="muted">Cuma günü yeni görev gelecek. O zamana kadar avatarını süsleyebilirsin.</p>
+            <div className="row"><button className="btn purple" onClick={onShop}><Icon name="bag" size={26} />Dükkana git</button></div>
           </>
         )}
       </section>
 
-      <section className="card">
-        <p className="eyebrow">Sınıf hedefi</p>
-        <h2>{g.reward}</h2>
-        <div className="bar"><div style={{ width: pct + '%' }} /></div>
-        <div className="goal-nums"><span>Hep birlikte {g.current} yıldız</span><span>Hedef {g.target}</span></div>
-      </section>
+      <Route home={home} onStart={onStart} onShowResult={onShowResult} />
 
-      <section className="card">
-        <p className="eyebrow">Sınıf arkadaşların</p>
-        <div className="mates">
-          {home.classmates.map((m) => (
-            <div key={m.id} className="mate">
-              <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} size={64} />
-              <span>{m.display_name}</span>
-            </div>
-          ))}
+      <section className={'panel goal-panel'}>
+        <span className="ribbon red"><Icon name="chest" size={24} />Sınıf sandığı</span>
+        <div className={'goal' + (pct >= 100 ? ' full' : '')}>
+          <div className="grow">
+            <p className="reward">Hep birlikte yıldız toplayın, sandık açılsın: <b>{g.reward}</b></p>
+            <div className="meter"><div style={{ width: Math.max(6, pct) + '%' }} /><span>{g.current} / {g.target}</span></div>
+          </div>
+          <Icon name="chest" size={64} className="chest-ic" />
         </div>
       </section>
 
-      {home.past.length > 0 && (
-        <section className="card">
-          <p className="eyebrow">Geçmiş ödevlerim</p>
-          <ul className="past">
-            {home.past.map((p, i) => (
-              <li key={i}><span>{p.title}</span><span>{p.correct}/{p.total} doğru · +{p.stars_earned}</span></li>
+      {home.classmates.length > 0 && (
+        <section className="panel">
+          <span className="ribbon blue"><Icon name="users" size={24} />Takım arkadaşların</span>
+          <div className="mates">
+            {home.classmates.map((m) => (
+              <div key={m.id} className="mate">
+                <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} size={62} />
+                <span>{m.display_name}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </section>
       )}
+
+      <button className="btn ghost small leave" onClick={onLogout}><Icon name="door" size={22} />Ben {me.display_name} değilim</button>
     </div>
   )
 }
 
-function ResultScreen({ result, assignment, onHome, onShop }: {
-  result: SubmitResult; assignment: NonNullable<StudentHome['assignment']>; onHome: () => void; onShop: () => void
+// Rota: haftalar bir harita yolunda seviye düğümleri. Üstte kilitli gelecek hafta, sonra bu hafta, aşağı doğru geçmiş haftalar.
+type Node =
+  | { kind: 'locked' }
+  | { kind: 'play' | 'done' | 'wait'; title: string; sub: string; stars?: number }
+  | { kind: 'past'; title: string; sub: string; stars: number }
+  | { kind: 'start' }
+const XS = [50, 72, 30, 66, 34, 62, 40]
+const ROW = 118
+
+function Route({ home, onStart, onShowResult }: { home: StudentHome; onStart: () => void; onShowResult: () => void }) {
+  const { assignment: a, my_result: r } = home
+  // canlıda "past" bu haftayı içermez, demoda içerir: bu haftayı bir kez göster
+  const past = [...home.past].sort((x, y) => Date.parse(y.created_at) - Date.parse(x.created_at))
+  if (a && r) { const k = past.findIndex((p) => p.title === a.title); if (k >= 0) past.splice(k, 1) }
+  const nodes: Node[] = [
+    { kind: 'locked' },
+    a ? r ? { kind: 'done', title: 'Bu hafta', sub: `${r.correct}/${r.total} doğru`, stars: rating(r.correct, r.total) }
+      : { kind: 'play', title: 'Bu hafta', sub: 'Oyna!' }
+      : { kind: 'wait', title: 'Bu hafta', sub: 'Cuma açılır' },
+    ...past.slice(0, 5).map((p): Node => ({ kind: 'past', title: p.title, sub: `${p.correct}/${p.total} doğru · +${p.stars_earned}`, stars: rating(p.correct, p.total) })),
+    { kind: 'start' },
+  ]
+  const done = past.length + (a && r ? 1 : 0)
+  const pts = nodes.map((_, i) => ({ x: XS[i % XS.length], y: ROW / 2 + i * ROW }))
+  const H = nodes.length * ROW
+  let d = `M ${pts[0].x} ${pts[0].y}`
+  for (let i = 1; i < pts.length; i++) {
+    const p = pts[i - 1], q = pts[i], my = (p.y + q.y) / 2
+    d += ` C ${p.x} ${my}, ${q.x} ${my}, ${q.x} ${q.y}`
+  }
+  return (
+    <section className="panel">
+      <span className="ribbon green"><Icon name="map" size={24} />Rotam</span>
+      <div className="route" style={{ height: H }}>
+        <svg className="path" viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" aria-hidden>
+          <path className="road" d={d} /><path className="road-in" d={d} /><path className="dash" d={d} />
+        </svg>
+        {nodes.map((n, i) => {
+          const { x, y } = pts[i]
+          const cur = n.kind === 'play' || n.kind === 'done' || n.kind === 'wait'
+          const gap = cur ? 60 : 48
+          const side = x > 52 ? { right: `calc(${100 - x}% + ${gap}px)` } : { left: `calc(${x}% + ${gap}px)` }
+          const cls = 'node' + (n.kind === 'locked' ? ' locked' : '') + (n.kind === 'start' ? ' start' : '') + (cur ? ' current' : '') + (n.kind === 'play' ? ' go' : '') + (n.kind === 'wait' ? ' wait' : '') + (n.kind === 'done' ? ' done-now' : '')
+          const click = n.kind === 'play' ? onStart : n.kind === 'done' ? onShowResult : undefined
+          const Tag = click ? 'button' : 'div'
+          return (
+            <div key={i}>
+              <Tag className={cls} style={{ left: x + '%', top: y }} onClick={click} aria-label={'title' in n ? n.title : n.kind === 'start' ? 'Başlangıç' : 'Kilitli'}>
+                {n.kind === 'locked' ? <Icon name="lock" size={34} />
+                  : n.kind === 'start' ? <Icon name="flag" size={32} />
+                  : n.kind === 'play' ? <Icon name="play" size={40} />
+                  : n.kind === 'wait' ? <Icon name="clock" size={40} />
+                  : <Icon name="check" size={n.kind === 'done' ? 40 : 32} />}
+                {'stars' in n && n.stars !== undefined && <MiniStars n={n.stars} size={14} />}
+              </Tag>
+              <span className={'node-label' + (cur ? ' cur' : '') + (n.kind === 'locked' || n.kind === 'start' ? ' dim' : '')} style={{ top: y, ...side }}>
+                {n.kind === 'locked' ? <>Gelecek hafta<small>Kilitli</small></> : n.kind === 'start' ? <>Başlangıç<small>{done ? `${done} görev bitti` : 'Rota buradan başlar'}</small></> : <>{n.title}<small>{n.sub}</small></>}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+// ---------- 5) Sonuç ----------
+function ResultScreen({ result, fresh, home, onHome, onShop }: {
+  result: SubmitResult; fresh: boolean; home: StudentHome; onHome: () => void; onShop: () => void
 }) {
-  const msg = result.correct === result.total ? 'Hepsi doğru, süpersin!' : result.correct >= result.total / 2 ? 'Çok iyi gidiyorsun!' : 'Ödevi bitirdin, aferin! Yanlışlara birlikte bakalım.'
+  const assignment = home.assignment!
+  const n = rating(result.correct, result.total)
+  const msg = n === 3 ? 'Hepsi doğru, süpersin!' : n === 2 ? 'Çok iyi gidiyorsun!' : 'Görevi bitirdin, aferin!'
+  const [shown, setShown] = useState(fresh ? 0 : result.stars_earned)
+  useEffect(() => {
+    if (!fresh) return
+    let v = 0
+    const step = Math.max(1, Math.ceil(result.stars_earned / 20))
+    let t: number | undefined
+    const start = window.setTimeout(() => {
+      t = window.setInterval(() => { v = Math.min(result.stars_earned, v + step); setShown(v); if (v >= result.stars_earned) window.clearInterval(t) }, 45)
+    }, 1100)
+    return () => { window.clearTimeout(start); window.clearInterval(t) }
+  }, [fresh, result.stars_earned])
   return (
     <div className="page">
-      <Confetti />
-      <section className="card result-head">
-        <div className="big-stars">+{result.stars_earned}</div>
+      {fresh && <Confetti />}
+      <div className="hud">
+        <button className="icon-btn" onClick={onHome} aria-label="Ana sayfa"><Icon name="home" size={30} /></button>
+        <span className="grow" />
+        <StarCount n={home.me.stars} />
+      </div>
+      <section className="panel result">
+        <span className="ribbon gold"><Icon name="trophy" size={28} />Görev tamam!</span>
+        <div className="big-stars3">
+          {[0, 1, 2].map((i) => <Icon key={i} name="star" size={i === 1 ? 92 : 70} className={i < n ? 'on' : 'off'} />)}
+        </div>
         <h1>{msg}</h1>
-        <p>{result.total} sorudan {result.correct} doğru</p>
+        <p className="muted">{result.total} sorudan <b>{result.correct}</b> doğru</p>
+        <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={120} mood="happy" />
+        <div className="earned"><StarCount n={shown} big plus /></div>
+        <p className="muted">yıldız kazandın</p>
         <div className="row">
-          <button className="btn" onClick={onShop}>Yıldızlarımı harca</button>
-          <button className="btn ghost" onClick={onHome}>Ana sayfa</button>
+          <button className="btn purple" onClick={onShop}><Icon name="bag" size={26} />Dükkana koş</button>
+          <button className="btn ghost" onClick={onHome}><Icon name="home" size={24} />Ana sayfa</button>
         </div>
       </section>
-      {result.items.length > 0 && assignment.questions.map((q, i) => {
-        const it = result.items.find((x) => x.id === q.id)
-        if (!it) return null
-        return (
-          <section key={q.id} className={'card review ' + (it.ok ? 'ok' : 'no')}>
-            <p className={'q-no ' + (it.ok ? 'ok' : 'no')}>{i + 1}. soru · {it.ok ? 'doğru' : 'yanlış'}</p>
-            <p className="q-text">{q.text}</p>
-            {!it.ok && (
-              <p>Senin cevabın: <s>{it.given === null ? 'boş' : q.options[it.given]}</s> · Doğrusu: <b>{q.options[it.answer]}</b></p>
-            )}
-            {it.explanation && <p className="explain">{it.explanation}</p>}
-          </section>
-        )
-      })}
+      {result.items.length > 0 && (
+        <section className="panel">
+          <span className="ribbon blue"><Icon name="eye" size={24} />Cevapların</span>
+          <div className="review-list">
+            {assignment.questions.map((q, i) => {
+              const it = result.items.find((x) => x.id === q.id)
+              if (!it) return null
+              return (
+                <div key={q.id} className={'review ' + (it.ok ? 'ok' : 'no')}>
+                  <span className="mark"><Icon name={it.ok ? 'check' : 'x'} size={20} /></span>
+                  <div>
+                    <p className="q-no">{i + 1}. soru · {it.ok ? 'doğru' : 'yanlış'}</p>
+                    <p className="q-text">{q.text}</p>
+                    {!it.ok && (
+                      <p>Senin cevabın: <s>{it.given === null ? 'boş' : q.options[it.given]}</s> · Doğrusu: <b>{q.options[it.answer]}</b></p>
+                    )}
+                    {it.explanation && <p className="explain">{it.explanation}</p>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { api } from '../data/api'
 import { resetDemo } from '../data/mock'
 import { errText, type TAssignment, type TClass, type TStudent, type TSubmission } from '../data/types'
 import { parseQuestions, questionsToText } from './questionText'
+import { Icon, Logo } from '../ui/Icon'
 
 type Tab = 'odev' | 'sonuc' | 'ogrenci' | 'sinif'
 // Öğretmenin verdiği hayvan arkadaş (öğrenci dükkandan başkasını da alabilir; görünüşünü kendi seçer).
@@ -13,7 +14,7 @@ const ANIMALS = SPECIES
 export function TeacherApp() {
   const [inn, setIn] = useState<boolean | null>(null)
   useEffect(() => { api.teacherIsIn().then(setIn) }, [])
-  if (inn === null) return <div className="center muted">Yükleniyor…</div>
+  if (inn === null) return <div className="center"><span className="loading">Yükleniyor…</span></div>
   if (!inn) return <TeacherLogin onIn={() => setIn(true)} />
   return <Panel onOut={async () => { await api.teacherLogout(); setIn(false) }} />
 }
@@ -24,8 +25,10 @@ function TeacherLogin({ onIn }: { onIn: () => void }) {
   const [err, setErr] = useState('')
   return (
     <div className="page narrow t">
-      <div className="logo small">Ödev <i>Rotası</i></div>
-      <h1 style={{ marginTop: '1.6rem' }}>Öğretmen girişi</h1>
+      <div className="title-screen"><Logo /></div>
+      <section className="panel login-card">
+      <span className="ribbon"><Icon name="pencil" size={22} />Öğretmen</span>
+      <h1>Öğretmen girişi</h1>
       {api.mode === 'demo' && <p className="hint">Demo modu: veriler yalnız bu tarayıcıda. Şifresiz girebilirsin.</p>}
       <form onSubmit={async (e) => { e.preventDefault(); try { await api.teacherLogin(email, pw); onIn() } catch (x) { setErr(errText(x)) } }}>
         {api.mode === 'canli' && (
@@ -34,10 +37,11 @@ function TeacherLogin({ onIn }: { onIn: () => void }) {
             <label>Şifre<input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required /></label>
           </>
         )}
-        <button className="btn">Giriş</button>
+        <div className="row"><button className="btn purple">Giriş</button></div>
         {err && <p className="err">{err}</p>}
       </form>
       <p><a href="#/">← Öğrenci sayfası</a></p>
+      </section>
     </div>
   )
 }
@@ -46,23 +50,27 @@ function Panel({ onOut }: { onOut: () => void }) {
   const [tab, setTab] = useState<Tab>('odev')
   return (
     <div className="page wide t">
-      <div className="topbar">
-        <span className="logo small">Ödev <i>Rotası</i> <small>Öğretmen</small></span>
-        <span>
-          {api.mode === 'demo' && <span className="badge">DEMO</span>}
+      <div className="t-head">
+        <Logo small />
+        <span className="t-tag">Öğretmen</span>
+        {api.mode === 'demo' && <span className="badge">DEMO</span>}
+        <span className="grow" />
+        <span className="t-links">
           <a href="#/" className="link">Öğrenci görünümü</a>
           <button className="link" onClick={onOut}>Çıkış</button>
         </span>
       </div>
       <div className="tabs">
-        {([['odev', 'Ödevler'], ['sonuc', 'Sonuçlar'], ['ogrenci', 'Öğrenciler'], ['sinif', 'Sınıf hedefi']] as [Tab, string][]).map(([k, l]) => (
-          <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
+        {([['odev', 'Ödevler', 'pencil'], ['sonuc', 'Sonuçlar', 'chart'], ['ogrenci', 'Öğrenciler', 'users'], ['sinif', 'Sınıf hedefi', 'chest']] as const).map(([k, l, ic]) => (
+          <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k as Tab)}><Icon name={ic} size={26} />{l}</button>
         ))}
       </div>
-      {tab === 'odev' && <Assignments />}
-      {tab === 'sonuc' && <Results />}
-      {tab === 'ogrenci' && <Students />}
-      {tab === 'sinif' && <ClassGoal />}
+      <div className="panel">
+        {tab === 'odev' && <Assignments />}
+        {tab === 'sonuc' && <Results />}
+        {tab === 'ogrenci' && <Students />}
+        {tab === 'sinif' && <ClassGoal />}
+      </div>
     </div>
   )
 }
@@ -105,15 +113,15 @@ function Assignments() {
   return (
     <section>
       <div className="row">
-        <button className="btn" onClick={() => newOne(3)}>+ 3. sınıf ödevi</button>
-        <button className="btn" onClick={() => newOne(4)}>+ 4. sınıf ödevi</button>
+        <button className="btn blue" onClick={() => newOne(3)}>+ 3. sınıf ödevi</button>
+        <button className="btn red" onClick={() => newOne(4)}>+ 4. sınıf ödevi</button>
       </div>
-      <table className="tbl">
+      {list.length === 0 ? <p className="muted">Henüz ödev yok. Yukarıdan ekle.</p> : <div className="tbl-wrap"><table className="tbl">
         <thead><tr><th>Sınıf</th><th>Başlık</th><th>Açılış</th><th>Kapanış</th><th>Soru</th><th>Durum</th><th /></tr></thead>
         <tbody>
           {list.map((a) => (
             <tr key={a.id}>
-              <td>{a.grade}</td><td>{a.title}</td>
+              <td><span className={'grade-pill g' + a.grade}>{a.grade}</span></td><td><b>{a.title}</b></td>
               <td>{new Date(a.opens_at).toLocaleString('tr-TR')}</td>
               <td>{new Date(a.closes_at).toLocaleString('tr-TR')}</td>
               <td>{a.questions.length}</td><td>{status(a)}</td>
@@ -124,7 +132,7 @@ function Assignments() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>}
     </section>
   )
 }
@@ -156,7 +164,7 @@ function AssignmentForm({ init, onDone }: { init: Partial<TAssignment> & { text:
             placeholder={'345 + 128 kaçtır?\n- 463\n* 473\n- 483\n! Birlerden 5+8=13, 3 yaz 1 elde.\n\nMıknatıs tahtayı çeker.\n- Doğru\n* Yanlış'} />
           <span className="hint">Sorular arasında boş satır. Doğru şıkkın başına *, diğerlerine -, açıklamaya ! koy.</span>
         </label>
-        <div>
+        <div className="preview-box">
           <p><b>Önizleme:</b> {parsed.questions.length} soru</p>
           {parsed.errors.map((e) => <p key={e} className="err">{e}</p>)}
           <ol className="preview">
@@ -168,7 +176,7 @@ function AssignmentForm({ init, onDone }: { init: Partial<TAssignment> & { text:
       </div>
       {err && <p className="err">{err}</p>}
       <div className="row">
-        <button className="btn" onClick={save}>Kaydet</button>
+        <button className="btn purple" onClick={save}>Kaydet</button>
         <button className="btn ghost" onClick={onDone}>Vazgeç</button>
       </div>
     </section>
@@ -205,8 +213,11 @@ function Results() {
       </label>
       {a && (
         <>
-          <p><b>{done} / {rows.length}</b> öğrenci yaptı.</p>
-          <table className="tbl">
+          <div className="t-stat">
+            <div><b>{done} / {rows.length}</b><span>öğrenci yaptı</span></div>
+            {online.length > 0 && <div><b>%{Math.round((online.reduce((x, y) => x + y.correct, 0) / Math.max(1, online.reduce((x, y) => x + y.total, 0))) * 100)}</b><span>ortalama doğru (online)</span></div>}
+          </div>
+          <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>Öğrenci</th><th>Durum</th><th>Doğru</th><th>Yıldız</th><th /></tr></thead>
             <tbody>
               {rows.map((s) => {
@@ -214,7 +225,7 @@ function Results() {
                 return (
                   <tr key={s.id}>
                     <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} size={34} /> {s.display_name}</span></td>
-                    <td>{sub ? (sub.source === 'kagit' ? 'Kâğıttan' : 'Online') : <span className="muted">yapmadı</span>}</td>
+                    <td>{sub ? (sub.source === 'kagit' ? <span className="status paper">Kâğıttan</span> : <span className="status open">Online</span>) : <span className="status">Yapmadı</span>}</td>
                     <td>{sub ? `${sub.correct}/${sub.total}` : ''}</td>
                     <td>{sub ? `+${sub.stars_earned}` : ''}</td>
                     <td className="nowrap">
@@ -232,7 +243,7 @@ function Results() {
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
           {err && <p className="err">{err}</p>}
           {online.length > 0 && (
             <>
@@ -241,7 +252,13 @@ function Results() {
                 {a.questions.map((q) => {
                   const ok = online.filter((s) => s.answers[q.id] === q.answer).length
                   const pct = Math.round((ok / online.length) * 100)
-                  return <li key={q.id} className={pct < 50 ? 'low' : ''}>{q.text} <b>%{pct}</b>{pct < 50 && ' ← tekrar et'}</li>
+                  return (
+                    <li key={q.id} className={pct < 50 ? 'low' : ''}>
+                      <span>{q.text}{pct < 50 && <b> · tekrar et</b>}</span>
+                      <span className="meter green"><div style={{ width: Math.max(4, pct) + '%' }} /></span>
+                      <b>%{pct}</b>
+                    </li>
+                  )
                 })}
               </ol>
             </>
@@ -263,13 +280,13 @@ function Students() {
     <section>
       <p className="hint">Gerçek soyadı ve fotoğraf yazma. Ad ya da takma ad yeter.</p>
       <label className="check"><input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Şifreleri göster</label>
-      <table className="tbl">
+      <div className="tbl-wrap"><table className="tbl">
         <thead><tr><th>Öğrenci</th><th>Sınıf</th><th>Şifre</th><th>Yıldız</th><th /></tr></thead>
         <tbody>
           {list.map((s) => (
             <tr key={s.id}>
               <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} size={34} /> {s.display_name}</span></td>
-              <td>{s.grade}</td>
+              <td><span className={'grade-pill g' + s.grade}>{s.grade}</span></td>
               <td className="mono">{s.pin === null ? <i className="muted">henüz yok</i> : show ? s.pin : '••••'}</td>
               <td>{s.stars}</td>
               <td className="nowrap">
@@ -279,14 +296,14 @@ function Students() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <h3>Öğrenci ekle</h3>
       <div className="row">
         <input placeholder="Ad" value={n.display_name} onChange={(e) => setN({ ...n, display_name: e.target.value })} />
         <select value={n.grade} onChange={(e) => setN({ ...n, grade: Number(e.target.value) as 3 | 4 })}><option value={3}>3. sınıf</option><option value={4}>4. sınıf</option></select>
         <select title="Hayvan arkadaşı" value={n.animal} onChange={(e) => setN({ ...n, animal: e.target.value })}>{ANIMALS.map((a) => <option key={a.id} value={a.id}>{a.emoji} {a.name}</option>)}</select>
         <img src={fx(n.animal)} alt="" width={40} height={40} />
-        <button className="btn" disabled={!n.display_name.trim()} onClick={async () => { await api.tAddStudent({ ...n, display_name: n.display_name.trim() }); setN({ ...n, display_name: '' }); load() }}>Ekle</button>
+        <button className="btn purple" disabled={!n.display_name.trim()} onClick={async () => { await api.tAddStudent({ ...n, display_name: n.display_name.trim() }); setN({ ...n, display_name: '' }); load() }}>Ekle</button>
       </div>
     </section>
   )
@@ -303,8 +320,8 @@ function ClassGoal() {
       <label>Hedef yıldız<input type="number" value={c.goal_target} onChange={(e) => setC({ ...c, goal_target: Number(e.target.value) })} /></label>
       <label>Ödül<input value={c.goal_reward} onChange={(e) => setC({ ...c, goal_reward: e.target.value })} /></label>
       <div className="row">
-        <button className="btn" onClick={async () => { await api.tSaveClass({ goal_target: c.goal_target, goal_reward: c.goal_reward }); setMsg('Kaydedildi.') }}>Kaydet</button>
-        {msg && <span className="muted">{msg}</span>}
+        <button className="btn purple" onClick={async () => { await api.tSaveClass({ goal_target: c.goal_target, goal_reward: c.goal_reward }); setMsg('Kaydedildi.') }}>Kaydet</button>
+        {msg && <span className="toast">{msg}</span>}
       </div>
       {api.mode === 'demo' && (
         <p><button className="link danger" onClick={() => { if (confirm('Demo verisi sıfırlansın mı?')) { resetDemo(); location.reload() } }}>Demo verisini sıfırla</button></p>
