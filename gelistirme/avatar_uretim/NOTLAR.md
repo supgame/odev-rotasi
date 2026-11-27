@@ -237,3 +237,35 @@ Altı çağrıda da `transparent_background=true` kullanıldı. Beş yüz istemi
 ### Faz 6 bağlama (Claude, 27 Kas 2026)
 
 Codex'in yüzleri `kaynak/shape/` altına taşındı; `yuz_varyant.py` oval (orijinal) + 5 yüzden 3'er kulak boyu (taşma 8/13/19 px) üretir. `goz_katmani.py` gözü hareketli yapar: göz açıklığı maskesi (`base/eye_open.webp`), açıklık içi kayan katman (`base/iris_full.webp`, göz akı + iris birlikte kayar, halka izi kalmaz), altta göz akı yaması (`base/eyes_empty.webp`). Kendi gözünü çizen ifadelerde (manifest `variants.eyes.ownEyes`) göz kaymaz. `sac_dolgu.py` her saç için yüzün arkasına koyu saç dolgusu üretir (dar yüzde arka plan görünmesin). Sırayla: yuz_varyant → goz_katmani → sac_dolgu, sonra manifest'e `hands` ve `hairBackDx` (Codex'in at kuyruğu kaydırmaları) elle.
+
+
+## Faz 7 · Yumuşak yüz şekilleri
+
+Beş yüz, yerleşik ImageGen ile pilotun `../pilot_avatar/kaynak/imagegen/base.png` tabanı düzenlenerek üretildi. Ham seçimler `kaynak/imagegen/faz7/` altında. 512 × 512 RGBA yüzler WebP kalite 92, ten maskeleri kayıpsız WebP olarak `kaynak/shape/` altına yazıldı. Önceki on dosyanın birebir kopyası `kaynak/shape/faz6_yedek/` altında.
+
+Yüzler iki göz ve ağızdan hizalandı. Alın ve tepe, kaşlar ve gözler, burun ve ağız, boyun ve tişört orijinal 512 px tabandan alındı. Göz ve ağız çevresindeki geçişler iki portrenin konturundan içeri alınarak kulak kenarları korundu. Uzun yüzde, tek çene çizgisini korumak için boyun geçişi birkaç piksel aşağı taşındı. Seçimlerin yanak ve çene konturuna küçük, kademeli düzeltmeler uygulandı. Uzun yüzün merkezindeki çene çizgisi orijinalin yaklaşık 9 px altında, geniş yüzünki yaklaşık 4 px üstünde.
+
+| Yüz | Aday ve seçim nedeni | Ölçülen `skinRef` |
+| --- | --- | ---: |
+| `round` | İkinci adayın dengeli alt yüzü seçildi. Dolgunluk çene köşelerine doğru yayılmadan üst yanağa taşındı. | 164.1649 |
+| `long` | İkinci adayın yuvarlak çene yayı seçildi. Alt oval biraz uzatıldı ve yanaklar hafif daraltıldı. | 165.0364 |
+| `square` | İlk aday seçildi. Çenenin alt yanlarındaki genişlik artırılıp yanaktan çene dibine geçiş yumuşatıldı. | 164.2578 |
+| `heart` | İkinci adayın küçük, yuvarlak çenesi seçildi. Elmacık çevresine hafif dolgunluk verildi. | 164.2800 |
+| `wide` | İlk adayın geniş yanakları seçildi. Çene yayı biraz yukarı alındı. | 163.5961 |
+
+Katalogdaki ortak `skinRef` 163.7334. Kodlanmış tüm yüzler ±8 aralığında. `kaynak/onizleme_faz7.png` oval referansı ve beş yüzü açık ve orta tende gösteriyor. Saçsız satırlar 256 px, kısa saç ve at kuyruğu satırları 128 px. Konturlar, kulak birleşimleri ve saç katmanları altı satırda görsel olarak kontrol edildi. At kuyruğu için mevcut katalogdaki arka katman konumları kullanıldı.
+
+### Yerleşik ImageGen istemleri
+
+Sekiz düzenlemenin tamamında pilot taban düzenleme hedefi olarak verildi ve `transparent_background=true` kullanıldı. Her çağrıda ortak isteme ilgili şeklin aşağıdaki İngilizce metni eklendi.
+
+> Use case: precise-object-edit. Image 1 is the edit target. Edit the cheeks, jaw, chin and ears only. Keep this exact friendly bald child, square bust framing, upper forehead and scalp, identical eyes, eyebrows, nose and small smile in the same positions, same neck and dark T-shirt. Match the warm thin brown ink and soft orange cel shading. Draw both ears small, natural and close to the head, around y=205–262 on the inherited 512px grid. The outline from temple past cheeks to chin should flow in continuously rounded curves, with a smooth jaw-to-neck join. Keep all proportions natural and cute, and the requested variation subtle. Avoid straight edge segments, corners, points, V-shaped tips and flat spots at the base of the chin. Transparent square canvas, no hair, text, accessories or props.
+
+- `round`, ilk aday — Give the child softly full, round cheeks and a gently rounded lower face. Let the cheek curve flow into a balanced circular chin arc.
+- `round`, seçilen aday — Use a fuller curved cheek silhouette between the lower eyelids and the corners of the smile. The cheeks extend only a few pixels farther outward on each side. Below the smile they flow into a compact, plush, circular lower face. Keep the chin a gently rounded arc. Keep the ears tucked close to the head.
+- `long`, ilk aday — Give the child a softly elongated slim oval with slightly narrower cheeks and jaw. On the 512px reference grid the rounded chin reaches about 8–10 pixels below the input chin. Keep a cute childlike ratio between width and height, with softly curved cheek sides.
+- `long`, seçilen aday — Keep the cheek curve gently oval and a little narrower than the edit target, with a broad rounded turn at the very bottom of the chin. Add a small amount of vertical space below the mouth, about 9 pixels on the inherited 512-pixel grid or 3 percent of head height. The chin is a rounded arc with no tip. Keep the soft cheek volume of a child.
+- `square` — Give the child a slightly wider jaw that stays rounded all the way down. Let the jaw carry some width to visible soft lower cheeks before it sweeps into one broad, continuously rounded chin arc. Use a modest change that looks like a healthy cute child.
+- `heart`, ilk aday — Give the child slightly fuller cheekbones and cheeks that gently narrow toward a modest small round chin. Keep the very bottom rounded, like a small U-shaped arc with a soft transition from each side.
+- `heart`, seçilen aday — Keep the child's cheeks softly full alongside the outer corners of the eyes. Give the lower jaw gently tapered upper sides that curve into a small, smooth oval chin with the bottom fully rounded. The base of the chin should follow a smooth bowl-shaped arc, with no tip and no corners. Preserve natural room around the smile.
+- `wide` — Give the child a slightly wider and shorter lower face with full cheeks. Use one visible, broad convex arc curving gently down at the center of the chin and smoothly up into the cheeks. Keep the compact shape subtle, cute and natural.

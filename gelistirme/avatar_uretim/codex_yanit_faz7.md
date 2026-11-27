@@ -1,0 +1,5 @@
+Faz 7 tamamlandı. Beş yüzü yerleşik ImageGen ile yeniden çizdim, 512 px WebP’leri ve ten maskelerini güncelledim. [Ham PNG’ler](/home/Edrow/ChatGPT/odev-rotasi/gelistirme/avatar_uretim/kaynak/imagegen/faz7) · [Faz 6 yedekleri](/home/Edrow/ChatGPT/odev-rotasi/gelistirme/avatar_uretim/kaynak/shape/faz6_yedek)
+
+[Önizlemedeki 36 örneği](/home/Edrow/ChatGPT/odev-rotasi/gelistirme/avatar_uretim/kaynak/onizleme_faz7.png) görsel olarak kontrol ettim. Beş yüzün de `skinRef` farkı 1,4 puanın altında. Uzun yüzün çenesi özgün tabandan yaklaşık 9 px aşağıda. Çene çizgisinin kesintisiz kalması için bu yüzde boyun geçişini birkaç piksel aşağı aldım.
+
+İstemleri ve seçim gerekçelerini [NOTLAR.md’ye](/home/Edrow/ChatGPT/odev-rotasi/gelistirme/avatar_uretim/NOTLAR.md:242) ekledim ve [faz7.bitti](/home/Edrow/ChatGPT/odev-rotasi/gelistirme/avatar_uretim/faz7.bitti) dosyasını oluşturdum. Tarayıcı açmadım, commit atmadım.
