@@ -3,13 +3,16 @@ import { createClient } from '@supabase/supabase-js'
 import type { Api, RosterStudent, ShopItem, StudentHome, SubmitResult, TAssignment, TClass, TStudent, TSubmission } from './types'
 
 export function makeSupabaseApi(url: string, anonKey: string, classCode: string): Api {
-  const sb = createClient(url, anonKey)
+  const sb = createClient(url, anonKey) // öğretmen (oturumlu)
+  // Öğrenci istekleri hep anonim gider: aynı tarayıcıda öğretmen girişi varken de öğrenci RPC'leri (yalnız anon'a açık) çalışsın.
+  const pub = createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'odev-rotasi-ogrenci' } })
 
-  async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
-    const { data, error } = await sb.rpc(fn, args)
+  async function rpc<T>(fn: string, args: Record<string, unknown>, client = sb): Promise<T> {
+    const { data, error } = await client.rpc(fn, args)
     if (error) throw new Error(error.message)
     return data as T
   }
+  const srpc = <T,>(fn: string, args: Record<string, unknown>) => rpc<T>(fn, args, pub)
   async function classId(): Promise<string> {
     const { data, error } = await sb.from('classes').select('id').eq('code', classCode).single()
     if (error) throw new Error(error.message)
@@ -23,18 +26,18 @@ export function makeSupabaseApi(url: string, anonKey: string, classCode: string)
   return {
     mode: 'canli',
     async roster(code) {
-      const r = await rpc<{ class: { name: string }; students: RosterStudent[] }>('roster', { p_class_code: code })
+      const r = await srpc<{ class: { name: string }; students: RosterStudent[] }>('roster', { p_class_code: code })
       return { className: r.class.name, students: r.students }
     },
     async login(code, studentId, pin) {
-      const r = await rpc<{ token: string }>('student_login', { p_class_code: code, p_student_id: studentId, p_pin: pin })
+      const r = await srpc<{ token: string }>('student_login', { p_class_code: code, p_student_id: studentId, p_pin: pin })
       return r.token
     },
-    home: (token) => rpc<StudentHome>('student_home', { p_token: token }),
-    submit: (token, assignmentId, answers) => rpc<SubmitResult>('submit_assignment', { p_token: token, p_assignment_id: assignmentId, p_answers: answers }),
-    async buy(token, itemId) { await rpc('buy_item', { p_token: token, p_item_id: itemId }) },
-    async equip(token, slot, itemId) { await rpc('equip_item', { p_token: token, p_slot: slot, p_item_id: itemId }) },
-    async shop() { return must(await sb.from('shop_items').select('id,slot,name,price').order('price')) as ShopItem[] },
+    home: (token) => srpc<StudentHome>('student_home', { p_token: token }),
+    submit: (token, assignmentId, answers) => srpc<SubmitResult>('submit_assignment', { p_token: token, p_assignment_id: assignmentId, p_answers: answers }),
+    async buy(token, itemId) { await srpc('buy_item', { p_token: token, p_item_id: itemId }) },
+    async equip(token, slot, itemId) { await srpc('equip_item', { p_token: token, p_slot: slot, p_item_id: itemId }) },
+    async shop() { return must(await pub.from('shop_items').select('id,slot,name,price').order('price')) as ShopItem[] },
 
     async teacherLogin(email, password) {
       const { error } = await sb.auth.signInWithPassword({ email, password })
