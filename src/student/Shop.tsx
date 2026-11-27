@@ -30,14 +30,14 @@ export function Shop({ home, token, onBack, onChange }: {
     <div className="page">
       <div className="topbar">
         <button className="link" onClick={onBack}>← Ana sayfa</button>
-        <span className="stars-pill">⭐ {home.me.stars}</span>
+        <span className="stars-pill">{home.me.stars}</span>
       </div>
       <section className="me-card shop-head">
         <Avatar animal={animal} equipped={eq} seed={seed} size={150} bounce />
         <p className="muted">Aldığın eşyalar hep senin. İstediğin zaman takıp çıkarabilirsin. Bedava olanları istediğin kadar değiştir.</p>
       </section>
       {msg && <p className="toast">{msg}</p>}
-      <div className="tabs">
+      <div className="tabs chips">
         {(Object.keys(SLOT_NAMES) as Slot[]).map((s) => (
           <button key={s} className={s === slot ? 'on' : ''} onClick={() => setSlot(s)}>{SLOT_NAMES[s]}</button>
         ))}
@@ -56,16 +56,16 @@ export function Shop({ home, token, onBack, onChange }: {
               {worn && !removable ? (
                 <span className="muted small-note">Şu an bu</span>
               ) : owned ? (
-                <button className="btn small" disabled={busy} onClick={() => act(async () => {
+                <button className={'btn small' + (worn ? ' ghost' : '')} disabled={busy} onClick={() => act(async () => {
                   if (worn || base) return api.equip(token, slot, null)
                   if (!home.owned.includes(it.id)) await api.buy(token, it.id) // bedava eşya: önce sahiplen
                   await api.equip(token, slot, it.id)
-                }, worn ? 'Çıkardın.' : 'Taktın! 😎')}>
+                }, worn ? 'Çıkardın.' : 'Taktın!')}>
                   {worn ? 'Çıkar' : 'Tak'}
                 </button>
               ) : (
-                <button className="btn small" disabled={busy || !canBuy} onClick={() => act(async () => { await api.buy(token, it.id); await api.equip(token, it.slot, it.id) }, `${it.name} senin! 🎉`)}>
-                  ⭐ {it.price}
+                <button className="btn small ghost price" disabled={busy || !canBuy} onClick={() => act(async () => { await api.buy(token, it.id); await api.equip(token, it.slot, it.id) }, `${it.name} artık senin!`)}>
+                  {it.price}
                 </button>
               )}
             </div>

@@ -93,8 +93,8 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
   return (
     <div className="page">
       <header className="hero">
-        <div className="logo">🧭 Ödev Rotası</div>
-        <p>{cls} · Merhaba! Kendi adını bul ve dokun.</p>
+        <div className="logo">Ödev <i>Rotası</i></div>
+        <p>{cls} · Kendi adını bul ve dokun.</p>
       </header>
       {[3, 4].map((g) => (
         <section key={g}>
@@ -174,7 +174,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
   return (
     <div className="page">
       <div className="topbar">
-        <span className="logo small">🧭 Ödev Rotası</span>
+        <span className="logo small">Ödev <i>Rotası</i></span>
         <button className="link" onClick={onLogout}>Ben değilim</button>
       </div>
 
@@ -182,8 +182,10 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
         <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={120} bounce />
         <div>
           <h1>Selam {home.me.display_name}!</h1>
-          <div className="stars-pill">⭐ {home.me.stars} yıldız</div>
-          <button className="btn ghost" onClick={onShop}>🛍️ Dükkana git</button>
+          <div className="row">
+            <span className="stars-pill">{home.me.stars} yıldız</span>
+            <button className="btn ghost small" onClick={onShop}>Dükkan →</button>
+          </div>
         </div>
       </section>
 
@@ -191,34 +193,37 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
         {home.assignment ? (
           home.my_result ? (
             <>
-              <h2>✅ {home.assignment.title}</h2>
-              <p>Bitirdin! {home.my_result.total} sorudan {home.my_result.correct} doğru, +{home.my_result.stars_earned} ⭐</p>
-              <button className="btn" onClick={onShowResult}>Cevaplarıma bak</button>
+              <p className="eyebrow">Bu haftanın ödevi · bitti</p>
+              <h2><span className="done-mark">✓</span>{home.assignment.title}</h2>
+              <p>{home.my_result.total} sorudan {home.my_result.correct} doğru, +{home.my_result.stars_earned} yıldız kazandın.</p>
+              <button className="btn ghost" onClick={onShowResult}>Cevaplarıma bak</button>
             </>
           ) : (
             <>
-              <h2>📝 {home.assignment.title}</h2>
+              <p className="eyebrow">Bu haftanın ödevi</p>
+              <h2>{home.assignment.title}</h2>
               <p>{home.assignment.questions.length} soru · Son gün: {fmtDate(home.assignment.closes_at)}</p>
               <button className="btn big" onClick={onStart}>Başla!</button>
             </>
           )
         ) : (
           <>
-            <h2>😴 Şu an açık ödev yok</h2>
+            <p className="eyebrow">Bu hafta</p>
+            <h2>Şu an açık ödev yok</h2>
             <p>Cuma günü yeni ödev gelecek. O zamana kadar avatarını süsleyebilirsin.</p>
           </>
         )}
       </section>
 
       <section className="card">
-        <h2>🎯 Sınıf hedefi</h2>
-        <p>Hep birlikte {g.target} yıldız toplarsak: <b>{g.reward}</b></p>
+        <p className="eyebrow">Sınıf hedefi</p>
+        <h2>{g.reward}</h2>
         <div className="bar"><div style={{ width: pct + '%' }} /></div>
-        <p className="muted">{g.current} / {g.target} yıldız</p>
+        <div className="goal-nums"><span>Hep birlikte {g.current} yıldız</span><span>Hedef {g.target}</span></div>
       </section>
 
       <section className="card">
-        <h2>👫 Sınıf arkadaşların</h2>
+        <p className="eyebrow">Sınıf arkadaşların</p>
         <div className="mates">
           {home.classmates.map((m) => (
             <div key={m.id} className="mate">
@@ -231,10 +236,10 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
 
       {home.past.length > 0 && (
         <section className="card">
-          <h2>📚 Geçmiş ödevlerim</h2>
+          <p className="eyebrow">Geçmiş ödevlerim</p>
           <ul className="past">
             {home.past.map((p, i) => (
-              <li key={i}><span>{p.title}</span><span>{p.correct}/{p.total} · +{p.stars_earned} ⭐</span></li>
+              <li key={i}><span>{p.title}</span><span>{p.correct}/{p.total} doğru · +{p.stars_earned}</span></li>
             ))}
           </ul>
         </section>
@@ -246,16 +251,16 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
 function ResultScreen({ result, assignment, onHome, onShop }: {
   result: SubmitResult; assignment: NonNullable<StudentHome['assignment']>; onHome: () => void; onShop: () => void
 }) {
-  const msg = result.correct === result.total ? 'Hepsi doğru, süpersin! 🏆' : result.correct >= result.total / 2 ? 'Çok iyi gidiyorsun! 💪' : 'Ödevi bitirdin, aferin! Yanlışlara birlikte bakalım. 🌱'
+  const msg = result.correct === result.total ? 'Hepsi doğru, süpersin!' : result.correct >= result.total / 2 ? 'Çok iyi gidiyorsun!' : 'Ödevi bitirdin, aferin! Yanlışlara birlikte bakalım.'
   return (
     <div className="page">
       <Confetti />
       <section className="card result-head">
-        <div className="big-stars">+{result.stars_earned} ⭐</div>
+        <div className="big-stars">+{result.stars_earned}</div>
         <h1>{msg}</h1>
         <p>{result.total} sorudan {result.correct} doğru</p>
         <div className="row">
-          <button className="btn" onClick={onShop}>🛍️ Yıldızlarımı harca</button>
+          <button className="btn" onClick={onShop}>Yıldızlarımı harca</button>
           <button className="btn ghost" onClick={onHome}>Ana sayfa</button>
         </div>
       </section>
@@ -264,12 +269,12 @@ function ResultScreen({ result, assignment, onHome, onShop }: {
         if (!it) return null
         return (
           <section key={q.id} className={'card review ' + (it.ok ? 'ok' : 'no')}>
-            <p className="q-no">{i + 1}. soru {it.ok ? '✅' : '❌'}</p>
+            <p className={'q-no ' + (it.ok ? 'ok' : 'no')}>{i + 1}. soru · {it.ok ? 'doğru' : 'yanlış'}</p>
             <p className="q-text">{q.text}</p>
             {!it.ok && (
               <p>Senin cevabın: <s>{it.given === null ? 'boş' : q.options[it.given]}</s> · Doğrusu: <b>{q.options[it.answer]}</b></p>
             )}
-            {it.explanation && <p className="explain">💡 {it.explanation}</p>}
+            {it.explanation && <p className="explain">{it.explanation}</p>}
           </section>
         )
       })}

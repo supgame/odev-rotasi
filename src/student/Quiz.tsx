@@ -89,7 +89,7 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
               onClick={() => pick(k)}
             >
               {q.type === 'mc' && <span className="opt-letter">{'ABCD'[k]}</span>}
-              {q.type === 'tf' ? (k === 0 ? '👍 ' : '👎 ') + o : o}
+              {o}
             </button>
           ))}
         </div>
@@ -100,7 +100,7 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
       <div className="row spread">
         <button className="btn ghost" disabled={i === 0} onClick={() => setI(i - 1)}>← Geri</button>
         {last
-          ? <button className="btn big" disabled={busy} onClick={send}>{busy ? 'Gönderiliyor…' : 'Bitir ve gönder ✨'}</button>
+          ? <button className="btn big" disabled={busy} onClick={send}>{busy ? 'Gönderiliyor…' : 'Bitir ve gönder'}</button>
           : <button className="btn" onClick={() => setI(i + 1)}>İleri →</button>}
       </div>
     </div>

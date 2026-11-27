@@ -24,7 +24,8 @@ function TeacherLogin({ onIn }: { onIn: () => void }) {
   const [err, setErr] = useState('')
   return (
     <div className="page narrow t">
-      <h1>👩‍🏫 Öğretmen girişi</h1>
+      <div className="logo small">Ödev <i>Rotası</i></div>
+      <h1 style={{ marginTop: '1.6rem' }}>Öğretmen girişi</h1>
       {api.mode === 'demo' && <p className="hint">Demo modu: veriler yalnız bu tarayıcıda. Şifresiz girebilirsin.</p>}
       <form onSubmit={async (e) => { e.preventDefault(); try { await api.teacherLogin(email, pw); onIn() } catch (x) { setErr(errText(x)) } }}>
         {api.mode === 'canli' && (
@@ -46,7 +47,7 @@ function Panel({ onOut }: { onOut: () => void }) {
   return (
     <div className="page wide t">
       <div className="topbar">
-        <span className="logo small">🧭 Ödev Rotası · Öğretmen</span>
+        <span className="logo small">Ödev <i>Rotası</i> <small>Öğretmen</small></span>
         <span>
           {api.mode === 'demo' && <span className="badge">DEMO</span>}
           <a href="#/" className="link">Öğrenci görünümü</a>
@@ -54,7 +55,7 @@ function Panel({ onOut }: { onOut: () => void }) {
         </span>
       </div>
       <div className="tabs">
-        {([['odev', '📝 Ödevler'], ['sonuc', '📊 Sonuçlar'], ['ogrenci', '👧 Öğrenciler'], ['sinif', '🎯 Sınıf hedefi']] as [Tab, string][]).map(([k, l]) => (
+        {([['odev', 'Ödevler'], ['sonuc', 'Sonuçlar'], ['ogrenci', 'Öğrenciler'], ['sinif', 'Sınıf hedefi']] as [Tab, string][]).map(([k, l]) => (
           <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
@@ -79,9 +80,9 @@ function nextFriday15() {
 }
 function status(a: TAssignment) {
   const n = Date.now()
-  if (n < Date.parse(a.opens_at)) return '⏳ Bekliyor'
-  if (n >= Date.parse(a.closes_at)) return '🔒 Kapandı'
-  return '🟢 Açık'
+  if (n < Date.parse(a.opens_at)) return <span className="status wait">Bekliyor</span>
+  if (n >= Date.parse(a.closes_at)) return <span className="status">Kapandı</span>
+  return <span className="status open">Açık</span>
 }
 
 function Assignments() {
@@ -213,7 +214,7 @@ function Results() {
                 return (
                   <tr key={s.id}>
                     <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} size={34} /> {s.display_name}</span></td>
-                    <td>{sub ? (sub.source === 'kagit' ? '📄 Kâğıttan' : '📱 Online') : '— yapmadı'}</td>
+                    <td>{sub ? (sub.source === 'kagit' ? 'Kâğıttan' : 'Online') : <span className="muted">yapmadı</span>}</td>
                     <td>{sub ? `${sub.correct}/${sub.total}` : ''}</td>
                     <td>{sub ? `+${sub.stars_earned}` : ''}</td>
                     <td className="nowrap">
