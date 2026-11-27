@@ -18,6 +18,11 @@ export const SLOT_NAMES: Record<string, string> = {
   hcolor: 'Saç rengi',
   face: 'Yüz ifadesi',
   skin: 'Ten',
+  fshape: 'Yüz şekli',
+  ears: 'Kulak',
+  eyes: 'Göz rengi',
+  cheek: 'Yanak',
   pet: 'Arkadaşı',
+  pose: 'Poz',
   bg: 'Arka plan',
 }

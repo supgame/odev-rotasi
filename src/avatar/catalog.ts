@@ -109,7 +109,7 @@ export const SPECIES: Species[] = [
 ]
 
 // ---- Dükkan eşyaları -------------------------------------------------------------------------------
-export type ItemSlot = 'skin' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'pet' | 'bg'
+export type ItemSlot = 'skin' | 'fshape' | 'ears' | 'eyes' | 'cheek' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'pet' | 'pose' | 'bg'
 /** Manifest'teki ham eşya (katman yolları, maske, ref, renk). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Raw = Record<string, any>
@@ -119,6 +119,12 @@ export const MANIFEST = M as unknown as {
   base: { layer: string; skinMask: string; skinRef: number }
   order: string[]
   slots: Record<string, { items: Raw[] }>
+  variants: {
+    base: string; mask: string
+    iris: { layer: string; mask: string; ref: number }
+    cheek: Record<string, string>
+    blink: { layer: string; mask: string; ref: number }
+  }
 }
 
 // Fiyat düzeltmeleri (manifest'in önerisinin üstüne). Temel saçlar ve başörtüsü bedava.
@@ -129,11 +135,30 @@ const PRICE: Record<string, number> = {
 const fromManifest = (slot: ItemSlot): CatalogItem[] =>
   (MANIFEST.slots[slot]?.items ?? []).map((r) => ({ id: r.id, slot, name: r.name, price: PRICE[r.id] ?? r.price, raw: r }))
 
-const I = (slot: ItemSlot, list: [string, string, number][]): CatalogItem[] =>
-  list.map(([id, name, price]) => ({ id: `${slot}_${id}`, slot, name, price, raw: {} }))
+const I = (slot: ItemSlot, list: [string, string, number, Raw?][]): CatalogItem[] =>
+  list.map(([id, name, price, raw]) => ({ id: `${slot}_${id}`, slot, name, price, raw: { key: id, ...raw } }))
+
+// Yüz çeşitleri: tek tabanın dönüşümleri (gelistirme/avatar_uretim/yuz_varyant.py). Hepsi bedava, ilk gün rastgele dağılır.
+export const FACE_ITEMS: CatalogItem[] = [
+  ...I('fshape', [['oval', 'Oval', 0], ['round', 'Yuvarlak', 0], ['slim', 'İnce', 0], ['square', 'Köşeli', 0]]),
+  ...I('ears', [['small', 'Küçük', 0], ['medium', 'Orta', 0], ['big', 'Kepçe', 0]]),
+  ...I('eyes', [
+    ['brown', 'Kahverengi', 0], ['dark', 'Koyu', 0, { color: '5a3420' }], ['hazel', 'Ela', 0, { color: '8c6d35' }],
+    ['green', 'Yeşil', 0, { color: '5fae4e' }], ['blue', 'Mavi', 0, { color: '4f95e8' }], ['gray', 'Gri', 0, { color: '9aa8b8' }],
+    ['purple', 'Mor', 10, { color: 'a46be8' }], ['gold', 'Altın', 15, { color: 'f2b632' }], ['red', 'Kırmızı', 15, { color: 'e8505b' }],
+  ]),
+  ...I('cheek', [['none', 'Sade', 0], ['blush', 'Pembe yanak', 0], ['freckles', 'Çilli', 0], ['both', 'Çil ve allık', 0]]),
+]
+
+// Arkadaşın duruşu: yalnız konum ve hareket (Avatar.tsx + index.css .pose-*).
+export const POSE_ITEMS: CatalogItem[] = I('pose', [
+  ['side', 'Yanımda', 0], ['shoulder', 'Omzumda', 0], ['peek', 'Arkamdan bakıyor', 0], ['head', 'Başımda', 10],
+])
 
 export const ITEMS: CatalogItem[] = [
   ...(['skin', 'hair', 'hcolor', 'hat', 'glasses', 'clothes', 'ccolor', 'face'] as ItemSlot[]).flatMap(fromManifest),
+  ...FACE_ITEMS,
+  ...POSE_ITEMS,
   ...I('bg', [
     ['polka', 'Puantiye', 10], ['checker', 'Damalı', 10], ['sky', 'Gökyüzü', 10], ['grass', 'Çimen', 15],
     ['sunset', 'Gün batımı', 15], ['sea', 'Deniz', 15], ['board', 'Kara tahta', 15], ['forest', 'Orman', 20],

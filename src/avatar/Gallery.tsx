@@ -9,6 +9,10 @@ export function Gallery() {
     <div className="page wide">
       <h1>Avatar galerisi</h1>
       <p className="muted">{SHOP_ITEMS.length} eşya. Her öğrenci ilk gün kendine özgü bir görünümle başlar, sonra dükkandan değiştirir.</p>
+      <h2>Canlı hâli (dokun)</h2>
+      <div className="gallery">
+        {['side', 'shoulder', 'peek', 'head'].map((p, k) => <div key={p} className="g-cell"><Avatar animal={SPECIES[k * 7].id} seed={'canli' + k} equipped={{ pose: 'pose_' + p }} size={130} /><span>{p}</span></div>)}
+      </div>
       <h2>Başlangıç görünümleri</h2>
       <div className="gallery">
         {seeds.map((s, k) => <div key={s.id} className="g-cell"><Avatar animal={s.id} seed={'ornek' + k} size={84} /><span>{s.name} ile</span></div>)}

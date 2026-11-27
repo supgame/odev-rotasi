@@ -101,8 +101,31 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 .av-free { position: absolute; inset: 0; }
 .av-kid { position: absolute; left: 3%; width: 94%; height: auto; pointer-events: none; user-select: none; }
 .av-free .av-kid { left: 0; top: 0; width: 100%; }
+.av-body { position: absolute; inset: 0; transform-origin: 50% 100%; }
 .av-pet { position: absolute; left: -16%; bottom: -8%; width: 52%; height: auto; z-index: 1; pointer-events: none;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); animation: petbob 2.2s ease-in-out infinite; }
+/* arkadaşın pozları */
+.av-pet.pose-shoulder { left: auto; right: -6%; bottom: 17%; width: 42%; animation: petsway 2.6s ease-in-out infinite; transform-origin: 50% 100%; }
+.av-pet.pose-head { left: 28%; bottom: auto; top: -42%; width: 44%; z-index: 2; animation: petwobble 3s ease-in-out infinite; transform-origin: 50% 100%; }
+.av-pet.pose-peek { left: 58%; bottom: auto; top: 34%; width: 54%; z-index: 0; filter: none; animation: petpeek 4.2s ease-in-out infinite; transform-origin: 30% 100%; }
+@keyframes petsway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg) translateY(-3%); } }
+@keyframes petwobble { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-6deg); } 60% { transform: rotate(5deg) translateY(-4%); } }
+@keyframes petpeek { 0%,100% { transform: rotate(14deg) translate(8%, 6%); } 40%,70% { transform: rotate(4deg) translate(-4%, -6%); } }
+/* canlı avatar: nefes + göz kırpma (yalnız büyük avatarlarda) */
+.avatar.alive .av-body { animation: breathe 3.4s ease-in-out infinite; animation-delay: var(--breath-delay, 0s); }
+@keyframes breathe { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.022); } }
+.av-blink { opacity: 0; animation: blink 4.7s steps(1, end) infinite; animation-delay: var(--blink-delay, 0s); }
+@keyframes blink { 0% { opacity: 0; } 94% { opacity: 1; } 96.5% { opacity: 0; } }
+/* dokununca zıpla, arkadaşı da zıplasın, kalpler uçsun */
+.avatar { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.avatar.tap .av-body { animation: kidjump .6s cubic-bezier(.3,1.5,.5,1); }
+.avatar.tap .av-pet { animation: petjump .7s cubic-bezier(.3,1.5,.5,1) .08s; }
+@keyframes kidjump { 0% { transform: scale(1.04, .94); } 40% { transform: translateY(-9%) scale(.97, 1.04); } 100% { transform: none; } }
+@keyframes petjump { 0% { transform: scale(1.1, .85); } 45% { transform: translateY(-28%) rotate(-10deg); } 100% { transform: none; } }
+.av-hearts { position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 3; pointer-events: none; }
+.av-hearts i { position: absolute; top: 10%; font-style: normal; font-size: 1.1rem; opacity: 0; animation: heartup .9s ease-out forwards; }
+.av-hearts i:nth-child(1) { left: 20%; } .av-hearts i:nth-child(2) { left: 48%; animation-delay: .1s; } .av-hearts i:nth-child(3) { left: 74%; animation-delay: .2s; }
+@keyframes heartup { 0% { opacity: 0; transform: translateY(10px) scale(.5); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-34px) scale(1.15); } }
 .pet-preview { width: 84px; height: 84px; border-radius: 50%; background: #fff6e0; display: grid; place-items: center; }
 .pet-preview img { width: 70%; height: auto; }
 .pet-preview.body { overflow: hidden; display: block; position: relative; background: #e9f3ff; border-radius: 18px; }
@@ -126,7 +149,7 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 @keyframes nodB { 30% { transform: translateY(5px) rotate(3deg); } 60% { transform: translateY(-2px); } }
 .paw { position: absolute; z-index: 2; top: -7px; width: 22px; height: 15px; border-radius: 10px 10px 6px 6px; border: 2px solid rgba(0,0,0,.2); }
 .paw.l { left: calc(50% - 50px); } .paw.r { left: calc(50% + 28px); }
-@media (prefers-reduced-motion: reduce) { .av-pet, .peeker, .peek-nod, .avatar.bounce, .avatar.happy .av-stage { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .av-pet, .peeker, .peek-nod, .avatar.bounce, .avatar.happy .av-stage, .av-body, .av-blink, .av-hearts i { animation: none !important; } }
 .avatar.bounce { animation: bounce 2.4s ease-in-out infinite; }
 @keyframes bounce { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-4px) rotate(-2deg); } 75% { transform: translateY(-2px) rotate(2deg); } }
 

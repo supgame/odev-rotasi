@@ -1,4 +1,4 @@
-export type Slot = 'skin' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'pet' | 'bg'
+export type Slot = 'skin' | 'fshape' | 'ears' | 'eyes' | 'cheek' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'pet' | 'pose' | 'bg'
 export type Equipped = Partial<Record<Slot, string>>
 
 export interface Question {
