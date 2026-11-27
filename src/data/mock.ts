@@ -1,6 +1,7 @@
 // Demo modu: Supabase bağlanana kadar her şey bu tarayıcının localStorage'ında.
 // Kurallar SOZLESME.md ile aynı (puanlama, yıldız, kilit), böylece canlıya geçince davranış değişmez.
 import { SHOP_ITEMS } from './shopItems'
+import { RABBIT_CRADLE } from '../avatar/catalog'
 import type { Api, Equipped, Question, StudentHome, SubmitResult, TAssignment, TClass, TStudent, TSubmission } from './types'
 
 interface DB {
@@ -21,8 +22,8 @@ function seed(): DB {
   const now = Date.now()
   const opens = new Date(now - 3600e3).toISOString()
   const closes = new Date(now + 5 * 86400e3).toISOString()
-  const s = (display_name: string, animal: string, grade: 3 | 4) => ({
-    id: uid(), display_name, animal, grade, pin: null, stars_bonus: 0, equipped: {},
+  const s = (display_name: string, animal: string, grade: 3 | 4, equipped: Equipped = {}) => ({
+    id: uid(), display_name, animal, grade, pin: null, stars_bonus: 0, equipped,
   })
   const q3: Question[] = [
     { id: 'q1', type: 'mc', text: '345 + 128 işleminin sonucu kaçtır?', options: ['463', '473', '483', '373'], answer: 1, explanation: 'Birler: 5+8=13, 3 yaz 1 elde. Onlar: 4+2+1=7. Yüzler: 3+1=4. Sonuç 473.' },
@@ -42,7 +43,7 @@ function seed(): DB {
     cls: { name: '3-4. Sınıf', code: 'DOGANLI', goal_target: 300, goal_reward: 'Pazartesi 15 dakika oyun!' },
     students: [
       s('Ali', '🦁', 3), s('Elif', '🐱', 3), s('Mert', '🐶', 3), s('Zeynep', '🦊', 3), s('Yusuf', '🐼', 3),
-      s('Ayşe', '🐰', 4), s('Emir', '🐯', 4), s('Defne', '🐨', 4), s('Ömer', '🐸', 4), s('Nehir', '🐵', 4),
+      s('Ayşe', '🐰', 4, RABBIT_CRADLE), s('Emir', '🐯', 4), s('Defne', '🐨', 4), s('Ömer', '🐸', 4), s('Nehir', '🐵', 4),
     ],
     assignments: [
       { id: uid(), grade: 3, title: 'Örnek: 28-29 Kasım Tekrar Ödevi', opens_at: opens, closes_at: closes, questions: q3 },
@@ -112,7 +113,7 @@ export const mockApi: Api = {
     const db = load()
     return wait({
       className: db.cls.name,
-      students: db.students.map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, grade: s.grade, has_pin: !!s.pin })),
+      students: db.students.map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, grade: s.grade, equipped: s.equipped ?? {}, has_pin: !!s.pin })),
     })
   },
   async login(_code, studentId, pin) {
@@ -183,7 +184,6 @@ export const mockApi: Api = {
     if (db.purchases.some((p) => p.student_id === st.id && p.item_id === itemId)) return wait(undefined)
     if (stars(db, st.id) < item.price) throw new Error('YETERSIZ_YILDIZ')
     db.purchases.push({ student_id: st.id, item_id: itemId })
-    st.equipped = { ...st.equipped, [item.slot]: item.id }
     save(db)
     return wait(undefined)
   },

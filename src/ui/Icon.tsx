@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 
 const INK = 'var(--ink)'
 type Name =
-  | 'star' | 'lock' | 'bag' | 'home' | 'play' | 'check' | 'x' | 'back' | 'next' | 'chest' | 'flag'
+  | 'star' | 'lock' | 'bag' | 'home' | 'play' | 'check' | 'x' | 'back' | 'next' | 'chest' | 'chest-open' | 'flag'
   | 'door' | 'trophy' | 'eye' | 'backspace' | 'clock' | 'sparkle' | 'crown' | 'map' | 'pencil' | 'users' | 'chart' | 'target'
 
 export function Icon({ name, size = 24, style, className }: { name: Name; size?: number; style?: CSSProperties; className?: string }) {
@@ -59,6 +59,16 @@ export function Icon({ name, size = 24, style, className }: { name: Name; size?:
           <path d="M4 15h24" {...s} />
           <rect x="13" y="12.5" width="6" height="7" rx="1.5" fill="var(--gold)" {...s} />
           <path d="M9 8.5V27M23 8.5V27" stroke={INK} strokeWidth={2} opacity=".35" />
+        </svg>
+      )
+    case 'chest-open':
+      return (
+        <svg {...p}>
+          <path d="M4 15 7 6a3 3 0 013-2h14l4 11" fill="#ca783b" {...s} />
+          <path d="M5 15h22v6H5z" fill="#6d3e2b" {...s} />
+          <path d="m13 13 2-5 3 3 5-1-1 5 3 3-6 1-2 4-3-4-5-2z" fill="var(--gold)" {...s} />
+          <path d="M4 19h24v7a2 2 0 01-2 2H6a2 2 0 01-2-2z" fill="#e08b45" {...s} />
+          <path d="M14 19h4v4h-4z" fill="var(--gold)" {...s} />
         </svg>
       )
     case 'flag':

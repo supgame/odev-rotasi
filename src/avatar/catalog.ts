@@ -3,6 +3,12 @@
 // Arkadaşı (hayvan): aynı çizgide ImageGen görseli, public/av/pet (manifest'in pet bölümü). Species.src eski Fluent adı, artık kullanılmıyor.
 // Bu dosya yalnız manifest'i import eder (node ile doğrudan çalışabilsin diye).
 import M from '../../public/av/manifest.json' with { type: 'json' }
+import type { Equipped, Slot } from '../data/types'
+
+export const RABBIT_CRADLE: Equipped = {
+  skin: 'skin_tan', hair: 'hair_side_part', hcolor: 'hcolor_dark_brown', clothes: 'clothes_tshirt', ccolor: 'ccolor_gray',
+  fshape: 'fshape_oval', ears: 'ears_small', cheek: 'cheek_none', eyes: 'eyes_brown', face: 'face_smile', pose: 'pose_hug',
+}
 
 export interface Species {
   id: string
@@ -109,7 +115,7 @@ export const SPECIES: Species[] = [
 ]
 
 // ---- Dükkan eşyaları -------------------------------------------------------------------------------
-export type ItemSlot = 'skin' | 'fshape' | 'ears' | 'eyes' | 'cheek' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'pet' | 'pose' | 'bg'
+export type ItemSlot = Slot
 /** Manifest'teki ham eşya (katman yolları, maske, ref, renk). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Raw = Record<string, any>
@@ -151,6 +157,14 @@ export const FACE_ITEMS: CatalogItem[] = [
     ['purple', 'Mor', 10, { color: 'a46be8' }], ['gold', 'Altın', 15, { color: 'f2b632' }], ['red', 'Kırmızı', 15, { color: 'e8505b' }],
   ]),
   ...I('cheek', [['none', 'Sade', 0], ['blush', 'Pembe yanak', 0], ['freckles', 'Çilli', 0], ['both', 'Çil ve allık', 0]]),
+  ...I('mouth', [
+    ['expression', 'İfadeye göre', 0],
+    ['smile', 'Kapalı gülümseme', 0],
+    ['bigsmile', 'Dişli gülüş', 0, { sourceFace: 'face_bigsmile' }],
+    ['smirk', 'Yarım gülüş', 0, { sourceFace: 'face_smirk' }],
+    ['surprised', 'Yuvarlak ağız', 0, { sourceFace: 'face_surprised' }],
+    ['tongue', 'Dil çıkarma', 0, { sourceFace: 'face_tongue' }],
+  ]),
 ]
 
 // Arkadaşın duruşu: yalnız konum ve hareket (Avatar.tsx + index.css .pose-*).

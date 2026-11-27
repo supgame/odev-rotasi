@@ -1,6 +1,7 @@
 import { Avatar, ItemPreview } from './Avatar'
 import { SHOP_ITEMS, SLOT_NAMES } from '../data/shopItems'
-import { SPECIES } from './catalog'
+import { RABBIT_CRADLE, SPECIES } from './catalog'
+import { Icon } from '../ui/Icon'
 
 // #/galeri: bütün eşyaların vitrini (öğretmen kontrolü için).
 export function Gallery() {
@@ -9,9 +10,13 @@ export function Gallery() {
     <div className="page wide">
       <h1>Avatar galerisi</h1>
       <p className="muted">{SHOP_ITEMS.length} eşya. Her öğrenci ilk gün kendine özgü bir görünümle başlar, sonra dükkandan değiştirir.</p>
+      <div className="g-cell gallery-illustration">
+        <Avatar animal="rabbit" equipped={RABBIT_CRADLE} size={220} />
+        <strong>Kucağımda · Tavşan</strong>
+      </div>
       <h2>Canlı hâli (dokun)</h2>
-      <div className="gallery">
-        {['side', 'shoulder', 'hug', 'peek', 'head'].map((p, k) => <div key={p} className="g-cell"><Avatar animal={SPECIES[k * 7].id} seed={'canli' + k} equipped={{ pose: 'pose_' + p, fshape: 'fshape_' + ['round', 'long', 'square', 'heart', 'wide'][k] }} size={130} /><span>{p}</span></div>)}
+      <div className="gallery gallery-live">
+        {['side', 'shoulder', 'hug', 'peek', 'head'].map((p, k) => <div key={p} className="g-cell"><Avatar animal={['giraffe', 'frog', 'fox', 'elephant', 'hedgehog'][k]} seed={'canli' + k} equipped={{ pose: 'pose_' + p, fshape: 'fshape_' + ['round', 'long', 'square', 'heart', 'wide'][k] }} size={130} /><span>{SHOP_ITEMS.find((item) => item.id === 'pose_' + p)?.name}</span></div>)}
       </div>
       <h2>Başlangıç görünümleri</h2>
       <div className="gallery">
@@ -24,7 +29,7 @@ export function Gallery() {
             {SHOP_ITEMS.filter((i) => i.slot === slot).map((i) => (
               <div key={i.id} className="g-cell">
                 <ItemPreview id={i.id} slot={slot} animal="fox" equipped={{}} seed="galeri" />
-                <span>{i.name}</span><small>{i.price ? `⭐ ${i.price}` : 'Bedava'}</small>
+                <span>{i.name}</span><small>{i.price ? <><Icon name="star" size={14} /> {i.price}</> : 'Bedava'}</small>
               </div>
             ))}
           </div>

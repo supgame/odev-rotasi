@@ -263,7 +263,7 @@ begin
     'class', jsonb_build_object('name', v_class.name),
     'students', (select coalesce(jsonb_agg(jsonb_build_object(
       'id', s.id, 'display_name', s.display_name, 'animal', s.animal,
-      'grade', s.grade, 'has_pin', s.pin is not null
+      'grade', s.grade, 'equipped', s.equipped, 'has_pin', s.pin is not null
     ) order by s.display_name, s.id), '[]'::jsonb)
     from public.students s where s.class_id = v_class.id)
   );

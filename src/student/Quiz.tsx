@@ -10,16 +10,42 @@ type A = NonNullable<StudentHome['assignment']>
 // her seçimde aynı tepkiyi verir (o yöne bakar, başını sallar).
 const PEEK = 180
 
+// Taslak: sayfa yenilenir ya da çocuk çıkarsa işaretlediği cevaplar telefonda kalır.
+type Draft = { answers: Record<string, number>; i: number }
+const draftKey = (studentId: string, assignmentId: string) => `odev-rotasi:taslak:${studentId}:${assignmentId}`
+export function loadDraft(studentId: string, a: A): Draft | null {
+  try {
+    const raw = localStorage.getItem(draftKey(studentId, a.id))
+    if (!raw) return null
+    const d = JSON.parse(raw) as Draft
+    // Öğretmen soruyu değiştirdiyse artık var olmayan soru/şık cevaplarını at.
+    const answers: Record<string, number> = {}
+    for (const q of a.questions) {
+      const k = d.answers?.[q.id]
+      if (Number.isInteger(k) && k >= 0 && k < q.options.length) answers[q.id] = k
+    }
+    if (!Object.keys(answers).length) return null
+    return { answers, i: Math.min(Math.max(0, d.i | 0), a.questions.length - 1) }
+  } catch { return null }
+}
+function saveDraft(studentId: string, assignmentId: string, d: Draft) {
+  try { localStorage.setItem(draftKey(studentId, assignmentId), JSON.stringify(d)) } catch { /* boş */ }
+}
+export function clearDraft(studentId: string, assignmentId: string) {
+  try { localStorage.removeItem(draftKey(studentId, assignmentId)) } catch { /* boş */ }
+}
+
 export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }: {
   assignment: A; onSubmit: (answers: Record<string, number>) => Promise<void>; onCancel: () => void
   animal: string; equipped: Equipped; seed: string
 }) {
   const qs = assignment.questions
-  const [i, setI] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, number>>({})
+  const [draft] = useState(() => loadDraft(seed, assignment))
+  const [i, setI] = useState(draft?.i ?? 0)
+  const [answers, setAnswers] = useState<Record<string, number>>(draft?.answers ?? {})
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
-  const [ask, setAsk] = useState<'send' | 'quit' | null>(null)
+  const [ask, setAsk] = useState<'send' | null>(null)
   const q = qs[i]
   const last = i === qs.length - 1
   const blanks = qs.filter((x) => answers[x.id] === undefined).length
@@ -27,6 +53,10 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
   const [mood, setMood] = useState<Mood>('idle')
   const [nod, setNod] = useState(0)
   const lastAct = useRef(Date.now())
+
+  useEffect(() => {
+    if (Object.keys(answers).length) saveDraft(seed, assignment.id, { answers, i })
+  }, [answers, i, seed, assignment.id])
 
   // Yeni soruda: soruya bak.
   useEffect(() => { setLook({ x: 0, y: 0.9 }); setMood('idle'); lastAct.current = Date.now() }, [i])
@@ -53,7 +83,7 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
 
   function trySend() {
     if (blanks > 0) {
-      setErr(`${blanks} soru boş kaldı. Önce onları cevapla.`)
+      setErr(`${blanks} ${blanks === 1 ? 'soru boş kaldı. Önce onu cevapla.' : 'soru boş kaldı. Önce onları cevapla.'}`)
       setI(qs.findIndex((x) => answers[x.id] === undefined))
       return
     }
@@ -61,14 +91,13 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
   }
   async function send() {
     setAsk(null); setBusy(true); setErr(''); setMood('happy')
-    try { await onSubmit(answers) } catch (e) { setErr(errText(e)); setBusy(false) }
+    try { await onSubmit(answers); clearDraft(seed, assignment.id) } catch (e) { setErr(errText(e)); setBusy(false) }
   }
-  const answered = qs.length - blanks
 
   return (
-    <div className="page narrow">
+    <div className="page narrow q-page">
       <div className="q-hud">
-        <button className="icon-btn" onClick={() => (answered ? setAsk('quit') : onCancel())} aria-label="Çık"><Icon name="x" size={24} /></button>
+        <button className="icon-btn" onClick={onCancel} aria-label="Çık"><Icon name="x" size={24} /></button>
         <div className="q-steps">
           {qs.map((x, k) => (
             <button key={x.id} className={(k === i ? 'cur ' : '') + (answers[x.id] !== undefined ? 'done' : '')} onClick={() => setI(k)} aria-label={`${k + 1}. soru`} />
@@ -89,19 +118,19 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
           <p className="q-text big">{q.text}</p>
           <div className={'options ' + (q.type === 'tf' ? 'tf' : '')}>
             {q.options.map((o, k) => (
-              <button key={k} className={'option' + (answers[q.id] === k ? ' picked' : '')} onClick={() => pick(k)}>
+              <button key={k} className={'option' + (answers[q.id] === k ? ' picked' : '')} aria-pressed={answers[q.id] === k} onClick={() => pick(k)}>
                 {q.type === 'mc'
                   ? <span className="opt-letter">{'ABCD'[k]}</span>
                   : <span className="tf-ic"><Icon name={k === 0 ? 'check' : 'x'} size={28} /></span>}
                 <span>{o}</span>
-                <span className="tick"><Icon name="check" size={26} /></span>
+                <span className="selection-dot" aria-hidden="true" />
               </button>
             ))}
           </div>
         </section>
       </div>
 
-      {err && <p className="panel tight err center-text">{err}</p>}
+      {err && <p className="q-inline-error" role="status">{err}</p>}
       <div className="q-nav">
         <button className="btn ghost" disabled={i === 0} onClick={() => setI(i - 1)} aria-label="Geri"><Icon name="back" size={24} /></button>
         {last
@@ -115,15 +144,6 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
           <div className="row">
             <button className="btn" onClick={send}><Icon name="flag" size={24} />Gönder!</button>
             <button className="btn ghost" onClick={() => setAsk(null)}>Bir bakayım</button>
-          </div>
-        </Modal>
-      )}
-      {ask === 'quit' && (
-        <Modal ribbon="Dur bir dakika" title="Çıkmak mı istiyorsun?" onClose={() => setAsk(null)}>
-          <p className="muted">Çıkarsan işaretlediğin cevaplar silinir.</p>
-          <div className="row">
-            <button className="btn" onClick={() => setAsk(null)}>Devam et</button>
-            <button className="btn red" onClick={onCancel}>Çık</button>
           </div>
         </Modal>
       )}

@@ -12,7 +12,7 @@ export function Confetti({ n = 46 }: { n?: number }) {
             left: (i * 37) % 100 + '%',
             background: i % 5 === 0 ? '#ffcb3d' : COLORS[i % COLORS.length],
             animationDelay: ((i * 53) % 100) / 120 + 's',
-            animationDuration: 2 + ((i * 29) % 10) / 8 + 's',
+            animationDuration: 1.1 + ((i * 29) % 5) / 10 + 's',
             transform: `rotate(${(i * 47) % 360}deg)`,
           }}
         />

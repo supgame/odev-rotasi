@@ -3,9 +3,10 @@ import { api, CLASS_CODE } from '../data/api'
 import { errText, type RosterStudent, type StudentHome, type SubmitResult } from '../data/types'
 import { Avatar } from '../avatar/Avatar'
 import { Icon, Logo, StarCount } from '../ui/Icon'
-import { Quiz } from './Quiz'
+import { Quiz, loadDraft } from './Quiz'
 import { Shop } from './Shop'
 import { Confetti } from './Confetti'
+import './student.css'
 
 const TOKEN_KEY = 'odevrotasi_token'
 const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) } catch { return null } }
@@ -122,7 +123,7 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
           <div className="name-grid">
             {list.filter((s) => s.grade === g).map((s, k) => (
               <button key={s.id} className="player-card" style={{ ['--pc' as string]: CARD_COLORS[(k + g) % CARD_COLORS.length] }} onClick={() => onPick(s)}>
-                <span className="pc-stage"><Avatar animal={s.animal} seed={s.id} size={74} /></span>
+                <span className="pc-stage"><Avatar animal={s.animal} equipped={s.equipped} seed={s.id} size={74} /></span>
                 <span className="pc-name">{s.display_name}</span>
               </button>
             ))}
@@ -174,14 +175,14 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
   })
 
   return (
-    <div className="page narrow">
+    <div className="page narrow pin-page">
       <div className="hud">
         <button className="icon-btn" onClick={onBack} aria-label="Ben değilim"><Icon name="back" size={26} /></button>
         <span className="grow" />
       </div>
       <section className={'panel pin-panel' + (shake ? ' shake' : '')} key={shake}>
         <span className="ribbon gold" style={{ left: '50%', transform: 'translateX(-50%)' }}><Icon name="lock" size={22} />Giriş</span>
-        <Avatar animal={student.animal} seed={student.id} size={112} bounce />
+        <Avatar animal={student.animal} equipped={student.equipped} seed={student.id} size={82} bounce />
         <h2>{student.display_name}</h2>
         <p className="say">{title}</p>
         <p className="hint pin-hint">
@@ -190,7 +191,7 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
         <div className="pin-slots">
           {[0, 1, 2, 3].map((i) => <span key={i} className={i < pin.length ? 'on' : ''}>{i < pin.length && <Icon name="star" size={34} />}</span>)}
         </div>
-        <p className="err pin-err">{err}</p>
+        <p className={'err pin-err' + (err ? ' has-error' : '')} aria-live="polite">{err}</p>
         <div className="pinpad">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) =>
             k === '' ? <span key={i} /> : k === 'del' ? (
@@ -218,13 +219,11 @@ function left(iso: string) {
 function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
   home: StudentHome; onStart: () => void; onShowResult: () => void; onShop: () => void; onLogout: () => void
 }) {
-  const { me, assignment: a, my_result: r, goal: g } = home
-  const pct = Math.min(100, Math.round((g.current / Math.max(1, g.target)) * 100))
-  const say = a && !r ? <>Selam <b>{me.display_name}</b>! Yeni görev seni bekliyor.</>
-    : a && r ? <>Bu haftanın görevi tamam! Yıldızlarını harcamaya ne dersin?</>
-    : <>Selam <b>{me.display_name}</b>! Cuma yeni görev gelecek.</>
+  const { me, assignment: a, my_result: r } = home
+  const draft = a && !r ? loadDraft(me.id, a) : null
+  const drafted = draft ? Object.keys(draft.answers).length : 0
   return (
-    <div className="page">
+    <div className="page student-home">
       <div className="hud">
         <span className="hud-me"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={40} pet={false} alive={false} /><b>{me.display_name}</b></span>
         <span className="grow" />
@@ -232,69 +231,64 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
         <button className="icon-btn pink" onClick={onShop} aria-label="Dükkan"><Icon name="bag" size={30} /></button>
       </div>
 
-      <section className="hero">
-        <div className="island"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={150} bounce /></div>
-        <p className="bubble">{say}</p>
-      </section>
-
-      <section className={'panel quest' + (a && r ? ' done' : '')}>
-        {a ? r ? (
-          <>
-            <span className="ribbon green"><Icon name="check" size={20} />Görev tamam</span>
-            <h2>{a.title}</h2>
-            <div className="done-row">
-              <MiniStars n={rating(r.correct, r.total)} size={30} />
-              <span>{r.total} sorudan <b>{r.correct}</b> doğru · <b>+{r.stars_earned}</b> yıldız</span>
-            </div>
-            <button className="btn blue wide" onClick={onShowResult}><Icon name="eye" size={26} />Cevaplarıma bak</button>
-          </>
-        ) : (
-          <>
-            <span className="ribbon gold"><Icon name="target" size={22} />Bu haftanın görevi</span>
-            <h2>{a.title}</h2>
-            <div className="chips">
-              <span className="chip"><Icon name="pencil" size={20} />{a.questions.length} soru</span>
-              <span className="chip"><Icon name="clock" size={20} />{left(a.closes_at)}</span>
-              <span className="chip"><Icon name="star" size={20} />+{10 + a.questions.length} yıldıza kadar</span>
-            </div>
-            <button className="btn big pulse" onClick={onStart}><Icon name="play" size={30} />Başla!</button>
-          </>
-        ) : (
-          <>
-            <span className="ribbon blue"><Icon name="clock" size={22} />Bu hafta</span>
-            <h2>Şu an açık görev yok</h2>
-            <p className="muted">Cuma günü yeni görev gelecek. O zamana kadar avatarını süsleyebilirsin.</p>
-            <div className="row"><button className="btn purple" onClick={onShop}><Icon name="bag" size={26} />Dükkana git</button></div>
-          </>
-        )}
-      </section>
-
-      <Route home={home} onStart={onStart} onShowResult={onShowResult} />
-
-      <section className={'panel goal-panel'}>
-        <span className="ribbon red"><Icon name="chest" size={24} />Sınıf sandığı</span>
-        <div className={'goal' + (pct >= 100 ? ' full' : '')}>
-          <div className="grow">
-            <p className="reward">Hep birlikte yıldız toplayın, sandık açılsın: <b>{g.reward}</b></p>
-            <div className="meter"><div style={{ width: Math.max(6, pct) + '%' }} /><span>{g.current} / {g.target}</span></div>
+      <div className="student-columns">
+        <div className="student-main">
+          <section className={'panel quest' + (a && r ? ' done' : '')}>
+            {a ? r ? (
+              <>
+                <span className="ribbon green"><Icon name="check" size={20} />Görev tamam</span>
+                <h2>{a.title}</h2>
+                <div className="done-row">
+                  <MiniStars n={rating(r.correct, r.total)} size={30} />
+                  <span>{r.total} sorudan <b>{r.correct}</b> doğru · <b>+{r.stars_earned}</b> yıldız</span>
+                </div>
+                <button className="btn blue wide" onClick={onShowResult}><Icon name="eye" size={26} />Cevaplarıma bak</button>
+              </>
+            ) : (
+              <>
+                <span className="ribbon gold"><Icon name="target" size={22} />Bu haftanın görevi</span>
+                <h2>{a.title}</h2>
+                <div className="chips">
+                  <span className="chip"><Icon name="pencil" size={20} />{drafted ? `${drafted} / ${a.questions.length} cevaplı` : `${a.questions.length} soru`}</span>
+                  <span className="chip"><Icon name="clock" size={20} />{left(a.closes_at)}</span>
+                  <span className="chip"><Icon name="star" size={20} />+{10 + a.questions.length} yıldıza kadar</span>
+                </div>
+                {drafted
+                  ? <button className="btn big pulse" onClick={onStart}><Icon name="play" size={30} />Kaldığın yerden devam</button>
+                  : <button className="btn big pulse" onClick={onStart}><Icon name="play" size={30} />Başla!</button>}
+              </>
+            ) : (
+              <>
+                <span className="ribbon blue"><Icon name="clock" size={22} />Bu hafta</span>
+                <h2>Şu an açık görev yok</h2>
+                <p className="muted">Cuma günü yeni görev gelecek. O zamana kadar avatarını süsleyebilirsin.</p>
+                <div className="row"><button className="btn purple" onClick={onShop}><Icon name="bag" size={26} />Dükkana git</button></div>
+              </>
+            )}
+          </section>
+          <div className="student-profile">
+            <Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={240} pet />
           </div>
-          <Icon name="chest" size={64} className="chest-ic" />
         </div>
-      </section>
 
-      {home.classmates.length > 0 && (
-        <section className="panel">
-          <span className="ribbon blue"><Icon name="users" size={24} />Takım arkadaşların</span>
-          <div className="mates">
-            {home.classmates.map((m) => (
-              <div key={m.id} className="mate">
-                <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} size={62} />
-                <span>{m.display_name}</span>
+        <div className="student-side">
+          <Route home={home} onShowResult={onShowResult} />
+
+          {home.classmates.length > 0 && (
+            <section className="panel">
+              <span className="ribbon blue"><Icon name="users" size={24} />Takım arkadaşların</span>
+              <div className="mates">
+                {home.classmates.map((m) => (
+                  <div key={m.id} className="mate">
+                    <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} size={62} />
+                    <span>{m.display_name}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            </section>
+          )}
+        </div>
+      </div>
 
       <button className="btn ghost small leave" onClick={onLogout}><Icon name="door" size={22} />Ben {me.display_name} değilim</button>
     </div>
@@ -310,15 +304,16 @@ type Node =
 const XS = [50, 72, 30, 66, 34, 62, 40]
 const ROW = 118
 
-function Route({ home, onStart, onShowResult }: { home: StudentHome; onStart: () => void; onShowResult: () => void }) {
-  const { assignment: a, my_result: r } = home
+function Route({ home, onShowResult }: { home: StudentHome; onShowResult: () => void }) {
+  const { assignment: a, my_result: r, goal: g } = home
+  const pct = Math.min(100, Math.round((g.current / Math.max(1, g.target)) * 100))
   // canlıda "past" bu haftayı içermez, demoda içerir: bu haftayı bir kez göster
   const past = [...home.past].sort((x, y) => Date.parse(y.created_at) - Date.parse(x.created_at))
   if (a && r) { const k = past.findIndex((p) => p.title === a.title); if (k >= 0) past.splice(k, 1) }
   const nodes: Node[] = [
     { kind: 'locked' },
-    a ? r ? { kind: 'done', title: 'Bu hafta', sub: `${r.correct}/${r.total} doğru`, stars: rating(r.correct, r.total) }
-      : { kind: 'play', title: 'Bu hafta', sub: 'Oyna!' }
+      a ? r ? { kind: 'done', title: 'Bu hafta', sub: `${r.correct}/${r.total} doğru`, stars: rating(r.correct, r.total) }
+      : { kind: 'play', title: 'Bu hafta', sub: 'Görev hazır' }
       : { kind: 'wait', title: 'Bu hafta', sub: 'Cuma açılır' },
     ...past.slice(0, 5).map((p): Node => ({ kind: 'past', title: p.title, sub: `${p.correct}/${p.total} doğru · +${p.stars_earned}`, stars: rating(p.correct, p.total) })),
     { kind: 'start' },
@@ -344,16 +339,15 @@ function Route({ home, onStart, onShowResult }: { home: StudentHome; onStart: ()
           const gap = cur ? 60 : 48
           const side = x > 52 ? { right: `calc(${100 - x}% + ${gap}px)` } : { left: `calc(${x}% + ${gap}px)` }
           const cls = 'node' + (n.kind === 'locked' ? ' locked' : '') + (n.kind === 'start' ? ' start' : '') + (cur ? ' current' : '') + (n.kind === 'play' ? ' go' : '') + (n.kind === 'wait' ? ' wait' : '') + (n.kind === 'done' ? ' done-now' : '')
-          const click = n.kind === 'play' ? onStart : n.kind === 'done' ? onShowResult : undefined
+          const click = n.kind === 'done' ? onShowResult : undefined
           const Tag = click ? 'button' : 'div'
           return (
             <div key={i}>
               <Tag className={cls} style={{ left: x + '%', top: y }} onClick={click} aria-label={'title' in n ? n.title : n.kind === 'start' ? 'Başlangıç' : 'Kilitli'}>
                 {n.kind === 'locked' ? <Icon name="lock" size={34} />
                   : n.kind === 'start' ? <Icon name="flag" size={32} />
-                  : n.kind === 'play' ? <Icon name="play" size={40} />
-                  : n.kind === 'wait' ? <Icon name="clock" size={40} />
-                  : <Icon name="check" size={n.kind === 'done' ? 40 : 32} />}
+                  : cur ? <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={56} pet={false} alive={false} />
+                  : <Icon name="check" size={32} />}
                 {'stars' in n && n.stars !== undefined && <MiniStars n={n.stars} size={14} />}
               </Tag>
               <span className={'node-label' + (cur ? ' cur' : '') + (n.kind === 'locked' || n.kind === 'start' ? ' dim' : '')} style={{ top: y, ...side }}>
@@ -362,6 +356,14 @@ function Route({ home, onStart, onShowResult }: { home: StudentHome; onStart: ()
             </div>
           )
         })}
+      </div>
+      <div className={'route-chest' + (pct >= 100 ? ' full' : '')}>
+        <Icon name={pct >= 100 ? 'chest-open' : 'chest'} size={42} className="chest-ic" />
+        <div className="route-chest-copy">
+          <b>{pct >= 100 ? 'Sınıf sandığı açıldı!' : 'Sınıf sandığı'}</b>
+          <span className="reward"><strong>{g.reward}</strong></span>
+          <div className="meter"><div style={{ width: pct + '%' }} /><span>{g.current} / {g.target}</span></div>
+        </div>
       </div>
     </section>
   )
@@ -375,6 +377,7 @@ function ResultScreen({ result, fresh, home, onHome, onShop }: {
   const n = rating(result.correct, result.total)
   const msg = n === 3 ? 'Hepsi doğru, süpersin!' : n === 2 ? 'Çok iyi gidiyorsun!' : 'Görevi bitirdin, aferin!'
   const [shown, setShown] = useState(fresh ? 0 : result.stars_earned)
+  const [shownAnswers, setShownAnswers] = useState(false)
   useEffect(() => {
     if (!fresh) return
     let v = 0
@@ -387,29 +390,30 @@ function ResultScreen({ result, fresh, home, onHome, onShop }: {
   }, [fresh, result.stars_earned])
   return (
     <div className="page">
-      {fresh && <Confetti />}
+      {fresh && <Confetti n={24} />}
       <div className="hud">
         <button className="icon-btn" onClick={onHome} aria-label="Ana sayfa"><Icon name="home" size={30} /></button>
         <span className="grow" />
-        <StarCount n={home.me.stars} />
+        {!fresh && <StarCount n={home.me.stars} />}
       </div>
       <section className="panel result">
         <span className="ribbon gold"><Icon name="trophy" size={28} />Görev tamam!</span>
         <div className="big-stars3">
-          {[0, 1, 2].map((i) => <Icon key={i} name="star" size={i === 1 ? 92 : 70} className={i < n ? 'on' : 'off'} />)}
+          {[0, 1, 2].map((i) => <Icon key={i} name="star" size={i === 1 ? 65 : 48} className={i < n ? 'on' : 'off'} />)}
         </div>
-        <h1>{msg}</h1>
-        <p className="muted">{result.total} sorudan <b>{result.correct}</b> doğru</p>
+        <h1 className="result-score"><b>{result.correct}</b> / {result.total} doğru</h1>
+        <p className="result-cheer">{msg}</p>
         <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={120} mood="happy" />
         <div className="earned"><StarCount n={shown} big plus /></div>
         <p className="muted">yıldız kazandın</p>
-        <div className="row">
-          <button className="btn purple" onClick={onShop}><Icon name="bag" size={26} />Dükkana koş</button>
+        <div className="row result-actions">
+          {result.items.length > 0 && <button className="btn blue" onClick={() => { setShownAnswers(true); document.getElementById('answer-review')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}><Icon name="eye" size={24} />Cevaplarıma bak</button>}
           <button className="btn ghost" onClick={onHome}><Icon name="home" size={24} />Ana sayfa</button>
+          <button className="shop-quiet" onClick={onShop}><Icon name="bag" size={22} />Dükkân</button>
         </div>
       </section>
       {result.items.length > 0 && (
-        <section className="panel">
+        <section id="answer-review" className={'panel answer-review' + (shownAnswers ? ' answer-highlight' : '')}>
           <span className="ribbon blue"><Icon name="eye" size={24} />Cevapların</span>
           <div className="review-list">
             {assignment.questions.map((q, i) => {
@@ -421,9 +425,8 @@ function ResultScreen({ result, fresh, home, onHome, onShop }: {
                   <div>
                     <p className="q-no">{i + 1}. soru · {it.ok ? 'doğru' : 'yanlış'}</p>
                     <p className="q-text">{q.text}</p>
-                    {!it.ok && (
-                      <p>Senin cevabın: <s>{it.given === null ? 'boş' : q.options[it.given]}</s> · Doğrusu: <b>{q.options[it.answer]}</b></p>
-                    )}
+                    {!it.ok && <p>Senin cevabın: <s>{it.given === null ? 'boş' : q.options[it.given]}</s></p>}
+                    {!it.ok && <p>Doğru cevap <strong className="correct-answer">{q.options[it.answer]}</strong></p>}
                     {it.explanation && <p className="explain">{it.explanation}</p>}
                   </div>
                 </div>

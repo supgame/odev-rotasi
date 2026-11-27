@@ -29,7 +29,7 @@ Yıldız bakiyesi = sum(submissions.stars_earned) + stars_bonus − sum(shop_ite
 ## Öğrenci RPC'leri (anon çağırır, SECURITY DEFINER, search_path sabit)
 Hepsi `jsonb` döner. Hata: `raise exception` ile kısa Türkçe mesaj kodu (`PIN_HATALI`, `KILITLI`, `OTURUM_YOK`, `YETERSIZ_YILDIZ`, `ZATEN_GONDERILDI`, `SET_KAPALI`).
 
-1. `roster(p_class_code text)` → `{ class: {name}, students: [{id, display_name, animal, grade, has_pin}] }`
+1. `roster(p_class_code text)` → `{ class: {name}, students: [{id, display_name, animal, grade, equipped, has_pin}] }`
 2. `student_login(p_class_code text, p_student_id uuid, p_pin text)` → `{ token }`
    - pin null ise p_pin'i (4 hane) kaydeder ve girer.
 3. `student_home(p_token text)` → 

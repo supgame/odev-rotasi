@@ -1,4 +1,4 @@
-export type Slot = 'skin' | 'fshape' | 'ears' | 'eyes' | 'cheek' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'pet' | 'pose' | 'bg'
+export type Slot = 'skin' | 'fshape' | 'ears' | 'eyes' | 'cheek' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'mouth' | 'pet' | 'pose' | 'bg'
 export type Equipped = Partial<Record<Slot, string>>
 
 export interface Question {
@@ -15,6 +15,7 @@ export interface RosterStudent {
   display_name: string
   animal: string
   grade: 3 | 4
+  equipped: Equipped
   has_pin: boolean
 }
 
