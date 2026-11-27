@@ -8,6 +8,14 @@ export interface Part {
   ref?: number
   color?: string // 'rrggbb'
   dx?: number // yatay kaydırma, 512 px ölçeğinde
+  dy?: number
+  scale?: number
+  scaleY?: number
+  clip?: string // poz katmanının 640 × 640 tuvalindeki kesim çizgisi
+  sourceRows?: [number, number] // 512 px kaynak tuvalinde görünen dikey aralık
+  metallic?: boolean
+  iris?: string
+  stronger?: boolean
 }
 
 const BASE = `${import.meta.env?.BASE_URL ?? '/'}av/`
@@ -29,25 +37,49 @@ function load(path: string): Promise<HTMLImageElement> {
 
 const hex = (h: string) => [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
 
-function tinted(im: HTMLImageElement, mask: HTMLImageElement, ref: number, color: string, n: number): HTMLCanvasElement {
+function tinted(im: HTMLImageElement, mask: HTMLImageElement | null, part: Part, n: number): HTMLCanvasElement {
   const c = document.createElement('canvas')
   c.width = c.height = n
   const x = c.getContext('2d', { willReadFrequently: true })!
-  x.drawImage(mask, 0, 0, n, n)
-  const m = x.getImageData(0, 0, n, n).data
-  x.clearRect(0, 0, n, n)
+  let m: Uint8ClampedArray | undefined
+  if (mask) {
+    x.drawImage(mask, 0, 0, n, n)
+    m = x.getImageData(0, 0, n, n).data
+    x.clearRect(0, 0, n, n)
+  }
   x.drawImage(im, 0, 0, n, n)
   const d = x.getImageData(0, 0, n, n)
   const p = d.data
-  const [cr, cg, cb] = hex(color)
-  const k = 1 / Math.max(ref, 1)
+  const [cr, cg, cb] = hex(part.color!)
+  const iris = part.iris ? hex(part.iris) : null
+  const k = 1 / Math.max(part.ref ?? 128, 1)
   for (let i = 0; i < p.length; i += 4) {
-    const a = m[i] / 255 // maske gri: R kanalı yeterli
-    if (a === 0 || p[i + 3] === 0) continue
+    if (p[i + 3] === 0) continue
+    const a = m ? m[i] / 255 : 1 // maske gri: R kanalı yeterli
+    const row = Math.floor(i / 4 / n) / n
+    const col = (i / 4 % n) / n
+    if (iris && a < 0.08 && row > .36 && row < .49 && (col > .32 && col < .46 || col > .54 && col < .68)) {
+      const [r, g, b] = [p[i], p[i + 1], p[i + 2]]
+      // İrisin sıcak kahvesi; beyazları, siyah çizgiyi ve kalp/yıldız desenini koru.
+      if (r > g * 1.25 && g > b * 1.17 && r > 44 && g < 154) {
+        const light = Math.min(1.25, (r * .21 + g * .72 + b * .07) / 94)
+        const mix = Math.min(1, (r - g) / 27)
+        p[i] = r * (1 - mix) + iris[0] * light * mix
+        p[i + 1] = g * (1 - mix) + iris[1] * light * mix
+        p[i + 2] = b * (1 - mix) + iris[2] * light * mix
+      }
+    }
+    if (a === 0) continue
+    const shine = part.metallic ? Math.max(0, 1 - Math.abs(col + row * 0.45 - 0.83) * 15) : 0
     const l = (0.2126 * p[i] + 0.7152 * p[i + 1] + 0.0722 * p[i + 2]) * k
     p[i] = p[i] * (1 - a) + Math.min(255, cr * l) * a
     p[i + 1] = p[i + 1] * (1 - a) + Math.min(255, cg * l) * a
     p[i + 2] = p[i + 2] * (1 - a) + Math.min(255, cb * l) * a
+    if (shine) {
+      p[i] += (255 - p[i]) * shine * a * 0.8
+      p[i + 1] += (246 - p[i + 1]) * shine * a * 0.8
+      p[i + 2] += (192 - p[i + 2]) * shine * a * 0.8
+    }
   }
   x.putImageData(d, 0, 0)
   return c
@@ -70,9 +102,27 @@ export function compose(parts: Part[], n: number): Promise<string> {
       const x = c.getContext('2d')!
       x.imageSmoothingQuality = 'high'
       for (const { pt, im, mk } of loaded) {
-        const ox = ((pt.dx ?? 0) * n) / 512
-        if (mk) x.drawImage(tinted(im, mk, pt.ref ?? 128, pt.color!, n), ox, 0)
-        else x.drawImage(im, ox, 0, n, n)
+        const size = n * (pt.scale ?? 1)
+        const height = pt.scaleY === undefined ? size : n * pt.scaleY
+        const ox = (n - size) / 2 + ((pt.dx ?? 0) * n) / 512
+        const oy = (n - height) / 2 + ((pt.dy ?? 0) * n) / 512
+        const layer = pt.color ? tinted(im, mk, pt, n) : im
+        const clipped = pt.clip || pt.sourceRows
+        if (clipped) x.save()
+        if (pt.clip) {
+          const path = new Path2D()
+          path.addPath(new Path2D(pt.clip), new DOMMatrix().scale(n / 640))
+          x.clip(path)
+        }
+        if (pt.sourceRows) {
+          const [top, bottom] = pt.sourceRows
+          x.beginPath()
+          x.rect(ox, oy + top * height / 512, size, (bottom - top) * height / 512)
+          x.clip()
+        }
+        x.drawImage(layer, ox, oy, size, height)
+        if (pt.stronger) x.drawImage(layer, ox, oy, size, height)
+        if (clipped) x.restore()
       }
       const uri = c.toDataURL('image/webp', 0.92)
       done.set(key, uri)

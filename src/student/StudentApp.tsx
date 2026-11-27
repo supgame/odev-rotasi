@@ -122,7 +122,7 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
           <div className="name-grid">
             {list.filter((s) => s.grade === g).map((s, k) => (
               <button key={s.id} className="player-card" style={{ ['--pc' as string]: CARD_COLORS[(k + g) % CARD_COLORS.length] }} onClick={() => onPick(s)}>
-                <span className="pc-stage"><Avatar animal={s.animal} seed={s.id} size={74} /></span>
+                <span className="pc-stage"><Avatar animal={s.animal} equipped={s.equipped} seed={s.id} size={74} /></span>
                 <span className="pc-name">{s.display_name}</span>
               </button>
             ))}
@@ -181,7 +181,7 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
       </div>
       <section className={'panel pin-panel' + (shake ? ' shake' : '')} key={shake}>
         <span className="ribbon gold" style={{ left: '50%', transform: 'translateX(-50%)' }}><Icon name="lock" size={22} />Giriş</span>
-        <Avatar animal={student.animal} seed={student.id} size={112} bounce />
+        <Avatar animal={student.animal} equipped={student.equipped} seed={student.id} size={112} pet={false} bounce />
         <h2>{student.display_name}</h2>
         <p className="say">{title}</p>
         <p className="hint pin-hint">

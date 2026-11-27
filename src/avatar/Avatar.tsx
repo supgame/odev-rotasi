@@ -5,6 +5,7 @@ import type { Equipped } from '../data/types'
 import { BG } from './bg'
 import { ITEMS, MANIFEST, SPECIES, fx, type CatalogItem, type ItemSlot, type Raw, type Species } from './catalog'
 import { compose, composed, type Part } from './render'
+import { cradleFor, cradleParts, type CradleShape } from './companionCradle'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -28,9 +29,11 @@ export function petOf(animal: string, eq?: Equipped): Species {
 const FREE = (slot: ItemSlot, skip: string[] = []) => ITEMS.filter((i) => i.slot === slot && i.price === 0 && !skip.includes(i.id))
 const ONE = (id: string) => ITEMS.filter((i) => i.id === id)
 const DEF: Partial<Record<ItemSlot, CatalogItem[]>> = {
-  skin: FREE('skin'), hair: FREE('hair', ['hair_headscarf']), hcolor: FREE('hcolor'), clothes: FREE('clothes'), ccolor: FREE('ccolor'),
+  skin: FREE('skin'), hair: ['hair_short', 'hair_curly', 'hair_bob', 'hair_side_part', 'hair_afro'].flatMap(ONE),
+  hcolor: FREE('hcolor'), clothes: FREE('clothes'), ccolor: FREE('ccolor'),
   fshape: FREE('fshape'), ears: [...ONE('ears_small'), ...ONE('ears_small'), ...ONE('ears_medium')], eyes: FREE('eyes'),
-  cheek: [...ONE('cheek_none'), ...FREE('cheek')], pose: [...ONE('pose_side'), ...ONE('pose_side'), ...ONE('pose_shoulder'), ...ONE('pose_peek')],
+  cheek: [...ONE('cheek_none'), ...FREE('cheek')],
+  mouth: ONE('mouth_expression'),
 }
 function hash(s: string) {
   let h = 2166136261
@@ -62,29 +65,57 @@ function part(r: Raw | undefined, k: string | null, color?: string): Part | null
 
 /** Mutluyken kullanılacak ifade (varsa). */
 const HAPPY = ITEMS.find((i) => i.id === 'face_bigsmile' || i.id === 'face_grin')
+const STARTER_SMILES = [undefined, ITEM.get('face_smirk'), HAPPY]
 
 const V = MANIFEST.variants
 const NO_BLINK = ['face_wink', 'face_happy_closed']
+const COLORED_EXPRESSIONS = new Set(['face_surprised', 'face_hearts', 'face_stars'])
+const MOUTH_TOP = 251 // Ortak 512 px yüz tuvalinde göz katmanlarının bittiği çizgi.
+const BASE_URL = import.meta.env.BASE_URL
+
+const SIDE_PETS = new Set(['giraffe', 'elephant', 'flamingo', 'llama', 'camel', 'mammoth', 'sauropod', 'moose', 'whale'])
+const HEAD_PETS = new Set(['hedgehog', 'snail', 'bee', 'ladybug', 'butterfly', 'chick', 'frog', 'mouse', 'hamster', 'turtle', 'owl'])
+const BULKY_PETS = new Set(['dragon', 'trex', 'unicorn', 'phoenix', 'rhino', 'hippo', 'bison', 'croc', 'shark', 'peacock'])
+
+export function availablePoses(petId: string): string[] {
+  if (SIDE_PETS.has(petId) || BULKY_PETS.has(petId)) return ['pose_side', 'pose_peek']
+  if (petId === 'rabbit') return ['pose_hug', 'pose_side', 'pose_peek']
+  return ['pose_side', 'pose_hug', 'pose_shoulder', 'pose_peek', ...(HEAD_PETS.has(petId) ? ['pose_head'] : [])]
+}
 
 /** Arkadaşın duruşu (side | shoulder | peek | head | hug). */
-export const poseOf = (eq: Equipped, seed: string) => {
-  const k = (pick(eq, 'pose', seed)?.raw.key as string | undefined) ?? 'side'
-  return k === 'hug' && !V?.hands ? 'side' : k
+export const poseOf = (eq: Equipped, petId: string) => {
+  const poses = availablePoses(petId)
+  const chosen = eq.pose && poses.includes(eq.pose) ? eq.pose : poses[0]
+  return chosen.slice('pose_'.length)
+}
+
+const floorHat = (p: Part | null): Part | null => {
+  if (p?.src === 'hat/crown.webp') return { ...p, scale: 0.85, dy: -24 }
+  if (p?.src === 'hat/pirate.webp' || p?.src === 'hat/cowboy.webp') return { ...p, dy: -13 }
+  return p
+}
+
+function clothesPart(cl: Raw | undefined, color: CatalogItem | undefined) {
+  const layer = part(cl, null, cl?.tintable === false ? undefined : color?.raw.color)
+  return layer && color?.id === 'ccolor_gold' && layer.mask ? { ...layer, metallic: true } : layer
 }
 
 interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string }
 
 /** Katmanları sıraya koyar. Canlı avatar için ayrıca: alt (gözler boş), kayan iris, kırpma, üst (kıyafet, saç önü, şapka, gözlük). */
-function layers(eq: Equipped, seed: string, mood?: Mood): Layers {
+function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): Layers {
   const skin = pick(eq, 'skin', seed)?.raw.color as string | undefined
   const hair = pick(eq, 'hair', seed)?.raw
   const hcol = pick(eq, 'hcolor', seed)?.raw.color as string | undefined
   const hat = pick(eq, 'hat', seed)?.raw
   const gl = pick(eq, 'glasses', seed)?.raw
-  const cl = pick(eq, 'clothes', seed)?.raw
-  const ccol = pick(eq, 'ccolor', seed)?.raw.color as string | undefined
+  const clothes = pick(eq, 'clothes', seed)
+  const ccol = pick(eq, 'ccolor', seed)
   const faceIt = mood === 'happy' && HAPPY ? HAPPY : pick(eq, 'face', seed)
-  const face = faceIt?.raw
+  const face = (faceIt ?? STARTER_SMILES[hash(seed + 'smile') % STARTER_SMILES.length])?.raw
+  const mouth = pick(eq, 'mouth', seed)
+  const overrideMouth = mood !== 'happy' && mouth && mouth.id !== 'mouth_expression'
   const shape = (pick(eq, 'fshape', seed)?.raw.key as string) ?? 'oval'
   const ears = (pick(eq, 'ears', seed)?.raw.key as string) ?? 'small'
   const eyes = pick(eq, 'eyes', seed)?.raw.color as string | undefined
@@ -95,22 +126,41 @@ function layers(eq: Equipped, seed: string, mood?: Mood): Layers {
   const dx = V?.hairBackDx?.[shape] ?? 0 // dar yüzde at kuyruğu yanağa yaklaşsın
   const moving = !!V?.eyes && !V.eyes.ownEyes.includes(faceIt?.id ?? '')
   const P = (x: Part | null | undefined) => (x && x.src ? [x] : [])
-  const lowerBase = [
+  const backHair = [
     ...P(back && dx ? { ...back, dx } : back),
     ...P(part(hair, hat ? 'fillUnderHat' : 'fill', hcol)), // yüzün arkasındaki saç (dar yüzde boşluk kalmasın)
+  ]
+  const head = [
     { src: V ? sub(V.base) : b.layer, mask: V ? sub(V.mask) : b.skinMask, ref: b.skinRef, color: skin },
     ...P(V && eyes ? { src: V.iris.layer, mask: V.iris.mask, ref: V.iris.ref, color: eyes } : null),
   ]
-  const mid = [...P(V && cheek && V.cheek[cheek] ? { src: V.cheek[cheek] } : null), ...P(part(face, null, skin))]
-  const upper = [
-    ...P(part(cl, null, cl?.tintable === false ? undefined : ccol)),
-    ...P(part(hair, hat ? 'frontUnderHat' : 'front', hcol)),
-    ...P(part(hat, null, hat?.color)),
-    ...P(part(gl, null, gl?.color)),
+  const lowerBase = [...backHair, ...head]
+  const expression = part(face, null, skin)
+  if (expression && eyes && COLORED_EXPRESSIONS.has(faceIt?.id ?? '')) expression.iris = eyes
+  if (expression && overrideMouth) expression.sourceRows = [0, MOUTH_TOP]
+  const mouthLayer = overrideMouth && mouth.raw.sourceFace ? part(ITEM.get(mouth.raw.sourceFace)?.raw, null, skin) : null
+  if (mouthLayer) mouthLayer.sourceRows = [MOUTH_TOP, 512]
+  const deeperSkin = ['skin_brown', 'skin_tan', 'skin_dark'].includes(currentId(eq, 'skin', seed) ?? '')
+  const mid = [
+    ...P(V && cheek && V.cheek[cheek] ? { src: V.cheek[cheek], stronger: deeperSkin } : null),
+    ...P(expression),
+    ...P(mouthLayer),
   ]
+  const glasses = part(gl, null, gl?.color)
+  const front = [
+    ...P(part(hair, hat ? 'frontUnderHat' : 'front', hcol)),
+    ...P(floorHat(part(hat, null, hat?.color))),
+    ...P(glasses && { ...glasses, scale: 0.92, dy: -4 }),
+  ]
+  const garment = clothesPart(clothes?.raw, ccol)
+  const upper = [...P(garment), ...front]
   const ir = V?.eyes?.iris
+  const tshirt = clothes?.id === 'clothes_tshirt'
+  const shirtDye = tshirt && garment ? { color: garment.color, metallic: garment.metallic } : undefined
   return {
-    all: [...lowerBase, ...mid, ...upper],
+    all: cradle
+      ? cradleParts(cradle, backHair, [...head, ...mid], front, tshirt ? null : garment, skin, shirtDye)
+      : [...lowerBase, ...mid, ...upper],
     lower: moving && V.eyes ? [...lowerBase, { src: V.eyes.layer }, ...mid] : [...lowerBase, ...mid],
     iris: moving && ir ? [eyes ? { src: ir.layer, mask: ir.mask, ref: ir.ref, color: eyes } : { src: ir.layer }] : [],
     blink: V && !NO_BLINK.includes(faceIt?.id ?? '') ? [{ src: V.blink.layer, mask: V.blink.mask, ref: V.blink.ref, color: skin }] : [],
@@ -141,48 +191,67 @@ export function peekMetrics(size: number) {
   return { offset: Math.round(0.66 * size), room: Math.round(0.56 * size) }
 }
 
-// Çerçeve: alt yarı dairenin içinde kalır, kafa ve şapka dairenin üstünden taşabilir (profil rozeti gibi).
-const UP = 0.24 // kutunun üstünde kafaya/şapkaya ayrılan pay (boyuta oranı)
-function clipStyle(size: number): CSSProperties {
-  const cy = UP * size + size / 2, r = size / 2 - 3
-  const m = `radial-gradient(circle at 50% ${cy}px, #000 ${r}px, transparent ${r + 1}px), linear-gradient(#000 ${cy}px, transparent ${cy}px)`
-  return { top: -UP * size, height: (1 + UP) * size, maskImage: m, WebkitMaskImage: m }
+// Temas çizgisi kaynağın 512 px tuvalinde, başın orta 64 pikselindeki opak tepeye denk gelir.
+const HAIR_TOP: Record<string, number> = {
+  hair_short: 87, hair_ponytail: 92, hair_curly: 87, hair_afro: 20, hair_straight_long: 90, hair_bob: 80, hair_bun: 29,
+  hair_braids: 91, hair_space_buns: 94, hair_wavy_long: 90, hair_bangs_long: 90, hair_spiky: 56,
+  hair_side_part: 78, hair_headscarf: 90,
+}
+const HAT_TOP: Record<string, number> = {
+  cap: 48, pom: 37, earflap: 43, cat: 71, bucket: 57, cowboy: 37, wizard: 12, pirate: 18, crown: 40, pilot: 81, bear: 87,
 }
 
-// Arkadaşın sahnedeki yeri (boyuta oranla; çerçeve içindeyse kırpma kutusuna göre, kutu = size x 1.24 size).
-// kid: çocuğun yana kayması (arkadaşa yer açılsın). gaze: çocuğun arkadaşa bakarken gözünün yönü.
-const POSES: Record<string, { left: number; top: number; w: number; inClip: boolean; kid: number; gaze: number; ey: number }> = {
-  side: { left: -0.06, top: 0.7, w: 0.56, inClip: true, kid: 0.09, gaze: -1, ey: 0.4 },
-  shoulder: { left: 0.6, top: 0.62, w: 0.36, inClip: true, kid: -0.04, gaze: 1, ey: 0.1 },
-  peek: { left: 0.56, top: 0.5, w: 0.42, inClip: true, kid: -0.03, gaze: 1, ey: 0 },
-  hug: { left: 0.26, top: 0.74, w: 0.48, inClip: true, kid: 0, gaze: 0, ey: 1 },
-  head: { left: 0.32, top: -0.34, w: 0.36, inClip: false, kid: 0, gaze: 0, ey: -1 },
+// Koordinatlar sahnenin genişliğine göre. Peek x'i çocuğun tuvaline göre ölçülür.
+const POSES: Record<string, { x: number; bottom: number; width: number; kid: number; gaze: number; ey: number }> = {
+  side: { x: 0.79, bottom: 0.94, width: 0.42, kid: -0.13, gaze: 1, ey: 0.45 },
+  shoulder: { x: 0.79, bottom: 0.79, width: 0.30, kid: -0.10, gaze: 1, ey: 0.20 },
+  peek: { x: 338 / 512, bottom: 0.90, width: 0.42, kid: -0.14, gaze: 1, ey: 0.15 },
+  hug: { x: 0.56, bottom: 0.91, width: 0.35, kid: -0.025, gaze: 0, ey: 1 },
+  head: { x: 0.50, bottom: 0.31, width: 0.30, kid: 0, gaze: 0, ey: -1 },
+}
+
+// Kumaşa basan pençe, kuş çiziminin 256 px tuvalindeki konumuyla sabitlenir.
+const BIRD_PERCH: Partial<Record<string, { x: number; y: number; width: number; faceChild?: boolean }>> = {
+  owl: { x: 120, y: 230, width: 0.30, faceChild: true },
+  parrot: { x: 91, y: 224, width: 0.30 },
+  dove: { x: 148, y: 229, width: 0.29, faceChild: true },
+  chick: { x: 104, y: 232, width: 0.26, faceChild: true },
+  eagle: { x: 142, y: 233, width: 0.32, faceChild: true },
+}
+
+// 512 px kıyafet katmanında omuz çizgisi (x=368). Kapüşon ve zırh daha yukarıda.
+const SHOULDER_Y: Partial<Record<string, number>> = {
+  clothes_tshirt: 367, clothes_hoodie: 349, clothes_knight: 347, clothes_dinosaur: 337,
 }
 
 const EX = 0.62 // gözün en fazla kayması: görsel genişliğinin yüzdesi (512'de ~3 px)
 
 export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look, mood, frame = true, pet, alive }: {
   animal: string; equipped?: Equipped; seed?: string; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
-  /** Yanında hayvanı göster (varsayılan: çerçeveli ve yeterince büyükse). */ pet?: boolean
+  /** Yanında hayvanı göster (varsayılan: çerçeveli ve 96 piksel veya daha büyük). */ pet?: boolean
   /** Bakınma + göz kırpma + nefes (varsayılan: büyük avatarlarda; listelerde kapalı kalır). */ alive?: boolean
 }) {
   const eq = equipped ?? {}
   const sd = seed ?? animal
-  const showPet = (pet ?? (frame && size >= 56)) && frame
+  const showPet = (pet ?? size >= 96) && frame
   const p = showPet ? petOf(animal, eq) : null
-  const pose = poseOf(eq, sd)
-  const pz = POSES[pose] ?? POSES.side
-  const live = alive ?? size >= 100
+  const pose = p ? poseOf(eq, p.id) : 'side'
+  const pz = POSES[pose]
+  const cradle = p && pose === 'hug' ? cradleFor(p.id) : undefined
+  const live = !cradle && (alive ?? size >= 100)
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
-  const L = layers(eq, sd, mood)
+  const L = layers(eq, sd, mood, cradle)
   const split = live && L.moving
-  const uriAll = useComp(split ? [] : L.all, px)
+  const uriCradle = useComp(cradle ? L.all : [], px)
+  const uriAll = useComp(split || cradle ? [] : L.all, px)
   const uriLow = useComp(split ? L.lower : [], px)
   const uriIris = useComp(split ? L.iris : [], px)
   const uriUp = useComp(split ? L.upper : [], px)
   const uriBlink = useComp(live ? L.blink : [], px)
-  const hands = p && pose === 'hug' && V?.hands ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }] : []
+  const hands = !cradle && p && pose === 'hug' && V?.hands
+    ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }]
+    : []
   const uriHands = useComp(hands, px)
   const root = useRef<HTMLDivElement>(null)
   const [tap, setTap] = useState(0)
@@ -238,64 +307,126 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const lookVars: CSSProperties = look
     ? ({ ['--ex' as string]: `${look.x * EX}%`, ['--ey' as string]: `${look.y * EX * 0.5}%`, ['--tl' as string]: `${look.x * 4}deg`, ['--tx' as string]: '0%' } as CSSProperties)
     : {}
-  const kidStyle: CSSProperties | undefined = frame ? { top: (UP - 0.3) * size, left: -0.3 * size, width: 1.6 * size } : undefined
+  const hairId = currentId(eq, 'hair', sd) ?? 'hair_short'
+  const hatName = String(pick(eq, 'hat', sd)?.raw.layer ?? '').split('/').at(-1)?.replace('.webp', '') ?? ''
+  const wideHair = hairId === 'hair_afro' || hairId === 'hair_headscarf'
+  const broadPet = p && (SIDE_PETS.has(p.id) || BULKY_PETS.has(p.id))
+  const scale = p ? (pose === 'head' || wideHair || broadPet ? 1.03 : 1.16) : (wideHair || hatName === 'wizard' ? 1.29 : 1.48)
+  const crownTop = (HAT_TOP[hatName] ?? HAIR_TOP[hairId] ?? 88) / 512 * scale
+  const kidTop = p
+    ? Math.max(pose === 'hug' ? -0.015 : 0, (pose === 'head' ? pz.bottom - 0.014 : 0.055) - crownTop)
+    : Math.max(-0.15, 0.045 - crownTop)
+  const kidOffset = p ? pz.kid * (wideHair ? 0.8 : 1) : 0
+  const kidLeft = (1 - scale) / 2 + kidOffset
+  const kidStyle: CSSProperties | undefined = frame
+    ? { top: kidTop * size, left: kidLeft * size, width: scale * size }
+    : undefined
   const eyeBox: CSSProperties = { ...(kidStyle ?? { top: 0, left: 0, width: '100%' }), aspectRatio: '1', position: 'absolute' }
   if (V?.eyes) {
     const m = `url(${import.meta.env?.BASE_URL ?? '/'}av/${V.eyes.open})`
     eyeBox.maskImage = m; eyeBox.WebkitMaskImage = m; eyeBox.maskSize = '100% 100%'; eyeBox.WebkitMaskSize = '100% 100%'
   }
-  const petStyle: CSSProperties = {
-    left: pz.left * size, top: pz.inClip ? pz.top * size : (pz.top + 0.0) * size, width: pz.w * size,
+  const perch = p && pose === 'shoulder' ? BIRD_PERCH[p.id] : undefined
+  const perchX = kidLeft + 368 / 512 * scale
+  const perchY = kidTop + ((SHOULDER_Y[currentId(eq, 'clothes', sd) ?? ''] ?? 364) + 3) / 512 * scale
+  const petWidth = perch?.width ?? (p?.id === 'giraffe' ? 0.51 : pz.width)
+  // Arkadaki hayvan başını dışa eğerken ağırlığı omuzun arkasında kalır.
+  const peek = pose === 'peek'
+  const petX = peek ? kidLeft + pz.x * scale : pz.x
+  const petStyle: CSSProperties = perch ? {
+    left: (perchX - perch.x / 256 * petWidth) * size,
+    top: (perchY - perch.y / 256 * petWidth) * size,
+    width: petWidth * size,
+    transformOrigin: `${perch.x / 2.56}% ${perch.y / 2.56}%`,
+    transform: `rotate(12deg)${perch.faceChild ? ' scaleX(-1)' : ''}`,
+  } : {
+    left: (petX - petWidth / 2) * size, top: (pz.bottom - petWidth * 0.95) * size, width: petWidth * size,
+    ...(peek ? { transform: 'rotate(24deg)', transformOrigin: '50% 95%' } : {}),
   }
   const petImg = p && (
-    <img key={'pet' + (tap ? 'x' + tap : '')} className={'av-pet pose-' + pose} src={fx(p.id)} alt={p.name} title={p.name} draggable={false} style={petStyle} />
+    <img key={'pet' + (tap ? 'x' + tap : '')} className={`av-pet pose-${pose}${perch ? ' av-perched-bird' : ''}`}
+      src={fx(p.id)} alt={p.name} title={p.name} draggable={false} style={petStyle} />
   )
-  const cls = ['avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '', live ? 'alive' : '', tap ? 'tap' : '', p ? 'with-pet' : ''].filter(Boolean).join(' ')
+  const cls = ['avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '', live ? 'alive' : '', tap ? 'tap' : '', p ? 'with-pet' : '', p && `scene-${pose}`].filter(Boolean).join(' ')
   const h = hash(sd)
   return (
     <div ref={root} className={cls} style={{ width: size, height: size, ['--breath-delay' as string]: `-${h % 3000}ms`, ...lookVars }} onPointerDown={poke}>
       {frame && <div className="av-bg" style={{ background: BG[eq.bg ?? 'none'] ?? BG.none }} />}
-      <div className={frame ? 'av-clip' : 'av-free'} style={frame ? clipStyle(size) : undefined}>
-        <div className="av-stage">
-          {p && pz.inClip && pose === 'peek' && petImg}
-          <div className="av-body" key={tap ? 'b' + tap : 'b'} style={p && pz.kid ? { left: pz.kid * size, right: -pz.kid * size } : undefined}>
-            <div className="av-head">
-              {split ? (
-                <>
-                  {uriLow && <img className="av-kid" src={uriLow} alt="" draggable={false} style={kidStyle} />}
-                  {uriIris && <div className="av-eyes" style={eyeBox}><img className="av-iris" src={uriIris} alt="" draggable={false} /></div>}
-                  {uriBlink && <img className="av-kid av-blink" src={uriBlink} alt="" draggable={false} style={kidStyle} />}
-                  {uriUp && <img className="av-kid" src={uriUp} alt="" draggable={false} style={kidStyle} />}
-                </>
-              ) : (
-                <>
-                  {uriAll && <img className="av-kid" src={uriAll} alt="" draggable={false} style={kidStyle} />}
-                  {live && uriBlink && <img className="av-kid av-blink" src={uriBlink} alt="" draggable={false} style={kidStyle} />}
-                </>
-              )}
-            </div>
-          </div>
-          {p && pz.inClip && pose !== 'peek' && petImg}
-          {uriHands && <img className="av-kid av-hands" src={uriHands} alt="" draggable={false} style={kidStyle} />}
+      {cradle ? (
+        <div className="av-stage av-illustration">
+          {uriCradle && <img src={uriCradle} alt={p ? `Kucağında ${p.name.toLocaleLowerCase('tr-TR')} tutan çocuk` : ''} draggable={false} />}
         </div>
-      </div>
-      {p && !pz.inClip && petImg}
+      ) : (
+        <div className={frame ? 'av-clip' : 'av-free'}>
+          <div className="av-stage">
+            {pose === 'peek' && petImg}
+            <div className="av-body" key={tap ? 'b' + tap : 'b'}>
+              <div className="av-head">
+                {frame && !(uriAll || uriLow) && <span className="av-placeholder" style={{ background: skinColor(eq, sd) }} />}
+                {split ? (
+                  <>
+                    {uriLow && <img className="av-kid" src={uriLow} alt="" draggable={false} style={kidStyle} />}
+                    {uriIris && <div className="av-eyes" style={eyeBox}><img className="av-iris" src={uriIris} alt="" draggable={false} /></div>}
+                    {uriBlink && <img className="av-kid av-blink" src={uriBlink} alt="" draggable={false} style={kidStyle} />}
+                    {uriUp && <img className="av-kid" src={uriUp} alt="" draggable={false} style={kidStyle} />}
+                  </>
+                ) : (
+                  <>
+                    {uriAll && <img className="av-kid" src={uriAll} alt="" draggable={false} style={kidStyle} />}
+                    {live && uriBlink && <img className="av-kid av-blink" src={uriBlink} alt="" draggable={false} style={kidStyle} />}
+                  </>
+                )}
+              </div>
+            </div>
+            {perch && <span className="av-perch-shadow" aria-hidden="true" style={{ left: perchX * size, top: perchY * size }} />}
+            {pose !== 'peek' && petImg}
+            {uriHands && <img className="av-kid av-hands" src={uriHands} alt="" draggable={false}
+              style={{ left: size * 0.10, top: size * 0.10, width: size * 0.90 }} />}
+          </div>
+        </div>
+      )}
       {tap > 0 && <span className="av-hearts" key={'h' + tap} aria-hidden><i>💖</i><i>✨</i><i>💛</i></span>}
     </div>
   )
 }
 
-/** Dükkanda tek eşyanın önizlemesi: öğrencinin şu anki hâli + o eşya. Hayvanlar tek başına büyük gösterilir. */
+function ProductLayer({ layer, kind }: { layer: Part; kind: 'hat' | 'clothes' | 'glasses' }) {
+  const src = useComp([layer], 320)
+  const base = BASE_URL + 'av/' + layer.src
+  return <div className={`av-product av-product-${kind}`}>
+    <img src={src ?? base} alt="" draggable={false} />
+  </div>
+}
+
 export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; slot: string; animal: string; equipped: Equipped; seed: string }) {
   if (slot === 'pet') {
     const sp = BY_ID.get(id.replace(/^pet_/, '')) ?? SPECIES[0]
     return <div className="pet-preview"><img src={fx(sp.id)} alt="" /></div>
   }
+  if (slot === 'bg') return <div className="av-background-preview" style={{ background: BG[id] ?? BG.none }} />
   const eq: Equipped = { ...equipped, [slot]: id }
-  if (slot === 'hair' || slot === 'ears' || slot === 'fshape') eq.hat = undefined // saç/kulak görünsün diye şapkayı çıkar
-  if (slot === 'ears') eq.hair = 'hair_short' // uzun saç kulağı örtmesin
-  if (slot === 'pose') return <Avatar animal={animal} equipped={eq} seed={seed} size={84} pet alive={false} />
-  if (slot === 'clothes' || slot === 'ccolor')
-    return <div className="pet-preview body"><Avatar animal={animal} equipped={{ ...eq, hat: undefined }} seed={seed} size={150} frame={false} pet={false} alive={false} /></div>
-  return <Avatar animal={animal} equipped={eq} seed={seed} size={84} pet={false} alive={false} />
+  const raw = ITEM.get(id)?.raw
+  if (slot === 'hat' || slot === 'glasses') {
+    const layer = part(raw, null, raw?.color)
+    if (layer) return <ProductLayer layer={layer} kind={slot} />
+  }
+  if (slot === 'clothes' || slot === 'ccolor') {
+    const color = slot === 'ccolor' ? ITEM.get(id) : equipped.ccolor ? ITEM.get(equipped.ccolor) : ITEM.get('ccolor_blue')
+    const garment = slot === 'ccolor' ? ITEM.get('clothes_tshirt')?.raw : raw
+    const layer = clothesPart(garment, color)
+    if (layer) return <ProductLayer layer={layer} kind="clothes" />
+  }
+  if (slot === 'pose') {
+    const pet = petOf(animal, eq)
+    const samplePet = availablePoses(pet.id).includes(id) ? pet.id : id === 'pose_head' ? 'hedgehog' : 'fox'
+    return <Avatar animal={samplePet} equipped={{ ...eq, pet: undefined }} seed={seed} size={84} pet alive={false} />
+  }
+  if (['hair', 'hcolor', 'ears', 'fshape'].includes(slot)) eq.hat = undefined
+  if (['face', 'skin', 'ears', 'fshape', 'cheek', 'eyes'].includes(slot)) {
+    eq.hair = 'hair_short'
+    eq.hat = undefined
+    eq.glasses = undefined
+  }
+  if (slot === 'eyes') eq.face = 'face_smile'
+  return <Avatar animal={animal} equipped={eq} seed={seed} size={slot === 'mouth' ? 110 : 84} pet={false} alive={false} />
 }
