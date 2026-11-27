@@ -71,6 +71,8 @@ const NO_BLINK = ['face_wink', 'face_happy_closed']
 const COLORED_EXPRESSIONS = new Set(['face_surprised', 'face_hearts', 'face_stars'])
 const MOUTH_TOP = 251 // Ortak 512 px yüz tuvalinde göz katmanlarının bittiği çizgi.
 const EYES_TOP = 188
+const HUG_FACE_BOTTOM = 312 // Ortak yüz tuvalinde kucak çiziminin üst sınırı.
+const HUG_BOTTOM = 0.975
 const BASE_URL = import.meta.env.BASE_URL
 
 const SIDE_PETS = new Set(['giraffe', 'elephant', 'flamingo', 'llama', 'camel', 'mammoth', 'sauropod', 'moose', 'whale'])
@@ -280,6 +282,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const pz = POSES[pose]
   const cradle = p && pose === 'hug' ? cradleFor(p.id) : undefined
   const fingerPerch = p?.id === 'parrot' && pose === 'hug' ? V?.parrotGrip : undefined
+  const sharedHug = !!p && pose === 'hug' && !cradle && !fingerPerch
   const live = !cradle && (alive ?? size >= 100)
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
@@ -291,7 +294,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const uriIris = useComp(split ? L.iris : [], px)
   const uriUp = useComp(split ? L.upper : [], px)
   const uriBlink = useComp(live ? L.blink : [], px)
-  const hands = !cradle && !fingerPerch && p && pose === 'hug' && V?.hands
+  const hands = sharedHug && V?.hands
     ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }, ...hugSleeves(L.garment)]
     : []
   const uriHands = useComp(hands, px)
@@ -378,7 +381,11 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const perch = p && pose === 'shoulder' ? SHOULDER_CONTACT[p.id] : undefined
   const perchX = kidLeft + 368 / 512 * scale
   const perchY = kidTop + ((SHOULDER_Y[currentId(eq, 'clothes', sd) ?? ''] ?? 364) + 3) / 512 * scale
-  const petWidth = perch?.width ?? (p?.id === 'giraffe' ? 0.51 : pz.width)
+  // Hayvan yüzün altına sığacak kadar küçülür. Eller aynı oranda ve bilek tabana sabit kalacak biçimde oturur.
+  const petBottom = sharedHug ? HUG_BOTTOM : pz.bottom
+  const hugWidth = Math.min(pz.width, (HUG_BOTTOM - kidTop - HUG_FACE_BOTTOM / 512 * scale) / 0.95)
+  const petWidth = perch?.width ?? (sharedHug ? hugWidth : p?.id === 'giraffe' ? 0.51 : pz.width)
+  const handScale = hugWidth / pz.width
   // Arkadaki hayvan başını dışa eğerken ağırlığı omuzun arkasında kalır.
   const peek = pose === 'peek'
   const petX = peek ? kidLeft + pz.x * scale : pz.x
@@ -389,7 +396,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     transformOrigin: `${perch.x / 2.56}% ${perch.y / 2.56}%`,
     transform: `rotate(${perch.angle ?? 12}deg)${perch.faceChild ? ' scaleX(-1)' : ''}`,
   } : {
-    left: (petX - petWidth / 2) * size, top: (pz.bottom - petWidth * 0.95) * size, width: petWidth * size,
+    left: (petX - petWidth / 2) * size, top: (petBottom - petWidth * 0.95) * size, width: petWidth * size,
     ...(peek ? { transform: 'rotate(24deg)', transformOrigin: '50% 95%' } : {}),
   }
   const petImg = p && (
@@ -432,7 +439,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
             {uriGrip && <img className="av-kid av-hands" src={uriGrip} alt="Parmağa tutunan papağan" draggable={false}
               style={{ left: 0, top: 0, width: '100%' }} />}
             {uriHands && <img className="av-kid av-hands" src={uriHands} alt="" draggable={false}
-              style={{ left: size * 0.10, top: size * 0.10, width: size * 0.90 }} />}
+              style={{ left: (pz.x + (0.10 - pz.x) * handScale) * size, bottom: 0, width: 0.90 * handScale * size }} />}
           </div>
         </div>
       )}

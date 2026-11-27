@@ -30,3 +30,4 @@ Yerleşik ImageGen aracı, şeffaf PNG ve ikinci ekran görüntüsü referansıy
 
 - [x] Kucak pozlarında uzun kolları giysiye uydur. Kep altında Afro hacmini, küçük kartlarda dinozor kapüşonu ile pelerinin okunurluğunu artır.
 - [x] Papağanın kucak pozunu parmağa bağla. Aslan, kaplan, leopar, kurt, kara kedi ve kanişe ayırt edici duruşlar ver.
+- [x] Ortak kucak pozunda hayvanı ve elleri ağız çizgisinin altında tut. Küçük kartlarda ve dükkân aynasında kontrol et.
