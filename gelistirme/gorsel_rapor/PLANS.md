@@ -32,3 +32,4 @@ Yerleşik ImageGen aracı, şeffaf PNG ve ikinci ekran görüntüsü referansıy
 - [x] Papağanın kucak pozunu parmağa bağla. Aslan, kaplan, leopar, kurt, kara kedi ve kanişe ayırt edici duruşlar ver.
 - [x] Ortak kucak pozunda hayvanı ve elleri ağız çizgisinin altında tut. Küçük kartlarda ve dükkân aynasında kontrol et.
 - [x] Başımda pozunda 11 hayvanın temasını saç veya şapkaya hizala. Seçili arka planı hayvanın arkasına kadar uzat.
+- [x] Omzumda pozunda pati ve pençeleri kıyafetin omuz çizgisine hizala. Süzülen türleri omzun yanında göster.

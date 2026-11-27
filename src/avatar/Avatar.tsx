@@ -270,11 +270,23 @@ const SHOULDER_CONTACT: Partial<Record<string, { x: number; y: number; width: nu
   wolf: { x: 74, y: 239, width: 0.27, angle: 8 },
   blackcat: { x: 135, y: 240, width: 0.28, angle: 7, faceChild: true },
   poodle: { x: 78, y: 240, width: 0.28, angle: 7 },
+  crab: { x: 72, y: 238, width: 0.25, angle: 7 },
 }
 
-// 512 px kıyafet katmanında omuz çizgisi (x=368). Kapüşon ve zırh daha yukarıda.
-const SHOULDER_Y: Partial<Record<string, number>> = {
-  clothes_tshirt: 367, clothes_hoodie: 349, clothes_knight: 347, clothes_dinosaur: 337,
+// Standart hayvan katmanları aynı taban çizgisine hizalı. Uçan ve yüzenler omuz yanında süzülür.
+const DEFAULT_SHOULDER_CONTACT = { x: 128, y: 237, width: 0.28, angle: 7, faceChild: false }
+const FLOATING_PETS = new Set(['bat', 'bee', 'butterfly', 'fish', 'blowfish', 'dolphin', 'octopus', 'jelly', 'ghost', 'sun', 'moon'])
+
+// 512 px kıyafet katmanında kumaşın ilk opak sırası. Dinozorda kol, kapüşonun dışındadır.
+const SHOULDER_SURFACE: Partial<Record<string, [x: number, y: number]>> = {
+  clothes_tshirt: [368, 367],
+  clothes_hoodie: [368, 349],
+  clothes_knight: [368, 347],
+  clothes_dinosaur: [376, 374],
+  clothes_astronaut: [368, 362],
+  clothes_blazer: [368, 363],
+  clothes_superhero: [368, 362],
+  clothes_winter_coat: [368, 363],
 }
 
 const EX = 0.62 // gözün en fazla kayması: görsel genişliğinin yüzdesi (512'de ~3 px)
@@ -391,9 +403,10 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     const m = `url(${import.meta.env?.BASE_URL ?? '/'}av/${V.eyes.open})`
     eyeBox.maskImage = m; eyeBox.WebkitMaskImage = m; eyeBox.maskSize = '100% 100%'; eyeBox.WebkitMaskSize = '100% 100%'
   }
-  const perch = p && pose === 'shoulder' ? SHOULDER_CONTACT[p.id] : undefined
-  const perchX = kidLeft + 368 / 512 * scale
-  const perchY = kidTop + ((SHOULDER_Y[currentId(eq, 'clothes', sd) ?? ''] ?? 364) + 3) / 512 * scale
+  const perch = p && pose === 'shoulder' && !FLOATING_PETS.has(p.id) ? SHOULDER_CONTACT[p.id] ?? DEFAULT_SHOULDER_CONTACT : undefined
+  const [shoulderX, shoulderY] = SHOULDER_SURFACE[currentId(eq, 'clothes', sd) ?? ''] ?? [368, 364]
+  const perchX = kidLeft + shoulderX / 512 * scale
+  const perchY = kidTop + (shoulderY + 3) / 512 * scale
   const headRestX = kidLeft + headSurfaceX / 512 * scale
   const headRestY = kidTop + crownTop + 0.008
   // Hayvan yüzün altına sığacak kadar küçülür. Eller aynı oranda ve bilek tabana sabit kalacak biçimde oturur.
