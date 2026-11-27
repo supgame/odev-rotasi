@@ -39,4 +39,6 @@ begin
 end;
 $$;
 
+grant execute on function public.equip_item(text, text, text) to anon;
+
 commit;

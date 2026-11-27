@@ -19,3 +19,5 @@ begin
   );
 end;
 $$;
+
+grant execute on function public.roster(text) to anon, authenticated;
