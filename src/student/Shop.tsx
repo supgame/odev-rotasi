@@ -9,7 +9,8 @@ import { Confetti } from './Confetti'
 import './shop.css'
 
 const REMOVABLE: Slot[] = ['hat', 'glasses', 'bg', 'pet']
-const FACE_SLOTS: Slot[] = ['fshape', 'face', 'mouth', 'eyes', 'ears', 'cheek']
+const FACE_SLOTS: Slot[] = ['fshape', 'face', 'mouth', 'nose', 'brow', 'eshape', 'eyes', 'ears', 'cheek']
+const BACKEND_GATED_FACE_SLOTS: Slot[] = ['mouth', 'nose', 'brow', 'eshape']
 const SECTIONS: { name: string; categories: { label: string; slot: Slot }[] }[] = [
   { name: 'Giyin', categories: [
     { label: 'Şapka', slot: 'hat' }, { label: 'Gözlük', slot: 'glasses' }, { label: 'Kıyafet', slot: 'clothes' },
@@ -213,7 +214,7 @@ export function Shop({ home, token, onBack, onChange }: {
                 aria-pressed={category === 'fshape' ? inFace : slot === category} onClick={() => selectSlot(category)}>{label}</button>)}
             </div>
             {inFace && <div className="shop-face-options" role="group" aria-label="Yüz ayrıntıları">
-              {FACE_SLOTS.filter((part) => part !== 'mouth' || items.some((item) => item.slot === part))
+              {FACE_SLOTS.filter((part) => !BACKEND_GATED_FACE_SLOTS.includes(part) || items.some((item) => item.slot === part))
                 .map((part) => <button type="button" key={part} aria-pressed={slot === part}
                   onClick={() => selectSlot(part)}>{SLOT_NAMES[part]}</button>)}
             </div>}
@@ -227,6 +228,8 @@ export function Shop({ home, token, onBack, onChange }: {
           </details>}
           {slot === 'face' && currentId(previewEq, 'mouth', seed) !== 'mouth_expression' &&
             <p className="shop-caption">Seçtiğin ağız korunur. İfadenin kendi ağzını görmek için Ağız bölümünde <b>İfadeye göre</b> seç.</p>}
+          {slot === 'face' && (currentId(previewEq, 'brow', seed) !== 'brow_expression' || currentId(previewEq, 'eshape', seed) !== 'eshape_expression') &&
+            <p className="shop-caption">Seçtiğin kaş ve göz biçimi ifadeden bağımsız kalır.</p>}
           {slot === 'pose' && <p className="shop-caption"><b>{petOf(animal, previewEq).name} için duruşlar</b></p>}
           {!items.length && <p className="center-text loading">Raflar diziliyor…</p>}
           <div className="shop-grid">

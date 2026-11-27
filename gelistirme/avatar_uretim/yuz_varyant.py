@@ -1,6 +1,6 @@
-"""Tek tabandan yüz çeşitleri üretir: 4 yüz şekli x 3 kulak boyu, ayrıca boyanabilir iris, yanak (allık/çil) ve göz kırpma katmanı.
+"""Yüz çeşitlerini üretir: 6 yüz şekli x 3 kulak boyu, ayrıca iris, yanak ve göz kırpma katmanı.
 
-Yeni ImageGen çizimi yok; hepsi kaynak/base_orijinal/ altındaki taban görselin geometrik dönüşümü.
+Taban kaynak/base_orijinal/, diğer yüz şekilleri kaynak/shape/ altındaki ImageGen çizimleridir.
 Saç/şapka katmanları alın ve tepe bölgesine hizalı olduğu için yalnız yanak-çene (y>=246) ve kulaklar oynatılır;
 ağız çevresi (merkezden 44 px) sabit kalır ki ifade katmanları kaymasın.
 Çalıştır: gelistirme/.venv/bin/python -B gelistirme/avatar_uretim/yuz_varyant.py
@@ -31,12 +31,16 @@ def tumsek(y, y0, y1, p=1.0):
 
 
 def olcek(sekil: str, y: float) -> float:
-    if sekil == 'round':   # dolgun yanak
-        return 1 + 0.14 * tumsek(y, 244, 314, 0.8)
-    if sekil == 'slim':    # ince, çeneye doğru daralan
-        return 1 - 0.19 * tumsek(y, 246, 318, 0.7) * min(1, (y - 246) / 40 + 0.3)
-    if sekil == 'square':  # geniş çene
-        return 1 + 0.16 * tumsek(y, 262, 318, 0.6)
+    if sekil == 'round':
+        return 1 + 0.32 * tumsek(y, 252, 304, 0.9)
+    if sekil == 'long':
+        return 1 - 0.22 * tumsek(y, 245, 302, 0.95)
+    if sekil == 'square':
+        return 1 + 0.54 * tumsek(y, 263, 306, 0.7)
+    if sekil == 'heart':
+        return 1 - 0.33 * tumsek(y, 258, 304, 1.0)
+    if sekil == 'wide':
+        return 1 + 0.35 * tumsek(y, 246, 291, 0.95)
     return 1.0
 
 
@@ -121,8 +125,10 @@ def main():
         cikis = max(1.0, ((sol - min(e[0] for e in ek)) + (max(e[1] for e in ek) - sag)) / 2)
         for kulak, hedef in HEDEF.items():
             F = hedef / cikis
-            t2 = satir_warp(t0, kulak_src(F, sol, sag))
-            m2 = satir_warp(m0, kulak_src(F, sol, sag))
+            kulak_warp = kulak_src(F, sol, sag)
+            yuz_warp = sekil_src(sekil)
+            t2 = satir_warp(satir_warp(t0, kulak_warp), yuz_warp)
+            m2 = satir_warp(satir_warp(m0, kulak_warp), yuz_warp)
             ad = f'base_{sekil}_{kulak}'
             unpremul(t2).save(AV / 'base' / f'{ad}.webp', 'WEBP', quality=92, method=6)
             Image.fromarray(np.clip(m2[..., 0], 0, 255).round().astype(np.uint8), 'L').convert('RGB').save(AV / 'base' / f'{ad}_mask.webp', 'WEBP', lossless=True)

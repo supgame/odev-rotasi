@@ -13,6 +13,7 @@ export interface Part {
   scaleY?: number
   clip?: string // poz katmanının 640 × 640 tuvalindeki kesim çizgisi
   sourceRows?: [number, number] // 512 px kaynak tuvalinde görünen dikey aralık
+  sourceColumns?: [number, number] // aynı tuvalde görünen yatay aralık
   metallic?: boolean
   iris?: string
   stronger?: boolean
@@ -107,17 +108,18 @@ export function compose(parts: Part[], n: number): Promise<string> {
         const ox = (n - size) / 2 + ((pt.dx ?? 0) * n) / 512
         const oy = (n - height) / 2 + ((pt.dy ?? 0) * n) / 512
         const layer = pt.color ? tinted(im, mk, pt, n) : im
-        const clipped = pt.clip || pt.sourceRows
+        const clipped = pt.clip || pt.sourceRows || pt.sourceColumns
         if (clipped) x.save()
         if (pt.clip) {
           const path = new Path2D()
           path.addPath(new Path2D(pt.clip), new DOMMatrix().scale(n / 640))
           x.clip(path)
         }
-        if (pt.sourceRows) {
-          const [top, bottom] = pt.sourceRows
+        if (pt.sourceRows || pt.sourceColumns) {
+          const [top, bottom] = pt.sourceRows ?? [0, 512]
+          const [left, right] = pt.sourceColumns ?? [0, 512]
           x.beginPath()
-          x.rect(ox, oy + top * height / 512, size, (bottom - top) * height / 512)
+          x.rect(ox + left * size / 512, oy + top * height / 512, (right - left) * size / 512, (bottom - top) * height / 512)
           x.clip()
         }
         x.drawImage(layer, ox, oy, size, height)

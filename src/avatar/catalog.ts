@@ -165,6 +165,24 @@ export const FACE_ITEMS: CatalogItem[] = [
     ['surprised', 'Yuvarlak ağız', 0, { sourceFace: 'face_surprised' }],
     ['tongue', 'Dil çıkarma', 0, { sourceFace: 'face_tongue' }],
   ]),
+  ...I('nose', [
+    ['original', 'Klasik burun', 0],
+    ['button', 'Yuvarlak burun', 0, { layer: 'features/nose_button.webp' }],
+    ['wide', 'Geniş burun', 0, { layer: 'features/nose_wide.webp' }],
+    ['straight', 'Kısa düz burun', 0, { layer: 'features/nose_straight.webp' }],
+  ]),
+  ...I('brow', [
+    ['expression', 'İfadeye göre', 0],
+    ['soft', 'Yumuşak kavis', 0, { layer: 'features/brow_soft.webp' }],
+    ['straight', 'Düz kaş', 0, { layer: 'features/brow_straight.webp' }],
+    ['bold', 'Kalın kaş', 0, { layer: 'features/brow_bold.webp' }],
+  ]),
+  ...I('eshape', [
+    ['expression', 'İfadeye göre', 0],
+    ['round', 'Yuvarlak göz', 0, { layer: 'features/eshape_round.webp', mask: 'features/eshape_round_mask.webp', ref: 81 }],
+    ['almond', 'Badem göz', 0, { layer: 'features/eshape_almond.webp', mask: 'features/eshape_almond_mask.webp', ref: 81 }],
+    ['gentle', 'Yumuşak göz', 0, { layer: 'features/eshape_gentle.webp', mask: 'features/eshape_gentle_mask.webp', ref: 81 }],
+  ]),
 ]
 
 // Arkadaşın duruşu: yalnız konum ve hareket (Avatar.tsx + index.css .pose-*).

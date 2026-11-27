@@ -33,7 +33,7 @@ const DEF: Partial<Record<ItemSlot, CatalogItem[]>> = {
   hcolor: FREE('hcolor'), clothes: FREE('clothes'), ccolor: FREE('ccolor'),
   fshape: FREE('fshape'), ears: [...ONE('ears_small'), ...ONE('ears_small'), ...ONE('ears_medium')], eyes: FREE('eyes'),
   cheek: [...ONE('cheek_none'), ...FREE('cheek')],
-  mouth: ONE('mouth_expression'),
+  mouth: ONE('mouth_expression'), nose: ONE('nose_original'), brow: ONE('brow_expression'), eshape: ONE('eshape_expression'),
 }
 function hash(s: string) {
   let h = 2166136261
@@ -71,6 +71,7 @@ const V = MANIFEST.variants
 const NO_BLINK = ['face_wink', 'face_happy_closed']
 const COLORED_EXPRESSIONS = new Set(['face_surprised', 'face_hearts', 'face_stars'])
 const MOUTH_TOP = 251 // Ortak 512 px yüz tuvalinde göz katmanlarının bittiği çizgi.
+const EYES_TOP = 188
 const BASE_URL = import.meta.env.BASE_URL
 
 const SIDE_PETS = new Set(['giraffe', 'elephant', 'flamingo', 'llama', 'camel', 'mammoth', 'sauropod', 'moose', 'whale'])
@@ -124,7 +125,16 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   const sub = (t: string) => t.replace('{shape}', shape).replace('{ears}', ears)
   const back = part(hair, hat ? 'backUnderHat' : 'back', hcol)
   const dx = V?.hairBackDx?.[shape] ?? 0 // dar yüzde at kuyruğu yanağa yaklaşsın
-  const moving = !!V?.eyes && !V.eyes.ownEyes.includes(faceIt?.id ?? '')
+  const brow = part(pick(eq, 'brow', seed)?.raw, null)
+  const nose = part(pick(eq, 'nose', seed)?.raw, null)
+  const openEye = faceIt?.id === 'face_happy_closed' ? null : part(pick(eq, 'eshape', seed)?.raw, null, eyes)
+  const wink = faceIt?.id === 'face_wink'
+  const movingIris = !!V?.eyes && !openEye && !V.eyes.ownEyes.includes(faceIt?.id ?? '')
+  const moving = movingIris || !!openEye
+  const clearSkin = (feature: string): Part => ({ src: `features/clear_${feature}.webp`, color: skin, ref: b.skinRef })
+  // Göz kırpma ifadesi seçildiyse biçim yalnız açık kalan göze uygulanır.
+  const openColumns: [number, number] | undefined = wink ? [256, 512] : undefined
+  const clearEyes = openEye ? { ...clearSkin('eyes'), sourceColumns: openColumns } : null
   const P = (x: Part | null | undefined) => (x && x.src ? [x] : [])
   const backHair = [
     ...P(back && dx ? { ...back, dx } : back),
@@ -132,18 +142,29 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   ]
   const head = [
     { src: V ? sub(V.base) : b.layer, mask: V ? sub(V.mask) : b.skinMask, ref: b.skinRef, color: skin },
-    ...P(V && eyes ? { src: V.iris.layer, mask: V.iris.mask, ref: V.iris.ref, color: eyes } : null),
+    ...P(V && eyes && !openEye ? { src: V.iris.layer, mask: V.iris.mask, ref: V.iris.ref, color: eyes } : null),
   ]
   const lowerBase = [...backHair, ...head]
   const expression = part(face, null, skin)
   if (expression && eyes && COLORED_EXPRESSIONS.has(faceIt?.id ?? '')) expression.iris = eyes
-  if (expression && overrideMouth) expression.sourceRows = [0, MOUTH_TOP]
+  const expressionTop = brow ? EYES_TOP : 0
+  const expressionBottom = overrideMouth ? MOUTH_TOP : 512
+  const expressionLayers: Part[] = !expression ? [] : openEye && !wink ? [
+    ...(brow ? [] : [{ ...expression, sourceRows: [0, EYES_TOP] as [number, number] }]),
+    { ...expression, sourceRows: [249, expressionBottom] },
+  ] : [{ ...expression, sourceRows: [expressionTop, expressionBottom] }]
   const mouthLayer = overrideMouth && mouth.raw.sourceFace ? part(ITEM.get(mouth.raw.sourceFace)?.raw, null, skin) : null
   if (mouthLayer) mouthLayer.sourceRows = [MOUTH_TOP, 512]
   const deeperSkin = ['skin_brown', 'skin_tan', 'skin_dark'].includes(currentId(eq, 'skin', seed) ?? '')
   const mid = [
+    ...P(brow && clearSkin('brows')),
+    ...P(nose && clearSkin('nose')),
     ...P(V && cheek && V.cheek[cheek] ? { src: V.cheek[cheek], stronger: deeperSkin } : null),
-    ...P(expression),
+    ...expressionLayers,
+    ...P(clearEyes),
+    ...P(openEye && { ...openEye, sourceColumns: openColumns }),
+    ...P(brow),
+    ...P(nose && { ...nose, color: skin, ref: b.skinRef }),
     ...P(mouthLayer),
   ]
   const glasses = part(gl, null, gl?.color)
@@ -161,9 +182,11 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
     all: cradle
       ? cradleParts(cradle, backHair, [...head, ...mid], front, tshirt ? null : garment, skin, shirtDye)
       : [...lowerBase, ...mid, ...upper],
-    lower: moving && V.eyes ? [...lowerBase, { src: V.eyes.layer }, ...mid] : [...lowerBase, ...mid],
-    iris: moving && ir ? [eyes ? { src: ir.layer, mask: ir.mask, ref: ir.ref, color: eyes } : { src: ir.layer }] : [],
-    blink: V && !NO_BLINK.includes(faceIt?.id ?? '') ? [{ src: V.blink.layer, mask: V.blink.mask, ref: V.blink.ref, color: skin }] : [],
+    lower: movingIris && V?.eyes ? [...lowerBase, { src: V.eyes.layer }, ...mid] : [...lowerBase, ...mid],
+    iris: movingIris && ir ? [eyes ? { src: ir.layer, mask: ir.mask, ref: ir.ref, color: eyes } : { src: ir.layer }] : [],
+    blink: V && !NO_BLINK.includes(faceIt?.id ?? '') ? [
+      ...P(clearEyes), { src: V.blink.layer, mask: V.blink.mask, ref: V.blink.ref, color: skin },
+    ] : [],
     upper,
     moving,
     skin,
@@ -421,12 +444,7 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
     const samplePet = availablePoses(pet.id).includes(id) ? pet.id : id === 'pose_head' ? 'hedgehog' : 'fox'
     return <Avatar animal={samplePet} equipped={{ ...eq, pet: undefined }} seed={seed} size={84} pet alive={false} />
   }
-  if (['hair', 'hcolor', 'ears', 'fshape'].includes(slot)) eq.hat = undefined
-  if (['face', 'skin', 'ears', 'fshape', 'cheek', 'eyes'].includes(slot)) {
-    eq.hair = 'hair_short'
-    eq.hat = undefined
-    eq.glasses = undefined
-  }
-  if (slot === 'eyes') eq.face = 'face_smile'
-  return <Avatar animal={animal} equipped={eq} seed={seed} size={slot === 'mouth' ? 110 : 84} pet={false} alive={false} />
+  const portrait = ['face', 'mouth', 'skin', 'ears', 'fshape', 'cheek', 'eyes', 'eshape', 'brow', 'nose'].includes(slot)
+  const size = slot === 'fshape' ? 122 : portrait ? 112 : 84
+  return <Avatar animal={animal} equipped={eq} seed={seed} size={size} pet={false} alive={false} />
 }

@@ -190,8 +190,17 @@ export const mockApi: Api = {
   async equip(token, slot, itemId) {
     const db = load()
     const st = bySession(db, token)
-    if (itemId && !db.purchases.some((p) => p.student_id === st.id && p.item_id === itemId)) throw new Error('YOK')
-    st.equipped = { ...st.equipped, [slot]: itemId ?? undefined }
+    if (!SHOP_ITEMS.some((item) => item.slot === slot)) throw new Error('YUVA_GECERSIZ')
+    if (itemId) {
+      const item = SHOP_ITEMS.find((i) => i.id === itemId)
+      if (!item || item.slot !== slot || !db.purchases.some((p) => p.student_id === st.id && p.item_id === itemId)) {
+        throw new Error('ESYA_TAKILAMAZ')
+      }
+      st.equipped = { ...st.equipped, [slot]: itemId }
+    } else {
+      const { [slot]: _removed, ...equipped } = st.equipped
+      st.equipped = equipped
+    }
     save(db)
     return wait(undefined)
   },

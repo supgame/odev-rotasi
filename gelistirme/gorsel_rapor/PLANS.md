@@ -18,3 +18,12 @@
 Yerleşik ImageGen aracı, şeffaf PNG ve ikinci ekran görüntüsü referansıyla çalıştırıldı. Projede web için küçültülen WebP kullanılıyor. Kaydedilen çizim `public/av/pose/rabbit-cradle.webp`.
 
 > Create one polished transparent PNG character illustration asset for a Turkish primary-school homework game. Children's picture book / crisp 2D cartoon with deep brown ink contours, softly painted gradients, large warm eyes, and clean shapes matching the supplied UI reference. Same child visual identity as reference: warm dark brown skin, short chocolate side-swept hair, bright brown eyes, grey blue crew-neck shirt. Same little cream rabbit with pink inner ears. Redesign the composition entirely as an integrated waist-up/below-chest posed illustration. Child physically cradles rabbit just below the child's chin and slightly toward viewer's right. Show bent supporting arm beneath rabbit and a clearly visible foreground hand resting over rabbit's lower body with warm contact shadow at their meeting. Rabbit's ears can rise by cheek but stay clear of eyes and mouth. Both friendly, child face and eyebrows readable. Center the complete tightly unified silhouette with slight padding in square format, include full head and ears, crop at below chest with rounded outer shirt hem rather than abrupt ground strip. Plain true alpha everywhere outside character. No stand, frame, letters, additional objects, or ground shadow.
+
+## Yüz düzenleyici
+
+- [x] Yerleşik ImageGen ile üç burun, üç kaş ve üç göz biçimi üret. Bunları mevcut ten paleti, iris rengi ve ifade katmanlarıyla hizala.
+- [x] Yeni ücretsiz seçenekleri dükkâna bağla. 0012, tek seferlik kurulum ve demo kataloğunda aynı yuvaları doğrula.
+- [x] Yanak ve çene hatlarını belirginleştir. Küçük yüz kartlarında oyuncunun saç, şapka ve gözlüğünü göster.
+- [x] 360 × 640 ve 1440 × 900 yerel Chrome demolarında parçaları tek tek dene, geri al, tak ve yenile. Yerel PostgreSQL kurulumunu ve geçişi kontrol et.
+
+Sıradaki aşama uzun kollu kucak çizimleri, kep altında Afro hacmi ve dinozor kapüşonu ile pelerinin okunurluğu.
