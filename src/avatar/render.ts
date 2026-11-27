@@ -7,6 +7,7 @@ export interface Part {
   mask?: string
   ref?: number
   color?: string // 'rrggbb'
+  dx?: number // yatay kaydırma, 512 px ölçeğinde
 }
 
 const BASE = `${import.meta.env?.BASE_URL ?? '/'}av/`
@@ -69,8 +70,9 @@ export function compose(parts: Part[], n: number): Promise<string> {
       const x = c.getContext('2d')!
       x.imageSmoothingQuality = 'high'
       for (const { pt, im, mk } of loaded) {
-        if (mk) x.drawImage(tinted(im, mk, pt.ref ?? 128, pt.color!, n), 0, 0)
-        else x.drawImage(im, 0, 0, n, n)
+        const ox = ((pt.dx ?? 0) * n) / 512
+        if (mk) x.drawImage(tinted(im, mk, pt.ref ?? 128, pt.color!, n), ox, 0)
+        else x.drawImage(im, ox, 0, n, n)
       }
       const uri = c.toDataURL('image/webp', 0.92)
       done.set(key, uri)

@@ -11,7 +11,7 @@ export function Gallery() {
       <p className="muted">{SHOP_ITEMS.length} eşya. Her öğrenci ilk gün kendine özgü bir görünümle başlar, sonra dükkandan değiştirir.</p>
       <h2>Canlı hâli (dokun)</h2>
       <div className="gallery">
-        {['side', 'shoulder', 'peek', 'head'].map((p, k) => <div key={p} className="g-cell"><Avatar animal={SPECIES[k * 7].id} seed={'canli' + k} equipped={{ pose: 'pose_' + p }} size={130} /><span>{p}</span></div>)}
+        {['side', 'shoulder', 'hug', 'peek', 'head'].map((p, k) => <div key={p} className="g-cell"><Avatar animal={SPECIES[k * 7].id} seed={'canli' + k} equipped={{ pose: 'pose_' + p, fshape: 'fshape_' + ['round', 'long', 'square', 'heart', 'wide'][k] }} size={130} /><span>{p}</span></div>)}
       </div>
       <h2>Başlangıç görünümleri</h2>
       <div className="gallery">

@@ -102,20 +102,23 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 .av-kid { position: absolute; left: 3%; width: 94%; height: auto; pointer-events: none; user-select: none; }
 .av-free .av-kid { left: 0; top: 0; width: 100%; }
 .av-body { position: absolute; inset: 0; transform-origin: 50% 100%; }
-.av-pet { position: absolute; left: -16%; bottom: -8%; width: 52%; height: auto; z-index: 1; pointer-events: none;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); animation: petbob 2.2s ease-in-out infinite; }
-/* arkadaşın pozları */
-.av-pet.pose-shoulder { left: auto; right: -6%; bottom: 17%; width: 42%; animation: petsway 2.6s ease-in-out infinite; transform-origin: 50% 100%; }
-.av-pet.pose-head { left: 28%; bottom: auto; top: -42%; width: 44%; z-index: 2; animation: petwobble 3s ease-in-out infinite; transform-origin: 50% 100%; }
-.av-pet.pose-peek { left: 58%; bottom: auto; top: 34%; width: 54%; z-index: 0; filter: none; animation: petpeek 4.2s ease-in-out infinite; transform-origin: 30% 100%; }
-@keyframes petsway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg) translateY(-3%); } }
+.av-head { position: absolute; inset: 0; transform-origin: 50% 80%; transform: translateX(var(--tx, 0)) rotate(var(--tl, 0deg)); transition: transform .45s cubic-bezier(.3,.7,.4,1); }
+.av-eyes { pointer-events: none; }
+.av-iris { position: absolute; inset: 0; width: 100%; height: 100%; transform: translate(var(--ex, 0), var(--ey, 0)); transition: transform .16s ease-out; }
+.av-pet { position: absolute; bottom: auto; height: auto; z-index: 1; pointer-events: none; transform-origin: 50% 100%;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,.28)); animation: petidle 3.4s ease-in-out infinite; }
+.av-pet.pose-peek { z-index: 0; filter: none; animation: petpeek 4.2s ease-in-out infinite; }
+.av-pet.pose-head { z-index: 2; animation: petwobble 3s ease-in-out infinite; }
+.av-hands { z-index: 2; transform: translateY(-15%) scale(.74); transform-origin: 50% 80%; } /* eller 512 tuvalde göğüs altında çizildi; çerçevede omuz hizasına çıkar */
+.avatar.pet-hi .av-pet { animation: petjump .7s cubic-bezier(.3,1.5,.5,1); }
+@keyframes petidle { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.02, .97) translateY(1%); } }
 @keyframes petwobble { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-6deg); } 60% { transform: rotate(5deg) translateY(-4%); } }
-@keyframes petpeek { 0%,100% { transform: rotate(14deg) translate(8%, 6%); } 40%,70% { transform: rotate(4deg) translate(-4%, -6%); } }
-/* canlı avatar: nefes + göz kırpma (yalnız büyük avatarlarda) */
+@keyframes petpeek { 0%,100% { transform: rotate(12deg) translate(8%, 8%); } 40%,70% { transform: rotate(3deg) translate(-3%, -4%); } }
+/* canlı avatar: nefes, bakınma, göz kırpma (yalnız büyük avatarlarda) */
 .avatar.alive .av-body { animation: breathe 3.4s ease-in-out infinite; animation-delay: var(--breath-delay, 0s); }
-@keyframes breathe { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.022); } }
-.av-blink { opacity: 0; animation: blink 4.7s steps(1, end) infinite; animation-delay: var(--blink-delay, 0s); }
-@keyframes blink { 0% { opacity: 0; } 94% { opacity: 1; } 96.5% { opacity: 0; } }
+@keyframes breathe { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.008, 1.016); } }
+.av-blink { opacity: 0; }
+.avatar.blinking .av-blink { opacity: 1; }
 /* dokununca zıpla, arkadaşı da zıplasın, kalpler uçsun */
 .avatar { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .avatar.tap .av-body { animation: kidjump .6s cubic-bezier(.3,1.5,.5,1); }

@@ -124,6 +124,9 @@ export const MANIFEST = M as unknown as {
     iris: { layer: string; mask: string; ref: number }
     cheek: Record<string, string>
     blink: { layer: string; mask: string; ref: number }
+    eyes?: { layer: string; open: string; iris: { layer: string; mask: string; ref: number }; ownEyes: string[] }
+    hands?: { layer: string; mask: string; ref: number }
+    hairBackDx?: Record<string, number>
   }
 }
 
@@ -140,7 +143,7 @@ const I = (slot: ItemSlot, list: [string, string, number, Raw?][]): CatalogItem[
 
 // Yüz çeşitleri: tek tabanın dönüşümleri (gelistirme/avatar_uretim/yuz_varyant.py). Hepsi bedava, ilk gün rastgele dağılır.
 export const FACE_ITEMS: CatalogItem[] = [
-  ...I('fshape', [['oval', 'Oval', 0], ['round', 'Yuvarlak', 0], ['slim', 'İnce', 0], ['square', 'Köşeli', 0]]),
+  ...I('fshape', [['oval', 'Oval', 0], ['round', 'Tombul', 0], ['long', 'Uzun', 0], ['square', 'Köşeli', 0], ['heart', 'Sivri çene', 0], ['wide', 'Geniş', 0]]),
   ...I('ears', [['small', 'Küçük', 0], ['medium', 'Orta', 0], ['big', 'Kepçe', 0]]),
   ...I('eyes', [
     ['brown', 'Kahverengi', 0], ['dark', 'Koyu', 0, { color: '5a3420' }], ['hazel', 'Ela', 0, { color: '8c6d35' }],
@@ -152,7 +155,7 @@ export const FACE_ITEMS: CatalogItem[] = [
 
 // Arkadaşın duruşu: yalnız konum ve hareket (Avatar.tsx + index.css .pose-*).
 export const POSE_ITEMS: CatalogItem[] = I('pose', [
-  ['side', 'Yanımda', 0], ['shoulder', 'Omzumda', 0], ['peek', 'Arkamdan bakıyor', 0], ['head', 'Başımda', 10],
+  ['side', 'Yanımda', 0], ['shoulder', 'Omzumda', 0], ['hug', 'Kucağımda', 0], ['peek', 'Arkamdan bakıyor', 0], ['head', 'Başımda', 10],
 ])
 
 export const ITEMS: CatalogItem[] = [

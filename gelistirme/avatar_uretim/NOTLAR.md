@@ -191,3 +191,49 @@ Her çağrı aşağıdaki ortak metinle başladı. `10.png` için `exactly nine`
 ## Faz 5 · Yüz çeşitleri, poz, animasyon (27 Kas 2026)
 
 Yeni çizim yok; `yuz_varyant.py` orijinal tabandan (kaynak/base_orijinal/) 4 yüz şekli (oval, yuvarlak, ince, köşeli) x 3 kulak (küçük, orta, kepçe) taban üretir. Yanak-çene yalnız y>=246'da ve merkezden 44 px dışında oynar, ifade katmanları kaymaz. Ayrıca boyanabilir iris (göz rengi), yanak katmanları (allık, çil) ve göz kırpma katmanı (mutlu kapalı gözlerin üst yarısı). Manifest `variants` bölümüne yazar. Yüz şekli, kulak, göz rengi, yanak ve arkadaşın pozu ilk gün öğrenciye seed'den rastgele dağılır. Nefes ve göz kırpma yalnız 100 px üstü avatarlarda (GPT istişaresi: listede 20 animasyon telefonu yorar).
+
+
+## Faz 6 · Yüz şekilleri ve kucakta tutan eller
+
+Yerleşik ImageGen, pilotun `../pilot_avatar/kaynak/imagegen/base.png` portresini referans alarak beş yüzü ve iki eli gösteren tek katmanı ayrı çağrılarda çizdi. Altı ham PNG `kaynak/imagegen/faz6/` klasöründe. Yüz katmanları `public/av/base/shape_<id>.webp`, el katmanı `public/av/pose/hands.webp` yolunda. Katmanlar 512 × 512 RGBA, WebP kalite 92. Eşleşen `_mask.webp` dosyaları kayıpsız.
+
+- Yüzler iki göz ve ağızdan hizalandı. Alın, yüz çizgileri, boyun ve tişört `kaynak/base_orijinal/` içindeki 512 px tabandan geri kopyalandı. Geçişler yaklaşık 7 px. Göz kutusunun kulaklara taşan yan kenarlarında eski kulakların izini engellemek için geçiş yeni kulak ve yanak konturunu izliyor. Piksel kopyası WebP kodlamasından önce alındı.
+- Katalog tabanının `skinRef` değeri **163.7334**. Kodlanmış yüzler ve ten maskelerinden ölçülen referanslar `round` 164.5132, `long` 165.1164, `square` 164.1902, `heart` 163.7820 ve `wide` 162.7327. Beş yüz ortak `skinRef` ile boyanabilir. El katmanının kendi `ref` değeri **157.0464**.
+- `kaynak/onizleme_faz6.png` orijinal tabanı ve beş yeni yüzü açık ve koyu tende, kısa saç ve at kuyruğuyla, 256 ve 96 px olarak gösterir. Kedi göğüste, eller kedinin önünde birleştirildi.
+- At kuyruğunun arka katmanının kökü küçük kulakların altında görünür hâle geldiği için önizlemede arka katman şu miktarlarda sola alındı. 512 px kanvasta yatay kaydırma miktarları `round` 5 px, `long` 13 px, `square` 7 px, `heart` 10 px, `wide` 5 px. Ön saç katmanı aynı koordinatlarda kullanılır.
+
+### ImageGen istemleri
+
+Altı çağrıda da `transparent_background=true` kullanıldı. Beş yüz istemi aşağıdaki ortak metin ile ilgili şekil paragrafının birleşimidir.
+
+**Ortak yüz istemi**
+
+> Use case: precise-object-edit. Input image: the existing transparent 2D avatar portrait is the edit target. Produce a tightly registered replacement portrait on the same square canvas, genuine transparent alpha, same framing, cel illustration, line weight, warm orange skin and light direction. Lock the forehead and scalp above y=190, eyes and eyebrows, nose and mouth coordinates and dimensions, shirt, neck position and shoulder framing. Pixel coordinates refer to the inherited image on a 512x512 grid. Edit ONLY cheeks, jawline, chin and ears. Both ears should be small natural ears tucked close to the face, around y=223–262 (much smaller and less protruding than the input). Make the lower-face outline read unmistakably at 96x96. The upper forehead remains the exact original silhouette, with a smooth natural transition into the new cheeks below the outer eye corners. Short jaw shapes need natural continuous neck skin behind the jaw, matching the original neck from y=318 down. Keep the mouth on the face with room underneath. No hair, accessories, text, sex/gender cues, new clothing or marks.
+
+**`round.png`**
+
+> Shape ROUND: distinctly baby-faced pillowy full round cheeks, strongly bowed out below eyes, rounded jaw with a curved generous chin, contour visibly fuller than reference and widest at y=255–273. Chin low point y=310–315 and width at y=295 around 165px; strongly circular lower shape.
+
+**`long.png`**
+
+> Shape LONG: notably slender and vertically elongated lower face, like a tall oval, long tapering sides and a slim elongated softly rounded chin reaching toward y=324. Cheeks are narrow and relatively straight below the eyes. Lower face is visibly slim, especially around y=284–312. Keep enough space next to eyes and mouth so contours do not overlap them.
+
+**`square.png`**
+
+> Shape SQUARE: distinctly broad squared jaw with visually clear rounded angular corners around y=288 and a broad nearly horizontal bottom of chin at y=311–315, straight broad side cheeks. An obvious blocky jaw compared to the input, while still a cute child.
+
+**`heart.png`**
+
+> Shape HEART: strong wide cheekbone shoulders next to and just below the eyes, then dramatically diagonal tapered lower cheeks leading to a small sharply pointed but softly finished chin at y=316–320. The narrow point is obvious and visually distinct. Avoid squaring off the chin.
+
+**`wide.png`**
+
+> Shape WIDE: very broad squat face contour, width emphasized low on either side of the mouth, shallow broadly rounded chin and dramatically short height below the mouth. Chin bottom y=292–296, wide at y=281, curves rapidly into a low gently rounded horizontal arc, almost flat bottom without any square angles. Narrow neck skin becomes visible directly below this short jaw.
+
+**`hands.png`**
+
+> Use case: illustration-story, transparent compositing asset for a 2D layered avatar. The input avatar is only a style, scale and positioning reference. Draw precisely two small chubby children's hands with a little wrist each, in the same softly shaded semi-gloss 2D cartoon illustration and dark thin warm brown outlines. Draw the two hands in warm tawny orange skin matching the reference; these will be converted to grayscale skin. Front view. Both hands cup the sides and bottom of the same invisible small upright animal held against the chest. Empty transparent canvas everywhere else including all space at the top. The imaginary animal occupies x=181 to 331, is about 150px tall, centered at x=256 on a virtual 512x512 square canvas, with its feet around y=455. Each hand wraps partly inward in front of its invisible lower sides, with curved rounded separated fingertips. Outer hand boundaries around x=149 and x=363, highest fingertips around y=361–380. Palms curve under the animal at about y=431–467. Wrists point down and continue to the lower canvas edge, about x=165–205 and x=307–347. Preserve the central transparent gap between the two hands. Show two natural gripping hands, genuine alpha, no person, animal, sleeves, arms, shirt, scene, text or placement guides.
+
+### Faz 6 bağlama (Claude, 27 Kas 2026)
+
+Codex'in yüzleri `kaynak/shape/` altına taşındı; `yuz_varyant.py` oval (orijinal) + 5 yüzden 3'er kulak boyu (taşma 8/13/19 px) üretir. `goz_katmani.py` gözü hareketli yapar: göz açıklığı maskesi (`base/eye_open.webp`), açıklık içi kayan katman (`base/iris_full.webp`, göz akı + iris birlikte kayar, halka izi kalmaz), altta göz akı yaması (`base/eyes_empty.webp`). Kendi gözünü çizen ifadelerde (manifest `variants.eyes.ownEyes`) göz kaymaz. `sac_dolgu.py` her saç için yüzün arkasına koyu saç dolgusu üretir (dar yüzde arka plan görünmesin). Sırayla: yuz_varyant → goz_katmani → sac_dolgu, sonra manifest'e `hands` ve `hairBackDx` (Codex'in at kuyruğu kaydırmaları) elle.

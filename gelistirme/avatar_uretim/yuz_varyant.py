@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw, ImageFilter
 KOK = Path(__file__).resolve().parents[2]
 AV = KOK / 'public/av'
 YEDEK = Path(__file__).resolve().parent / 'kaynak/base_orijinal'
+KAYNAK_SEKIL = Path(__file__).resolve().parent / 'kaynak/shape'  # Faz 6 ImageGen yüzleri (Codex)
 CX = 256.0
 
 # ---- kulak: başın kenarından dışarı taşan kısım F oranına iner ----
@@ -52,9 +53,9 @@ def satir_warp(a, src_of_x):
     return out
 
 
-def kulak_src(F):
+def kulak_src(F, SOL=SOL, SAG=SAG):
     def f(y, xs):
-        if F >= 1 or y < KY0 or y > KY1:
+        if abs(F - 1) < 0.02 or y < KY0 or y > KY1:
             return None
         k = float(tumsek(y, KY0, KY1, 0.6))
         s = 1 - (1 - F) * k
@@ -101,18 +102,34 @@ def main():
     maske_im = Image.open(YEDEK / 'base_mask.webp')
     maske = np.array(maske_im.convert('L')).astype(np.float64)[..., None]
 
-    for kulak, F in KULAK.items():
-        t1 = satir_warp(taban, kulak_src(F))
-        m1 = satir_warp(maske, kulak_src(F))
-        for sekil in ('oval', 'round', 'slim', 'square'):
-            t2 = satir_warp(t1, sekil_src(sekil))
-            m2 = satir_warp(m1, sekil_src(sekil))
+    # Yüz şekilleri: oval = orijinal taban, diğerleri Faz 6 ImageGen çizimleri (public/av/base/shape_<id>.webp).
+    # Kulak boyu: başın kenarından taşan kısım hedef piksel kadar olacak şekilde kulak bükülür (sıkıştırma ya da genişletme).
+    HEDEF = {'small': 8.0, 'medium': 13.0, 'big': 19.0}
+    for sekil in ('oval', 'round', 'long', 'square', 'heart', 'wide'):
+        if sekil == 'oval':
+            t0, m0 = taban, maske
+        else:
+            t0 = premul(Image.open(KAYNAK_SEKIL / f'shape_{sekil}.webp'))
+            m0 = np.array(Image.open(KAYNAK_SEKIL / f'shape_{sekil}_mask.webp').convert('L')).astype(np.float64)[..., None]
+        alfa = t0[..., 3]
+        def kenar(y):
+            r = np.where(alfa[y] > 40)[0]
+            return r.min(), r.max()
+        ust, alt = kenar(KY0 - 2), kenar(KY1 - 2)
+        sol, sag = (ust[0] + alt[0]) / 2, (ust[1] + alt[1]) / 2
+        ek = [kenar(y) for y in range(KY0 + 8, KY1 - 10)]
+        cikis = max(1.0, ((sol - min(e[0] for e in ek)) + (max(e[1] for e in ek) - sag)) / 2)
+        for kulak, hedef in HEDEF.items():
+            F = hedef / cikis
+            t2 = satir_warp(t0, kulak_src(F, sol, sag))
+            m2 = satir_warp(m0, kulak_src(F, sol, sag))
             ad = f'base_{sekil}_{kulak}'
             unpremul(t2).save(AV / 'base' / f'{ad}.webp', 'WEBP', quality=92, method=6)
             Image.fromarray(np.clip(m2[..., 0], 0, 255).round().astype(np.uint8), 'L').convert('RGB').save(AV / 'base' / f'{ad}_mask.webp', 'WEBP', lossless=True)
             if (sekil, kulak) == ('oval', 'small'):  # eski yol da yeni varsayılanı göstersin
                 shutil.copy2(AV / 'base' / f'{ad}.webp', AV / 'base' / 'base.webp')
                 shutil.copy2(AV / 'base' / f'{ad}_mask.webp', AV / 'base' / 'base_mask.webp')
+        print(sekil, 'kenar', sol, sag, 'kulak çıkışı', round(cikis, 1))
 
     # ---- iris: göz bebeği çevresindeki doygun kahve pikseller, boyanabilir ----
     o = np.array(Image.open(YEDEK / 'base.webp').convert('RGBA')).astype(np.float64)
@@ -163,11 +180,11 @@ def main():
     # ---- göz kırpma: mutlu kapalı göz ifadesinin yalnız göz kısmı ----
     for s, d in (('happy_closed.webp', 'blink.webp'), ('happy_closed_mask.webp', 'blink_mask.webp')):
         im = Image.open(AV / 'face' / s)
-        a = np.array(im); a[252:] = 0
+        a = np.array(im); a[252:] = 0; a[:189] = 0  # yalnız göz kapakları: kaşlar oynamasın
         Image.fromarray(a, im.mode).save(AV / 'face' / d, 'WEBP', lossless=True)
 
     man = json.loads((AV / 'manifest.json').read_text())
-    man['variants'] = {
+    man['variants'] = {**man.get('variants', {}),
         'base': 'base/base_{shape}_{ears}.webp', 'mask': 'base/base_{shape}_{ears}_mask.webp',
         'iris': {'layer': 'base/iris.webp', 'mask': 'base/iris_mask.webp', 'ref': round(iris_ref, 4)},
         'cheek': {k: f'base/cheek_{k}.webp' for k in ('blush', 'freckles', 'both')},

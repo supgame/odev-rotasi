@@ -196,15 +196,21 @@
             "front": "hair/short_front.webp",
             "frontUnderHat": "hair/short_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/short_fill.webp",
+            "fillUnderHat": "hair/short_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/short_front_mask.webp",
-            "frontUnderHat": "hair/short_front_hat_mask.webp"
+            "frontUnderHat": "hair/short_front_hat_mask.webp",
+            "fill": "hair/short_fill_mask.webp",
+            "fillUnderHat": "hair/short_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 49.2634,
-            "frontUnderHat": 35.0829
+            "frontUnderHat": 35.0829,
+            "fill": 17.98,
+            "fillUnderHat": 17.36
           }
         },
         {
@@ -215,19 +221,25 @@
             "back": "hair/ponytail_back.webp",
             "front": "hair/ponytail_front.webp",
             "backUnderHat": "hair/ponytail_back_hat.webp",
-            "frontUnderHat": "hair/ponytail_front_hat.webp"
+            "frontUnderHat": "hair/ponytail_front_hat.webp",
+            "fill": "hair/ponytail_fill.webp",
+            "fillUnderHat": "hair/ponytail_hat_fill_hat.webp"
           },
           "mask": {
             "back": "hair/ponytail_back_mask.webp",
             "front": "hair/ponytail_front_mask.webp",
             "backUnderHat": "hair/ponytail_back_hat_mask.webp",
-            "frontUnderHat": "hair/ponytail_front_hat_mask.webp"
+            "frontUnderHat": "hair/ponytail_front_hat_mask.webp",
+            "fill": "hair/ponytail_fill_mask.webp",
+            "fillUnderHat": "hair/ponytail_hat_fill_hat_mask.webp"
           },
           "ref": {
             "back": 48.9021,
             "front": 56.2769,
             "backUnderHat": 48.9021,
-            "frontUnderHat": 38.5097
+            "frontUnderHat": 38.5097,
+            "fill": 21.08,
+            "fillUnderHat": 21.08
           }
         },
         {
@@ -238,15 +250,21 @@
             "front": "hair/curly_front.webp",
             "frontUnderHat": "hair/curly_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/curly_fill.webp",
+            "fillUnderHat": "hair/curly_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/curly_front_mask.webp",
-            "frontUnderHat": "hair/curly_front_hat_mask.webp"
+            "frontUnderHat": "hair/curly_front_hat_mask.webp",
+            "fill": "hair/curly_fill_mask.webp",
+            "fillUnderHat": "hair/curly_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 74.783,
-            "frontUnderHat": 50.4912
+            "frontUnderHat": 50.4912,
+            "fill": 17.98,
+            "fillUnderHat": 17.98
           }
         },
         {
@@ -257,15 +275,21 @@
             "front": "hair/afro_front.webp",
             "frontUnderHat": "hair/afro_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/afro_fill.webp",
+            "fillUnderHat": "hair/afro_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/afro_front_mask.webp",
-            "frontUnderHat": "hair/afro_front_hat_mask.webp"
+            "frontUnderHat": "hair/afro_front_hat_mask.webp",
+            "fillUnderHat": "hair/afro_hat_fill_hat_mask.webp",
+            "fill": "hair/afro_fill_mask.webp"
           },
           "ref": {
             "front": 67.3015,
-            "frontUnderHat": 34.218
+            "frontUnderHat": 34.218,
+            "fillUnderHat": 14.26,
+            "fill": 14.26
           }
         },
         {
@@ -276,15 +300,21 @@
             "front": "hair/straight_long_front.webp",
             "frontUnderHat": "hair/straight_long_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/straight_long_fill.webp",
+            "fillUnderHat": "hair/straight_long_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/straight_long_front_mask.webp",
-            "frontUnderHat": "hair/straight_long_front_hat_mask.webp"
+            "frontUnderHat": "hair/straight_long_front_hat_mask.webp",
+            "fill": "hair/straight_long_fill_mask.webp",
+            "fillUnderHat": "hair/straight_long_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 75.9414,
-            "frontUnderHat": 70.8861
+            "frontUnderHat": 70.8861,
+            "fill": 38.44,
+            "fillUnderHat": 38.44
           }
         },
         {
@@ -295,15 +325,21 @@
             "front": "hair/bob_front.webp",
             "frontUnderHat": "hair/bob_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/bob_fill.webp",
+            "fillUnderHat": "hair/bob_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/bob_front_mask.webp",
-            "frontUnderHat": "hair/bob_front_hat_mask.webp"
+            "frontUnderHat": "hair/bob_front_hat_mask.webp",
+            "fillUnderHat": "hair/bob_hat_fill_hat_mask.webp",
+            "fill": "hair/bob_fill_mask.webp"
           },
           "ref": {
             "front": 75.4913,
-            "frontUnderHat": 63.2632
+            "frontUnderHat": 63.2632,
+            "fillUnderHat": 26.66,
+            "fill": 26.66
           }
         },
         {
@@ -314,15 +350,21 @@
             "front": "hair/bun_front.webp",
             "frontUnderHat": "hair/bun_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/bun_fill.webp",
+            "fillUnderHat": "hair/bun_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/bun_front_mask.webp",
-            "frontUnderHat": "hair/bun_front_hat_mask.webp"
+            "frontUnderHat": "hair/bun_front_hat_mask.webp",
+            "fill": "hair/bun_fill_mask.webp",
+            "fillUnderHat": "hair/bun_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 67.2256,
-            "frontUnderHat": 37.1956
+            "frontUnderHat": 37.1956,
+            "fill": 18.6,
+            "fillUnderHat": 19.22
           }
         },
         {
@@ -333,15 +375,21 @@
             "front": "hair/braids_front.webp",
             "frontUnderHat": "hair/braids_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/braids_fill.webp",
+            "fillUnderHat": "hair/braids_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/braids_front_mask.webp",
-            "frontUnderHat": "hair/braids_front_hat_mask.webp"
+            "frontUnderHat": "hair/braids_front_hat_mask.webp",
+            "fill": "hair/braids_fill_mask.webp",
+            "fillUnderHat": "hair/braids_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 75.2019,
-            "frontUnderHat": 73.0112
+            "frontUnderHat": 73.0112,
+            "fill": 33.48,
+            "fillUnderHat": 33.48
           }
         },
         {
@@ -352,15 +400,21 @@
             "front": "hair/space_buns_front.webp",
             "frontUnderHat": "hair/space_buns_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/space_buns_fill.webp",
+            "fillUnderHat": "hair/space_buns_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/space_buns_front_mask.webp",
-            "frontUnderHat": "hair/space_buns_front_hat_mask.webp"
+            "frontUnderHat": "hair/space_buns_front_hat_mask.webp",
+            "fill": "hair/space_buns_fill_mask.webp",
+            "fillUnderHat": "hair/space_buns_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 79.3065,
-            "frontUnderHat": 42.2014
+            "frontUnderHat": 42.2014,
+            "fill": 19.22,
+            "fillUnderHat": 19.22
           }
         },
         {
@@ -371,15 +425,21 @@
             "front": "hair/wavy_long_front.webp",
             "frontUnderHat": "hair/wavy_long_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/wavy_long_fill.webp",
+            "fillUnderHat": "hair/wavy_long_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/wavy_long_front_mask.webp",
-            "frontUnderHat": "hair/wavy_long_front_hat_mask.webp"
+            "frontUnderHat": "hair/wavy_long_front_hat_mask.webp",
+            "fill": "hair/wavy_long_fill_mask.webp",
+            "fillUnderHat": "hair/wavy_long_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 82.4071,
-            "frontUnderHat": 78.2315
+            "frontUnderHat": 78.2315,
+            "fill": 35.96,
+            "fillUnderHat": 35.96
           }
         },
         {
@@ -390,15 +450,21 @@
             "front": "hair/bangs_long_front.webp",
             "frontUnderHat": "hair/bangs_long_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/bangs_long_fill.webp",
+            "fillUnderHat": "hair/bangs_long_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/bangs_long_front_mask.webp",
-            "frontUnderHat": "hair/bangs_long_front_hat_mask.webp"
+            "frontUnderHat": "hair/bangs_long_front_hat_mask.webp",
+            "fill": "hair/bangs_long_fill_mask.webp",
+            "fillUnderHat": "hair/bangs_long_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 82.1807,
-            "frontUnderHat": 73.2094
+            "frontUnderHat": 73.2094,
+            "fill": 40.3,
+            "fillUnderHat": 40.3
           }
         },
         {
@@ -409,15 +475,21 @@
             "front": "hair/spiky_front.webp",
             "frontUnderHat": "hair/spiky_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/spiky_fill.webp",
+            "fillUnderHat": "hair/spiky_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/spiky_front_mask.webp",
-            "frontUnderHat": "hair/spiky_front_hat_mask.webp"
+            "frontUnderHat": "hair/spiky_front_hat_mask.webp",
+            "fill": "hair/spiky_fill_mask.webp",
+            "fillUnderHat": "hair/spiky_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 71.9758,
-            "frontUnderHat": 38.2567
+            "frontUnderHat": 38.2567,
+            "fill": 16.74,
+            "fillUnderHat": 16.74
           }
         },
         {
@@ -428,15 +500,21 @@
             "front": "hair/side_part_front.webp",
             "frontUnderHat": "hair/side_part_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/side_part_fill.webp",
+            "fillUnderHat": "hair/side_part_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/side_part_front_mask.webp",
-            "frontUnderHat": "hair/side_part_front_hat_mask.webp"
+            "frontUnderHat": "hair/side_part_front_hat_mask.webp",
+            "fill": "hair/side_part_fill_mask.webp",
+            "fillUnderHat": "hair/side_part_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 73.0211,
-            "frontUnderHat": 37.0763
+            "frontUnderHat": 37.0763,
+            "fill": 16.74,
+            "fillUnderHat": 16.12
           }
         },
         {
@@ -447,15 +525,21 @@
             "front": "hair/headscarf_front.webp",
             "frontUnderHat": "hair/headscarf_front_hat.webp",
             "back": null,
-            "backUnderHat": null
+            "backUnderHat": null,
+            "fill": "hair/headscarf_fill.webp",
+            "fillUnderHat": "hair/headscarf_hat_fill_hat.webp"
           },
           "mask": {
             "front": "hair/headscarf_front_mask.webp",
-            "frontUnderHat": "hair/headscarf_front_hat_mask.webp"
+            "frontUnderHat": "hair/headscarf_front_hat_mask.webp",
+            "fill": "hair/headscarf_fill_mask.webp",
+            "fillUnderHat": "hair/headscarf_hat_fill_hat_mask.webp"
           },
           "ref": {
             "front": 86.1197,
-            "frontUnderHat": 80.6685
+            "frontUnderHat": 80.6685,
+            "fill": 46.5,
+            "fillUnderHat": 46.5
           }
         }
       ]
@@ -1863,6 +1947,35 @@
       "layer": "face/blink.webp",
       "mask": "face/blink_mask.webp",
       "ref": 166.4953
+    },
+    "eyes": {
+      "layer": "base/eyes_empty.webp",
+      "open": "base/eye_open.webp",
+      "iris": {
+        "layer": "base/iris_full.webp",
+        "mask": "base/iris_full_mask.webp",
+        "ref": 81.7453
+      },
+      "ownEyes": [
+        "face_happy_closed",
+        "face_hearts",
+        "face_stars",
+        "face_surprised",
+        "face_wink"
+      ]
+    },
+    "hands": {
+      "layer": "pose/hands.webp",
+      "mask": "pose/hands_mask.webp",
+      "ref": 157.0464
+    },
+    "hairBackDx": {
+      "oval": 0,
+      "round": -5,
+      "long": -13,
+      "square": -7,
+      "heart": -10,
+      "wide": -5
     }
   }
 }
