@@ -76,13 +76,19 @@ const HUG_BOTTOM = 0.975
 const BASE_URL = import.meta.env.BASE_URL
 
 const SIDE_PETS = new Set(['giraffe', 'elephant', 'flamingo', 'llama', 'camel', 'mammoth', 'sauropod', 'moose', 'whale'])
-const HEAD_PETS = new Set(['hedgehog', 'snail', 'bee', 'ladybug', 'butterfly', 'chick', 'frog', 'mouse', 'hamster', 'turtle', 'owl'])
 const BULKY_PETS = new Set(['dragon', 'trex', 'unicorn', 'phoenix', 'rhino', 'hippo', 'bison', 'croc', 'shark', 'peacock'])
+
+// Pati veya gövdenin saça dayandığı yer, 256 px hayvan tuvalinde.
+const HEAD_CONTACT: Partial<Record<string, [x: number, y: number]>> = {
+  hedgehog: [128, 239], snail: [134, 239], bee: [145, 239], ladybug: [128, 239],
+  butterfly: [128, 222], chick: [109, 236], frog: [128, 239], mouse: [128, 239],
+  hamster: [110, 239], turtle: [122, 238], owl: [120, 232],
+}
 
 export function availablePoses(petId: string): string[] {
   if (SIDE_PETS.has(petId) || BULKY_PETS.has(petId)) return ['pose_side', 'pose_peek']
   if (petId === 'rabbit') return ['pose_hug', 'pose_side', 'pose_peek']
-  return ['pose_side', 'pose_hug', 'pose_shoulder', 'pose_peek', ...(HEAD_PETS.has(petId) ? ['pose_head'] : [])]
+  return ['pose_side', 'pose_hug', 'pose_shoulder', 'pose_peek', ...(Object.hasOwn(HEAD_CONTACT, petId) ? ['pose_head'] : [])]
 }
 
 /** Arkadaşın duruşu (side | shoulder | peek | head | hug). */
@@ -237,6 +243,10 @@ const HAIR_TOP: Record<string, number> = {
 const HAT_TOP: Record<string, number> = {
   cap: 48, pom: 37, earflap: 43, cat: 71, bucket: 57, cowboy: 37, wizard: 12, pirate: 18, crown: 40, pilot: 81, bear: 87,
 }
+// Sivri veya asimetrik tepelerde temas orta eksenden ayrılır.
+const HEAD_HAT_SURFACE: Partial<Record<string, [x: number, y: number]>> = {
+  wizard: [304, 8], cowboy: [216, 37],
+}
 
 // Koordinatlar sahnenin genişliğine göre. Peek x'i çocuğun tuvaline göre ölçülür.
 const POSES: Record<string, { x: number; bottom: number; width: number; kid: number; gaze: number; ey: number }> = {
@@ -364,7 +374,10 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const hatTop = hairId === 'hair_afro' && hatName === 'cap'
     ? 256 + (HAT_TOP.cap - 256) * AFRO_CAP.scale + AFRO_CAP.dy
     : HAT_TOP[hatName]
-  const crownTop = (hatTop ?? HAIR_TOP[hairId] ?? 88) / 512 * scale
+  const crownRow = hatTop ?? HAIR_TOP[hairId] ?? 88
+  const headContact = p && pose === 'head' ? HEAD_CONTACT[p.id] : undefined
+  const [headSurfaceX, headSurfaceY] = HEAD_HAT_SURFACE[hatName] ?? [256, !hatName && hairId === 'hair_spiky' ? 65 : crownRow]
+  const crownTop = (headContact ? headSurfaceY : crownRow) / 512 * scale
   const kidTop = p
     ? Math.max(pose === 'hug' ? -0.015 : 0, (pose === 'head' ? pz.bottom - 0.014 : 0.055) - crownTop)
     : Math.max(-0.15, 0.045 - crownTop)
@@ -381,6 +394,8 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const perch = p && pose === 'shoulder' ? SHOULDER_CONTACT[p.id] : undefined
   const perchX = kidLeft + 368 / 512 * scale
   const perchY = kidTop + ((SHOULDER_Y[currentId(eq, 'clothes', sd) ?? ''] ?? 364) + 3) / 512 * scale
+  const headRestX = kidLeft + headSurfaceX / 512 * scale
+  const headRestY = kidTop + crownTop + 0.008
   // Hayvan yüzün altına sığacak kadar küçülür. Eller aynı oranda ve bilek tabana sabit kalacak biçimde oturur.
   const petBottom = sharedHug ? HUG_BOTTOM : pz.bottom
   const hugWidth = Math.min(pz.width, (HUG_BOTTOM - kidTop - HUG_FACE_BOTTOM / 512 * scale) / 0.95)
@@ -395,6 +410,10 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     width: petWidth * size,
     transformOrigin: `${perch.x / 2.56}% ${perch.y / 2.56}%`,
     transform: `rotate(${perch.angle ?? 12}deg)${perch.faceChild ? ' scaleX(-1)' : ''}`,
+  } : headContact ? {
+    left: (headRestX - headContact[0] / 256 * petWidth) * size,
+    top: (headRestY - headContact[1] / 256 * petWidth) * size,
+    width: petWidth * size,
   } : {
     left: (petX - petWidth / 2) * size, top: (petBottom - petWidth * 0.95) * size, width: petWidth * size,
     ...(peek ? { transform: 'rotate(24deg)', transformOrigin: '50% 95%' } : {}),
@@ -435,6 +454,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
               </div>
             </div>
             {perch && <span className="av-perch-shadow" aria-hidden="true" style={{ left: perchX * size, top: perchY * size }} />}
+            {headContact && <span className="av-perch-shadow" aria-hidden="true" style={{ left: headRestX * size, top: headRestY * size }} />}
             {pose !== 'peek' && !uriGrip && petImg}
             {uriGrip && <img className="av-kid av-hands" src={uriGrip} alt="Parmağa tutunan papağan" draggable={false}
               style={{ left: 0, top: 0, width: '100%' }} />}

@@ -376,6 +376,7 @@ label.check input { width: 20px; height: 20px; accent-color: var(--purple); }
 }
 .av-placeholder { position: absolute; width: 46%; height: 52%; top: 25%; left: 27%; border-radius: 47% 47% 44% 44%; opacity: .34; }
 .avatar.with-pet .av-bg { inset: 15% 2% 1%; border-radius: 46% 46% 22% 22% / 36% 36% 18% 18%; border: 1px solid #29254d34; box-shadow: none; }
+.avatar.scene-head .av-bg { inset-block-start: 4%; }
 .av-illustration img { position: absolute; width: 90%; height: 92%; inset: 4% 5%; object-fit: contain; user-select: none; pointer-events: none; }
 .av-free { position: absolute; inset: 0; }
 .av-kid { position: absolute; left: 3%; width: 94%; height: auto; pointer-events: none; user-select: none; }
@@ -394,6 +395,7 @@ label.check input { width: 20px; height: 20px; accent-color: var(--purple); }
   position: absolute; width: 9%; height: 2.4%; transform: translate(-78%, -18%) rotate(20deg);
   background: radial-gradient(ellipse, #39241b80, transparent 72%); pointer-events: none;
 }
+.scene-head .av-perch-shadow { width: 15%; transform: translate(-50%, -18%); }
 .av-hands { z-index: 2; }
 .avatar.pet-hi .av-pet { animation: petjump .7s cubic-bezier(.3,1.5,.5,1); }
 @keyframes petidle { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.02, .97) translateY(1%); } }
