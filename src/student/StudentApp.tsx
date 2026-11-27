@@ -55,6 +55,7 @@ export function StudentApp() {
         assignment={home.assignment}
         animal={home.me.animal}
         equipped={home.me.equipped}
+        seed={home.me.id}
         onCancel={() => setScreen('home')}
         onSubmit={async (answers) => {
           const r = await api.submit(token!, home.assignment!.id, answers)
@@ -101,7 +102,7 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
           <div className="name-grid">
             {list.filter((s) => s.grade === g).map((s) => (
               <button key={s.id} className="name-card" onClick={() => onPick(s)}>
-                <Avatar animal={s.animal} size={64} />
+                <Avatar animal={s.animal} seed={s.id} size={64} />
                 <span>{s.display_name}</span>
               </button>
             ))}
@@ -141,7 +142,7 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
     <div className="page narrow">
       <button className="link" onClick={onBack}>← Ben değilim</button>
       <div className="pin-head">
-        <Avatar animal={student.animal} size={110} bounce />
+        <Avatar animal={student.animal} seed={student.id} size={110} bounce />
         <h2>{student.display_name}</h2>
         <p>{title}</p>
         <p className="hint pin-hint">
@@ -178,7 +179,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
       </div>
 
       <section className="me-card">
-        <Avatar animal={home.me.animal} equipped={home.me.equipped} size={120} bounce />
+        <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={120} bounce />
         <div>
           <h1>Selam {home.me.display_name}!</h1>
           <div className="stars-pill">⭐ {home.me.stars} yıldız</div>
@@ -221,7 +222,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
         <div className="mates">
           {home.classmates.map((m) => (
             <div key={m.id} className="mate">
-              <Avatar animal={m.animal} equipped={m.equipped} size={64} />
+              <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} size={64} />
               <span>{m.display_name}</span>
             </div>
           ))}

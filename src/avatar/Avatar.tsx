@@ -1,11 +1,11 @@
-// Avatar = Fluent Emoji 3D karakter + kafa süsü + gözlük + elindeki eşya + arkadaşı + arka plan.
-// Yerleşim: anchors.ts (karakterde kafa/göz yeri) ve fxmeta.ts (her görselin dolu alanı).
+// Avatar = Avataaars çocuk (ten, saç, saç rengi, şapka, gözlük, kıyafet, ifade) + yanında hayvan arkadaşı + arka plan.
+// Şapka/gözlük/saç aynı çizim setinden geldiği için kafaya kendiliğinden oturur; elle konum ayarı yok.
 import type { CSSProperties } from 'react'
+import { createAvatar } from '@dicebear/core'
+import * as avataaars from '@dicebear/avataaars'
 import type { Equipped } from '../data/types'
-import { ANCHORS } from './anchors'
 import { BG } from './bg'
-import { SPECIES, fx, type Species } from './catalog'
-import { FXMETA } from './fxmeta'
+import { ITEMS, SPECIES, fx, type CatalogItem, type ItemSlot, type Species } from './catalog'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -13,87 +13,109 @@ export interface Look { x: number; y: number } // -1..1
 const BY_ID = new Map(SPECIES.map((s) => [s.id, s]))
 const BY_EMOJI = new Map<string, Species>()
 for (const s of SPECIES) if (!BY_EMOJI.has(s.emoji)) BY_EMOJI.set(s.emoji, s)
+const ITEM = new Map(ITEMS.map((i) => [i.id, i]))
 
-/** Öğrencinin görünen karakteri: taktığı karakter, yoksa öğretmenin verdiği (tür id'si ya da eski emoji). */
-export function speciesOf(animal: string, equipped?: Equipped): Species {
-  const ch = equipped?.char?.replace(/^char_/, '')
-  return (ch && BY_ID.get(ch)) || BY_ID.get(animal) || BY_EMOJI.get(animal) || SPECIES[0]
+/** Öğretmenin verdiği hayvan (tür id'si ya da eski emoji). */
+export function speciesOf(animal: string): Species {
+  return BY_ID.get(animal) || BY_EMOJI.get(animal) || SPECIES[0]
 }
-export const canWearGlasses = (sp: Species) => (ANCHORS[sp.id]?.[5] ?? 0) > 0
-export const pawColor = (sp: Species) => FXMETA[sp.id]?.c ?? '#f28a3c'
-/** Kart kenarından bakarken: görselin ne kadarı görünsün (göz hizasının biraz altına kadar) ve üstte ne kadar yer lazım. */
-export function peekMetrics(sp: Species, size: number, hasHat: boolean) {
-  const ey = ANCHORS[sp.id]?.[4] ?? 0.5
-  const top = FXMETA[sp.id]?.b[1] ?? 0.1
-  const cut = Math.min(0.8, ey + 0.14)
-  return { offset: Math.round(cut * size), room: Math.round((cut - top) * size + (hasHat ? 34 : 10)) }
+/** Yanındaki hayvan: taktığı arkadaş, yoksa öğretmenin verdiği. */
+export function petOf(animal: string, eq?: Equipped): Species {
+  const p = eq?.pet?.replace(/^pet_/, '')
+  return (p && BY_ID.get(p)) || speciesOf(animal)
 }
 
-// Kafa süsü ayarı: [genişlik çarpanı (kafa genişliğine göre), kafaya gömülme, yana kayma]
-const HATFIT: Record<string, [number, number, number]> = {
-  hat_headphone: [1.3, 0.62, 0], hat_helmet: [1.1, 0.22, 0], hat_cap: [1.05, 0.22, 0], hat_sunhat: [1.3, 0.2, 0],
-  hat_tophat: [0.8, 0.03, 0], hat_crown: [0.75, 0.1, 0], hat_grad: [1.0, 0.14, 0], hat_mushroom: [1.0, 0.18, 0],
-  hat_rainbow: [1.1, 0.02, 0], hat_cloud: [0.95, 0.02, 0], hat_cake: [0.8, 0.04, 0], hat_icecream: [0.6, 0.03, 0],
-  hat_ribbon: [0.5, 0.12, 0.28], hat_blossom: [0.42, 0.12, 0.3], hat_tulip: [0.36, 0.1, 0.3], hat_hibiscus: [0.45, 0.12, 0.3],
-  hat_sunflower: [0.48, 0.12, 0.28], hat_clover: [0.4, 0.1, -0.28], hat_feather: [0.42, 0.1, 0.25], hat_sprout: [0.5, 0.04, 0],
-  hat_star: [0.55, 0.03, 0], hat_glowstar: [0.6, 0.03, 0], hat_bulb: [0.5, 0.01, 0], hat_chick: [0.62, 0.06, 0],
-  hat_bird: [0.6, 0.05, 0.1], hat_butterfly: [0.6, 0.04, 0.12], hat_ladybug: [0.5, 0.05, 0.12],
+// Takılmamış yuvalar için öğrenciye özgü (seed'den) bedava varsayılanlar: herkes ilk gün farklı görünsün.
+const FREE = (slot: ItemSlot, skip: string[] = []) => ITEMS.filter((i) => i.slot === slot && i.price === 0 && !skip.includes(i.id))
+const DEF: Partial<Record<ItemSlot, CatalogItem[]>> = {
+  skin: FREE('skin'), hair: FREE('hair', ['hair_hijab']), hcolor: FREE('hcolor'), clothes: FREE('clothes'), ccolor: FREE('ccolor'),
+}
+function hash(s: string) {
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619)
+  return h >>> 0
+}
+function pick(eq: Equipped, slot: ItemSlot, seed: string): CatalogItem | undefined {
+  const it = eq[slot] ? ITEM.get(eq[slot]!) : undefined
+  if (it && it.slot === slot) return it // katalogdan kalkmış eski eşya sayılmaz
+  const list = DEF[slot]
+  return list?.length ? list[hash(seed + slot) % list.length] : undefined
 }
 
-type Box = { l: number; t: number; w: number } // karakter kutusu (avatar kutusunun yüzdesi)
+/** Yuvada şu an görünen eşya id'si (takılı ya da varsayılan). */
+export const currentId = (eq: Equipped, slot: ItemSlot, seed: string) => pick(eq, slot, seed)?.id
 
-/** Bir görseli, dolu alanının (FXMETA) istenen yere ve genişliğe oturacağı şekilde yerleştirir. */
-function placed(id: string, box: Box, cx: number, w: number, y: number, yAt: 'bottom' | 'center'): CSSProperties {
-  const b = FXMETA[id]?.b ?? [0, 0, 1, 1]
-  const W = w / Math.max(0.05, b[2] - b[0]) // görselin tam genişliği (karakter kutusu biriminde)
-  const left = cx - W * ((b[0] + b[2]) / 2)
-  const top = yAt === 'bottom' ? y - W * b[3] : y - W * ((b[1] + b[3]) / 2)
-  return { left: `${box.l + left * box.w}%`, top: `${box.t + top * box.w}%`, width: `${W * box.w}%` }
+export const skinColor = (eq: Equipped, seed: string) => '#' + (pick(eq, 'skin', seed)?.v ?? 'edb98a')
+
+const cache = new Map<string, string>()
+function svgUri(eq: Equipped, seed: string, mood?: Mood): string {
+  const hat = pick(eq, 'hat', seed), hair = pick(eq, 'hair', seed)!, gl = pick(eq, 'glasses', seed)
+  const cl = pick(eq, 'clothes', seed)!, face = (pick(eq, 'face', seed)?.v ?? 'default|defaultNatural|smile').split('|')
+  let [eyes, brows, mouth] = face
+  if (mood === 'happy') { eyes = eyes === 'hearts' ? 'hearts' : 'happy'; brows = 'raisedExcitedNatural'; mouth = 'smile' }
+  const opt = {
+    top: [hat ? hat.v! : hair.v!],
+    hatColor: [hat?.v2 ?? '262e33'],
+    hairColor: [pick(eq, 'hcolor', seed)!.v!],
+    skinColor: [pick(eq, 'skin', seed)!.v!],
+    accessories: [gl?.v ?? 'round'], accessoriesProbability: gl ? 100 : 0, accessoriesColor: [gl?.v2 ?? '262e33'],
+    clothing: [cl.v!], clothingGraphic: [cl.v2 ?? 'bear'], clothesColor: [pick(eq, 'ccolor', seed)!.v!],
+    eyes: [eyes], eyebrows: [brows], mouth: [mouth], facialHairProbability: 0, topProbability: 100,
+  }
+  const key = JSON.stringify(opt)
+  let uri = cache.get(key)
+  if (!uri) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    uri = createAvatar(avataaars, { ...(opt as any), seed: 'x' }).toDataUri()
+    cache.set(key, uri)
+  }
+  return uri
 }
 
-function Img({ id, style, className }: { id: string; style?: CSSProperties; className?: string }) {
-  return <img src={fx(id)} alt="" draggable={false} decoding="async" className={'av-img ' + (className ?? '')} style={style} />
+/** Kart kenarından bakarken (çerçevesiz avatar): görselin ne kadarı kartın üstünde kalsın. */
+export function peekMetrics(size: number) {
+  return { offset: Math.round(0.7 * size), room: Math.round(0.68 * size) }
 }
 
-export function AvatarLayers({ sp, eq, box, extras }: { sp: Species; eq: Equipped; box: Box; extras: boolean }) {
-  const a = ANCHORS[sp.id] ?? [0.5, 0.2, 0.6, 0.5, 0.5, 0.25]
-  const [hx, hy, hw, ex, ey, ed] = a
-  const ok = (id?: string) => (id && FXMETA[id] ? id : null) // katalogdan kalkmış eski eşya çizilmez
-  const hat = ok(eq.hat)
-  const hf = hat ? HATFIT[hat] ?? [1, 0.12, 0] : null
-  const glasses = ed > 0 ? ok(eq.glasses) : null
-  const pet = ok(eq.pet), item = ok(eq.item)
-  return (
-    <>
-      <Img id={sp.id} className="av-char" style={{ left: `${box.l}%`, top: `${box.t}%`, width: `${box.w}%` }} />
-      {glasses && <Img id={glasses} style={placed(glasses, box, ex, ed * (glasses === 'glasses_diving' ? 2.0 : glasses === 'glasses_goggles' ? 2.1 : 1.8), ey, 'center')} />}
-      {hat && hf && <Img id={hat} className="av-hat" style={placed(hat, box, hx + hf[2] * hw, Math.min(0.9, Math.max(0.24 * hf[0], hw * hf[0])), hy + hf[1] * hw, 'bottom')} />}
-      {extras && pet && <Img id={pet} className="av-pet" style={{ left: '-6%', top: '62%', width: '40%' }} />}
-      {extras && item && <Img id={item} className="av-item" style={{ left: '64%', top: '60%', width: '42%' }} />}
-    </>
-  )
+// Çerçeve: alt yarı dairenin içinde kalır, kafa ve şapka dairenin üstünden taşabilir (profil rozeti gibi).
+const UP = 0.2 // kutunun üstünde kafaya ayrılan pay (boyuta oranı)
+function clipStyle(size: number): CSSProperties {
+  const cy = UP * size + size / 2, r = size / 2 - 3
+  const m = `radial-gradient(circle at 50% ${cy}px, #000 ${r}px, transparent ${r + 1}px), linear-gradient(#000 ${cy}px, transparent ${cy}px)`
+  return { top: -UP * size, height: (1 + UP) * size, maskImage: m, WebkitMaskImage: m }
 }
 
-export function Avatar({ animal, equipped, size = 96, bounce = false, look, mood, frame = true }: {
-  animal: string; equipped?: Equipped; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
+export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look, mood, frame = true, pet }: {
+  animal: string; equipped?: Equipped; seed?: string; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
+  /** Yanında hayvanı göster (varsayılan: çerçeveli ve yeterince büyükse). */ pet?: boolean
 }) {
   const eq = equipped ?? {}
-  const sp = speciesOf(animal, eq)
-  const tilt = look ? `rotate(${look.x * 7}deg) translateY(${look.y * 2}%)` : undefined
+  const sd = seed ?? animal
+  const tilt = look ? `rotate(${look.x * 6}deg) translateY(${look.y * 2}%)` : undefined
+  const showPet = pet ?? (frame && size >= 56)
+  const p = showPet ? petOf(animal, eq) : null
   return (
     <div className={'avatar' + (frame ? '' : ' bare') + (bounce ? ' bounce' : '') + (mood === 'happy' ? ' happy' : '')} style={{ width: size, height: size }}>
       {frame && <div className="av-bg" style={{ background: BG[eq.bg ?? 'none'] ?? BG.none }} />}
-      <div className="av-stage" style={{ transform: tilt }}>
-        <AvatarLayers sp={sp} eq={eq} box={frame ? { l: 11, t: 13, w: 78 } : { l: 0, t: 0, w: 100 }} extras={frame} />
+      <div className={frame ? 'av-clip' : 'av-free'} style={frame ? clipStyle(size) : undefined}>
+        <div className="av-stage" style={{ transform: tilt }}>
+          <img className="av-kid" src={svgUri(eq, sd, mood)} alt="" draggable={false} style={frame ? { top: (UP - 0.04) * size, left: -0.06 * size, width: 1.12 * size } : undefined} />
+        </div>
       </div>
+      {p && <img className="av-pet" src={fx(p.id)} alt={p.name} title={p.name} draggable={false} />}
     </div>
   )
 }
 
-/** Dükkanda tek eşyanın önizlemesi (öğrencinin şu anki karakteri üstünde; gözlük uymuyorsa tilkide). */
-export function ItemPreview({ id, slot, animal, equipped }: { id: string; slot: string; animal: string; equipped: Equipped }) {
-  if (slot === 'char') return <Avatar animal={animal} equipped={{ char: id }} size={84} />
-  let ch = equipped.char
-  if (slot === 'glasses' && !canWearGlasses(speciesOf(animal, equipped))) ch = 'char_fox'
-  return <Avatar animal={animal} equipped={{ char: ch, [slot]: id }} size={84} />
+/** Dükkanda tek eşyanın önizlemesi: öğrencinin şu anki hâli + o eşya. Hayvanlar tek başına büyük gösterilir. */
+export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; slot: string; animal: string; equipped: Equipped; seed: string }) {
+  if (slot === 'pet') {
+    const sp = BY_ID.get(id.replace(/^pet_/, '')) ?? SPECIES[0]
+    return <div className="pet-preview"><img src={fx(sp.id)} alt="" /></div>
+  }
+  const eq: Equipped = { ...equipped, [slot]: id }
+  if (slot === 'hair') eq.hat = undefined // saç görünsün diye şapkayı çıkar
+  if (slot === 'clothes' || slot === 'ccolor')
+    return <div className="pet-preview body"><Avatar animal={animal} equipped={eq} seed={seed} size={84} frame={false} /></div>
+  return <Avatar animal={animal} equipped={eq} seed={seed} size={84} pet={false} />
 }

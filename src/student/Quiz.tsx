@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { errText, type Equipped, type StudentHome } from '../data/types'
-import { Avatar, pawColor, peekMetrics, speciesOf, type Look, type Mood } from '../avatar/Avatar'
+import { Avatar, peekMetrics, skinColor, type Look, type Mood } from '../avatar/Avatar'
 
 type A = NonNullable<StudentHome['assignment']>
 
@@ -8,9 +8,9 @@ type A = NonNullable<StudentHome['assignment']>
 // her seçimde aynı tepkiyi verir (o yöne bakar, başını sallar).
 const PEEK = 136
 
-export function Quiz({ assignment, onSubmit, onCancel, animal, equipped }: {
+export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }: {
   assignment: A; onSubmit: (answers: Record<string, number>) => Promise<void>; onCancel: () => void
-  animal: string; equipped: Equipped
+  animal: string; equipped: Equipped; seed: string
 }) {
   const qs = assignment.questions
   const [i, setI] = useState(0)
@@ -44,8 +44,8 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped }: {
     setLook(q.type === 'tf' ? { x: k === 0 ? -0.9 : 0.9, y: 0.9 } : { x: 0.25, y: 0.5 + (k / Math.max(1, n - 1)) * 0.5 })
     setNod((v) => v + 1)
   }
-  const sp = speciesOf(animal, equipped)
-  const pk = peekMetrics(sp, PEEK, !!equipped.hat)
+  const pk = peekMetrics(PEEK)
+  const hand = skinColor(equipped, seed)
 
   async function send() {
     if (blanks > 0) {
@@ -74,11 +74,11 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped }: {
       <div className="peek-wrap" style={{ marginTop: pk.room }}>
         <div className={'peeker' + (busy ? ' hop' : '')} key={'p' + i} style={{ top: -pk.offset }}>
           <div className={'peek-nod' + (nod ? ' n' + (nod % 2) : '')}>
-            <Avatar animal={animal} equipped={{ ...equipped, bg: undefined }} size={PEEK} frame={false} look={look} mood={busy ? 'happy' : mood} />
+            <Avatar animal={animal} equipped={{ ...equipped, bg: undefined }} size={PEEK} seed={seed} frame={false} look={look} mood={busy ? 'happy' : mood} />
           </div>
         </div>
-        <span className="paw l" style={{ background: pawColor(sp) }} />
-        <span className="paw r" style={{ background: pawColor(sp) }} />
+        <span className="paw l" style={{ background: hand }} />
+        <span className="paw r" style={{ background: hand }} />
       <section className="card question" key={q.id}>
         <p className="q-text big">{q.text}</p>
         <div className={'options ' + (q.type === 'tf' ? 'tf' : '')}>

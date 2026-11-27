@@ -1,40 +1,32 @@
-import { useState } from 'react'
-import { Avatar } from './Avatar'
-import { ITEMS, SPECIES, type ItemSlot } from './catalog'
-import { SLOT_NAMES } from '../data/shopItems'
+import { Avatar, ItemPreview } from './Avatar'
+import { SHOP_ITEMS, SLOT_NAMES } from '../data/shopItems'
+import { SPECIES } from './catalog'
 
-// #/galeri: bütün karakter ve eşyaların vitrini (öğretmen kontrolü için).
+// #/galeri: bütün eşyaların vitrini (öğretmen kontrolü için).
 export function Gallery() {
-  const [ch, setCh] = useState('fox')
-  const [tryHat, setTryHat] = useState('')
-  const [tryGl, setTryGl] = useState('')
+  const seeds = SPECIES.slice(0, 24)
   return (
     <div className="page wide">
       <h1>Avatar galerisi</h1>
-      <p className="muted">{SPECIES.length} karakter, {ITEMS.length} eşya. Bir karaktere dokun, eşyalar onun üstünde görünsün.</p>
-      <h2>Karakterler</h2>
-      <div className="row">
-        <select value={tryHat} onChange={(e) => setTryHat(e.target.value)}><option value="">Hepsinde dene: kafa süsü yok</option>{ITEMS.filter((i) => i.slot === 'hat').map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}</select>
-        <select value={tryGl} onChange={(e) => setTryGl(e.target.value)}><option value="">gözlük yok</option>{ITEMS.filter((i) => i.slot === 'glasses').map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}</select>
-      </div>
+      <p className="muted">{SHOP_ITEMS.length} eşya. Her öğrenci ilk gün kendine özgü bir görünümle başlar, sonra dükkandan değiştirir.</p>
+      <h2>Başlangıç görünümleri</h2>
       <div className="gallery">
-        {SPECIES.map((s) => (
-          <button key={s.id} className={'g-cell' + (s.id === ch ? ' on' : '')} onClick={() => setCh(s.id)}>
-            <Avatar animal={s.id} equipped={{ hat: tryHat || undefined, glasses: tryGl || undefined }} size={84} /><span>{s.name}</span><small>{s.price ? `⭐ ${s.price}` : 'Bedava'}</small>
-          </button>
-        ))}
+        {seeds.map((s, k) => <div key={s.id} className="g-cell"><Avatar animal={s.id} seed={'ornek' + k} size={84} /><span>{s.name} ile</span></div>)}
       </div>
-      {(['hat', 'glasses', 'item', 'pet', 'bg'] as ItemSlot[]).map((slot) => (
+      {Object.keys(SLOT_NAMES).map((slot) => (
         <section key={slot}>
           <h2>{SLOT_NAMES[slot]}</h2>
           <div className="gallery">
-            {ITEMS.filter((i) => i.slot === slot).map((i) => (
-              <div key={i.id} className="g-cell"><Avatar animal={ch} equipped={{ [slot]: i.id }} size={84} /><span>{i.name}</span><small>⭐ {i.price}</small></div>
+            {SHOP_ITEMS.filter((i) => i.slot === slot).map((i) => (
+              <div key={i.id} className="g-cell">
+                <ItemPreview id={i.id} slot={slot} animal="fox" equipped={{}} seed="galeri" />
+                <span>{i.name}</span><small>{i.price ? `⭐ ${i.price}` : 'Bedava'}</small>
+              </div>
             ))}
           </div>
         </section>
       ))}
-      <p className="hint">Görseller: Microsoft Fluent Emoji (MIT lisansı).</p>
+      <p className="hint">Çocuk: Avataaars, Pablo Stanley (avataaars.com, ticari dahil serbest), DiceBear ile. Hayvanlar: Microsoft Fluent Emoji (MIT).</p>
     </div>
   )
 }

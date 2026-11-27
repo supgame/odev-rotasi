@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react'
 import { api } from '../data/api'
 import { SLOT_NAMES } from '../data/shopItems'
 import { errText, type ShopItem, type Slot, type StudentHome } from '../data/types'
-import { Avatar, ItemPreview, canWearGlasses, speciesOf } from '../avatar/Avatar'
-import { charItemId } from '../avatar/catalog'
+import { Avatar, ItemPreview, currentId, petOf, speciesOf } from '../avatar/Avatar'
+import { petItemId } from '../avatar/catalog'
+
+// Çıkarılabilen yuvalar. Diğerlerinde (saç, ten, kıyafet...) hep bir şey takılıdır; çıkarınca varsayılana döner.
+const REMOVABLE: Slot[] = ['hat', 'glasses', 'bg', 'pet']
 
 export function Shop({ home, token, onBack, onChange }: {
   home: StudentHome; token: string; onBack: () => void; onChange: () => Promise<void>
 }) {
   const [items, setItems] = useState<ShopItem[]>([])
-  const [slot, setSlot] = useState<Slot>('char')
+  const [slot, setSlot] = useState<Slot>('hat')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   useEffect(() => { api.shop().then(setItems) }, [])
@@ -19,7 +22,10 @@ export function Shop({ home, token, onBack, onChange }: {
     try { await fn(); await onChange(); setMsg(ok) } catch (e) { setMsg(errText(e)) } finally { setBusy(false) }
   }
 
+  const { animal, id: seed } = home.me
   const eq = home.me.equipped
+  const basePet = petItemId(speciesOf(animal).id) // öğretmenin verdiği hayvan hep öğrencinin
+  const wornId = (s: Slot) => (s === 'pet' ? petItemId(petOf(animal, eq).id) : s === 'hat' || s === 'glasses' || s === 'bg' ? eq[s] : currentId(eq, s, seed))
   return (
     <div className="page">
       <div className="topbar">
@@ -27,8 +33,8 @@ export function Shop({ home, token, onBack, onChange }: {
         <span className="stars-pill">⭐ {home.me.stars}</span>
       </div>
       <section className="me-card shop-head">
-        <Avatar animal={home.me.animal} equipped={eq} size={140} bounce />
-        <p className="muted">Aldığın eşyalar hep senin. İstediğin zaman takıp çıkarabilirsin.</p>
+        <Avatar animal={animal} equipped={eq} seed={seed} size={150} bounce />
+        <p className="muted">Aldığın eşyalar hep senin. İstediğin zaman takıp çıkarabilirsin. Bedava olanları istediğin kadar değiştir.</p>
       </section>
       {msg && <p className="toast">{msg}</p>}
       <div className="tabs">
@@ -38,26 +44,28 @@ export function Shop({ home, token, onBack, onChange }: {
       </div>
       <div className="shop-grid">
         {items.filter((it) => it.slot === slot).sort((a, b) => a.price - b.price).map((it) => {
-          // Öğretmenin verdiği karakter her zaman öğrencinindir; takmak = karakter yuvasını boşaltmak.
-          const base = it.slot === 'char' && it.id === charItemId(speciesOf(home.me.animal).id)
-          const owned = base || home.owned.includes(it.id)
-          const worn = it.slot === 'char' ? speciesOf(home.me.animal, eq).id === it.id.replace(/^char_/, '') : eq[slot] === it.id
+          const base = it.id === basePet
+          const owned = base || it.price === 0 || home.owned.includes(it.id)
+          const worn = wornId(slot) === it.id
           const canBuy = home.me.stars >= it.price
-          const target = base ? null : it.id
+          const removable = REMOVABLE.includes(slot) && !base
           return (
             <div key={it.id} className={'shop-item' + (worn ? ' worn' : '')}>
-              <ItemPreview id={it.id} slot={it.slot} animal={home.me.animal} equipped={eq} />
+              <ItemPreview id={it.id} slot={it.slot} animal={animal} equipped={eq} seed={seed} />
               <b>{it.name}</b>
-              {it.slot === 'glasses' && !canWearGlasses(speciesOf(home.me.animal, eq)) && <span className="hint">Bu karakterde görünmez</span>}
-              {it.slot === 'char' && worn ? (
+              {worn && !removable ? (
                 <span className="muted small-note">Şu an bu</span>
               ) : owned ? (
-                <button className="btn small" disabled={busy} onClick={() => act(() => api.equip(token, slot, worn ? null : target), worn ? 'Çıkardın.' : 'Taktın! 😎')}>
-                  {worn ? 'Çıkar' : it.slot === 'char' ? 'Bu olayım' : 'Tak'}
+                <button className="btn small" disabled={busy} onClick={() => act(async () => {
+                  if (worn || base) return api.equip(token, slot, null)
+                  if (!home.owned.includes(it.id)) await api.buy(token, it.id) // bedava eşya: önce sahiplen
+                  await api.equip(token, slot, it.id)
+                }, worn ? 'Çıkardın.' : 'Taktın! 😎')}>
+                  {worn ? 'Çıkar' : 'Tak'}
                 </button>
               ) : (
                 <button className="btn small" disabled={busy || !canBuy} onClick={() => act(async () => { await api.buy(token, it.id); await api.equip(token, it.slot, it.id) }, `${it.name} senin! 🎉`)}>
-                  {it.price === 0 ? 'Bedava' : `⭐ ${it.price}`}
+                  ⭐ {it.price}
                 </button>
               )}
             </div>

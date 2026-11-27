@@ -97,12 +97,18 @@ label.check { flex-direction: row; align-items: center; font-weight: 500; }
 .avatar { position: relative; flex: none; }
 .av-bg { position: absolute; inset: 0; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.12); }
 .av-stage { position: absolute; inset: 0; transition: transform .35s ease; }
-.av-img { position: absolute; height: auto; pointer-events: none; user-select: none; }
-.av-item { transform: rotate(-10deg); filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
-.av-pet { filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); animation: petbob 2.2s ease-in-out infinite; }
+.av-clip { position: absolute; left: 0; right: 0; }
+.av-free { position: absolute; inset: 0; }
+.av-kid { position: absolute; left: 3%; width: 94%; height: auto; pointer-events: none; user-select: none; }
+.av-free .av-kid { left: 0; top: 0; width: 100%; }
+.av-pet { position: absolute; left: -12%; bottom: -6%; width: 42%; height: auto; z-index: 1; pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); animation: petbob 2.2s ease-in-out infinite; }
+.pet-preview { width: 84px; height: 84px; border-radius: 50%; background: #fff6e0; display: grid; place-items: center; }
+.pet-preview img { width: 70%; height: auto; }
+.pet-preview.body { overflow: hidden; align-items: end; background: #e9f3ff; }
+.pet-preview.body { border-radius: 18px; }
 @keyframes petbob { 50% { transform: translateY(-5%) rotate(-4deg); } }
 .avatar.happy .av-stage { animation: hop .45s ease-in-out infinite alternate; }
-.avatar-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
 .pin-head .avatar { margin: 0 auto .4rem; }
 .t-who { display: inline-flex; align-items: center; gap: .4rem; }
 .t-who .av-bg { border-width: 2px; }
