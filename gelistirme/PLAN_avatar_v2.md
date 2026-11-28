@@ -1,5 +1,14 @@
 # Avatar v2 planı (28 Kas 2026 → 5 Ara 2026)
 
+## Yarın "3. güne başla" denince (29 Kas)
+Sırayla:
+1. **Görsel denetim ızgarası (Claude):** galeriye ya da ayrı bir sayfaya (`#/denetim`) her kıyafet (14) × poz (yanımda, kucak, avuç, Elimde) × saç (kısa, uzun, afro, başörtüsü) × şapka (yok, bere, kep) birleşimini otomatik çizen ızgara. Çıktı: bozuk birleşimlerin listesi + ekran görüntüleri (`gelistirme/v3_denetim/`). Kullanıcıya önce bu liste gösterilir.
+2. **Bozuğu gizle (Claude):** v2 çizimi olmayan kıyafette Kucağımda/temas sahnesi gösterilmez, Yanımda'ya düşer; şapka altından taşan saç gibi kod kaynaklı hatalar düzeltilir. Hedef: çocukların gördüğü bozukluk hemen azalsın.
+3. **Astra (Codex) çizimleri:** kedi ve köpek sahneleri v2 yöntemiyle; köpek (el uzanmış), papağan (omuz), fil (büyük hayvan). Tek Codex, arka planda; brief `gelistirme/avatar_uretim/BRIEF_v2_gun3.md`.
+4. Gün sonu: Claude tarayıcıda eski/yeni yan yana ekran görüntüsü atar, onaylanırsa canlıya.
+
+Sonraki günler (4-7) aşağıdaki tabloda; kullanıcının 28 Kas akşamı eklediği hedefler (Elimde, kedi, dükkân-sahne hayvan birliği, kombinasyon hataları) tabloya işlendi.
+
 Karar: **hibrit poz şablonu** (Opus ve GPT Astra bağımsız sorulunca ikisi de bunu seçti; ayrıntı `mimari_danisma/`).
 
 - Kol ve gövde artık ayrı parça değil: her etkileşim pozu omuzdan parmak ucuna TEK çizim. Hayvanın önüne geçecek parmak/önkol aynı çizimden maskeyle ayrılır (yapıştırma değil, örtüşme). "Omuzdan kol çıkıyor" sorunu böyle biter.
