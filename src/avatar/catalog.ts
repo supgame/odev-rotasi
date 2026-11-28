@@ -3,6 +3,7 @@
 // Arkadaşı (hayvan): aynı çizgide ImageGen görseli, public/av/pet (manifest'in pet bölümü). Species.src eski Fluent adı, artık kullanılmıyor.
 // Bu dosya yalnız manifest'i import eder (node ile doğrudan çalışabilsin diye).
 import M from '../../public/av/manifest.json' with { type: 'json' }
+import eyeRefs from '../../public/av/features/refs.json' with { type: 'json' }
 import type { Equipped, Slot } from '../data/types'
 
 export const RABBIT_CRADLE: Equipped = {
@@ -149,6 +150,19 @@ const fromManifest = (slot: ItemSlot): CatalogItem[] =>
 const I = (slot: ItemSlot, list: [string, string, number, Raw?][]): CatalogItem[] =>
   list.map(([id, name, price, raw]) => ({ id: `${slot}_${id}`, slot, name, price, raw: { key: id, ...raw } }))
 
+function eyeArt(shape: keyof typeof eyeRefs) {
+  const path = `features/eshape_${shape}`
+  return {
+    layer: path + '.webp',
+    mask: path + '_mask.webp',
+    ref: eyeRefs[shape],
+    closed: path + '_closed.webp',
+    empty: path + '_empty.webp',
+    iris: path + '_iris.webp',
+    open: path + '_open.webp',
+  }
+}
+
 // Yüz çeşitleri: tek tabanın dönüşümleri (gelistirme/avatar_uretim/yuz_varyant.py). Hepsi bedava, ilk gün rastgele dağılır.
 export const FACE_ITEMS: CatalogItem[] = [
   ...I('fshape', [['oval', 'Oval', 0], ['round', 'Tombul', 0], ['long', 'Uzun', 0], ['square', 'Köşeli', 0], ['heart', 'Sivri çene', 0], ['wide', 'Geniş', 0]]),
@@ -168,22 +182,24 @@ export const FACE_ITEMS: CatalogItem[] = [
     ['tongue', 'Dil çıkarma', 0, { sourceFace: 'face_tongue' }],
   ]),
   ...I('nose', [
-    ['original', 'Klasik burun', 0],
+    ['original', 'Klasik burun', 0, { layer: 'features/nose_classic.webp' }],
     ['button', 'Yuvarlak burun', 0, { layer: 'features/nose_button.webp' }],
     ['wide', 'Geniş burun', 0, { layer: 'features/nose_wide.webp' }],
     ['straight', 'Kısa düz burun', 0, { layer: 'features/nose_straight.webp' }],
   ]),
   ...I('brow', [
-    ['expression', 'İfadeye göre', 0],
+    ['expression', 'Klasik kaş', 0, { layer: 'features/brow_classic.webp' }],
     ['soft', 'Yumuşak kavis', 0, { layer: 'features/brow_soft.webp' }],
     ['straight', 'Düz kaş', 0, { layer: 'features/brow_straight.webp' }],
     ['bold', 'Kalın kaş', 0, { layer: 'features/brow_bold.webp' }],
   ]),
   ...I('eshape', [
-    ['expression', 'İfadeye göre', 0],
-    ['round', 'Yuvarlak göz', 0, { layer: 'features/eshape_round.webp', mask: 'features/eshape_round_mask.webp', ref: 81 }],
-    ['almond', 'Badem göz', 0, { layer: 'features/eshape_almond.webp', mask: 'features/eshape_almond_mask.webp', ref: 81 }],
-    ['gentle', 'Yumuşak göz', 0, { layer: 'features/eshape_gentle.webp', mask: 'features/eshape_gentle_mask.webp', ref: 81 }],
+    ['expression', 'Klasik göz', 0, eyeArt('round')],
+    ['round', 'Yuvarlak göz', 0, eyeArt('round')],
+    ['almond', 'Badem göz', 0, eyeArt('almond')],
+    ['gentle', 'Yumuşak göz', 0, eyeArt('gentle')],
+    ['sparkle', 'İri parlak göz', 0, eyeArt('bright')],
+    ['upturned', 'Uçları yukarı göz', 0, eyeArt('upturn')],
   ]),
 ]
 

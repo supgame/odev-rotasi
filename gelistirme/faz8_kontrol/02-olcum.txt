@@ -1,0 +1,11 @@
+Bölüm 2 · 70 px göz görünürlüğü
+Pillow katman karşılaştırması; tarayıcı Canvas birebir doğrulaması değildir.
+Badem vs yuvarlak: eye-bandında 230 değişen piksel (70 px kart, RGB PNG)
+Yumuşak vs yuvarlak: eye-bandında 247 değişen piksel (70 px kart, RGB PNG)
+İri parlak vs yuvarlak: eye-bandında 235 değişen piksel (70 px kart, RGB PNG)
+Uçları yukarı vs yuvarlak: eye-bandında 241 değişen piksel (70 px kart, RGB PNG)
+Yuvarlak: açık/kapalı bandında 241 değişen piksel
+Badem: açık/kapalı bandında 203 değişen piksel
+Yumuşak: açık/kapalı bandında 208 değişen piksel
+İri parlak: açık/kapalı bandında 252 değişen piksel
+Uçları yukarı: açık/kapalı bandında 185 değişen piksel

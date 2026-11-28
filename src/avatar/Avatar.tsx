@@ -121,7 +121,7 @@ function clothesPart(cl: Raw | undefined, color: CatalogItem | undefined) {
   return layer && color?.id === 'ccolor_gold' && layer.mask ? { ...layer, metallic: true } : layer
 }
 
-interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string; garment: Part | null }
+interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string; garment: Part | null; eyeOpen?: string }
 
 /** Katmanları sıraya koyar. Canlı avatar için ayrıca: alt (gözler boş), kayan iris, kırpma, üst (kıyafet, saç önü, şapka, gözlük). */
 function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): Layers {
@@ -149,13 +149,20 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   const dx = V?.hairBackDx?.[shape] ?? 0 // dar yüzde at kuyruğu yanağa yaklaşsın
   const brow = part(pick(eq, 'brow', seed)?.raw, null)
   const nose = part(pick(eq, 'nose', seed)?.raw, null)
-  const openEye = faceIt?.id === 'face_happy_closed' ? null : part(pick(eq, 'eshape', seed)?.raw, null, eyes)
+  // Decorative eye expressions retain their own artwork. Every ordinary
+  // expression uses the chosen registered open/closed pair, including default.
+  const eyeStyle = pick(eq, 'eshape', seed)?.raw
+  const ownExpressionEyes = ['face_happy_closed', ...COLORED_EXPRESSIONS].includes(faceIt?.id ?? '')
+  const openEye = ownExpressionEyes ? null : part(eyeStyle, null, eyes)
+  const closedEye = openEye && eyeStyle?.closed ? { src: eyeStyle.closed as string } : null
   const wink = faceIt?.id === 'face_wink'
   const movingIris = !!V?.eyes && !openEye && !V.eyes.ownEyes.includes(faceIt?.id ?? '')
   const moving = movingIris || !!openEye
   const clearSkin = (feature: string): Part => ({ src: `features/clear_${feature}.webp`, color: skin, ref: b.skinRef })
   // Göz kırpma ifadesi seçildiyse biçim yalnız açık kalan göze uygulanır.
   const openColumns: [number, number] | undefined = wink ? [256, 512] : undefined
+  const eyeDraw = openEye && { ...openEye, sourceColumns: openColumns }
+  const gazeEyes = !!openEye && !!eyeStyle?.empty && !!eyeStyle?.iris
   const clearEyes = openEye ? { ...clearSkin('eyes'), sourceColumns: openColumns } : null
   const P = (x: Part | null | undefined) => (x && x.src ? [x] : [])
   const backHair = [
@@ -181,16 +188,18 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   if (mouthLayer) mouthLayer.sourceRows = [MOUTH_TOP, 512]
   const deeperSkin = ['skin_brown', 'skin_tan', 'skin_dark'].includes(currentId(eq, 'skin', seed) ?? '')
   const mid = [
-    ...P(brow && clearSkin('brows')),
-    ...P(nose && clearSkin('nose')),
     ...P(V && cheek && V.cheek[cheek] ? { src: V.cheek[cheek], stronger: deeperSkin } : null),
     ...expressionLayers,
+    ...P(brow && clearSkin('brows')),
+    ...P(nose && clearSkin('nose')),
     ...P(clearEyes),
-    ...P(openEye && { ...openEye, sourceColumns: openColumns }),
+    ...P(eyeDraw),
     ...P(brow),
     ...P(nose && { ...nose, color: skin, ref: b.skinRef }),
     ...P(mouthLayer),
   ]
+  const movingMid = gazeEyes ? mid.map((p) => p === eyeDraw
+    ? { src: eyeStyle!.empty as string, sourceColumns: openColumns } : p) : mid
   const glasses = part(gl, null, gl?.color)
   const hairFront = part(hair, 'front', hcol)
   const fittedTop = part(hair, underHat ? 'frontUnderHat' : 'front', hcol)
@@ -215,10 +224,12 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
     all: cradle
       ? cradleParts(cradle, backHair, [...head, ...mid], front, tshirt ? null : garment, skin, shirtDye)
       : [...lowerBase, ...mid, ...upper],
-    lower: movingIris && V?.eyes ? [...lowerBase, { src: V.eyes.layer }, ...mid] : [...lowerBase, ...mid],
-    iris: movingIris && ir ? [eyes ? { src: ir.layer, mask: ir.mask, ref: ir.ref, color: eyes } : { src: ir.layer }] : [],
+    lower: movingIris && V?.eyes ? [...lowerBase, { src: V.eyes.layer }, ...mid] : [...lowerBase, ...movingMid],
+    iris: gazeEyes ? [{ src: eyeStyle!.iris as string, mask: eyeStyle!.mask as string, ref: eyeStyle!.ref as number, color: eyes, sourceColumns: openColumns }]
+      : movingIris && ir ? [eyes ? { src: ir.layer, mask: ir.mask, ref: ir.ref, color: eyes } : { src: ir.layer }] : [],
+    eyeOpen: gazeEyes ? eyeStyle!.open as string : undefined,
     blink: V && !NO_BLINK.includes(faceIt?.id ?? '') ? [
-      ...P(clearEyes), { src: V.blink.layer, mask: V.blink.mask, ref: V.blink.ref, color: skin },
+      ...(closedEye ? [clearSkin('eyes'), closedEye] : [{ src: V.blink.layer, mask: V.blink.mask, ref: V.blink.ref, color: skin }]),
     ] : [],
     upper,
     moving,
@@ -419,8 +430,9 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     ? { top: kidTop * size, left: kidLeft * size, width: scale * size }
     : undefined
   const eyeBox: CSSProperties = { ...(kidStyle ?? { top: 0, left: 0, width: '100%' }), aspectRatio: '1', position: 'absolute' }
-  if (V?.eyes) {
-    const m = `url(${import.meta.env?.BASE_URL ?? '/'}av/${V.eyes.open})`
+  const opening = L.eyeOpen ?? V?.eyes?.open
+  if (opening) {
+    const m = `url(${import.meta.env?.BASE_URL ?? '/'}av/${opening})`
     eyeBox.maskImage = m; eyeBox.WebkitMaskImage = m; eyeBox.maskSize = '100% 100%'; eyeBox.WebkitMaskSize = '100% 100%'
   }
   const perch = p && pose === 'shoulder' && !FLOATING_PETS.has(p.id) ? SHOULDER_CONTACT[p.id] ?? DEFAULT_SHOULDER_CONTACT : undefined
