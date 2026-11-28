@@ -9,6 +9,8 @@ import { COMPANION_ACTIONS, contactFor, contactParts, gripParts } from './compan
 import { HELD_ACTION, HELD_ART, heldKind } from './held'
 import { HeldScene } from './HeldScene'
 import { GENDER_DEFAULTS } from './gender'
+import { poseV2For, poseV2Parts, type PoseV2Selection } from './poseV2'
+import './poseV2.css'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -121,10 +123,10 @@ function clothesPart(cl: Raw | undefined, color: CatalogItem | undefined) {
   return layer && color?.id === 'ccolor_gold' && layer.mask ? { ...layer, metallic: true } : layer
 }
 
-interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string; garment: Part | null; eyeOpen?: string }
+interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string; garment: Part | null; eyeOpen?: string; pilot?: ReturnType<typeof poseV2Parts> }
 
 /** Katmanları sıraya koyar. Canlı avatar için ayrıca: alt (gözler boş), kayan iris, kırpma, üst (kıyafet, saç önü, şapka, gözlük). */
-function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape, g?: Gender | null): Layers {
+function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape, g?: Gender | null, pilot?: PoseV2Selection): Layers {
   const skin = pick(eq, 'skin', seed, g)?.raw.color as string | undefined
   const hairItem = pick(eq, 'hair', seed, g)
   const hair = hairItem?.raw
@@ -235,11 +237,12 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape, g
     moving,
     skin,
     garment,
+    pilot: pilot ? poseV2Parts(pilot, backHair, [...head, ...mid], front, skin, ccol?.raw.color, ccol?.id === 'ccolor_gold', shape) : undefined,
   }
 }
 
 /** Katman listesini birleştirip görsel döndürür: hazırsa hemen, değilse çizilince. */
-function useComp(ps: Part[], px: number) {
+function useComp(ps: Part[], px: number, retainPrevious = true) {
   const n = Math.min(512, Math.max(96, Math.ceil(px / 64) * 64))
   const key = ps.length ? n + JSON.stringify(ps) : ''
   const [state, setState] = useState<{ key: string; uri?: string }>({ key, uri: ps.length ? composed(ps, n) : undefined })
@@ -251,7 +254,7 @@ function useComp(ps: Part[], px: number) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
   if (!ps.length) return undefined
-  return state.key === key ? state.uri ?? composed(ps, n) : composed(ps, n) ?? state.uri
+  return state.key === key ? state.uri ?? composed(ps, n) : composed(ps, n) ?? (retainPrevious ? state.uri : undefined)
 }
 
 /** Kart kenarından bakarken (çerçevesiz avatar): görselin ne kadarı kartın üstünde kalsın. */
@@ -261,11 +264,12 @@ export function peekMetrics(size: number) {
 
 const EX = 0.62 // gözün en fazla kayması: görsel genişliğinin yüzdesi (512'de ~3 px)
 
-export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = false, look, mood, frame = true, pet, alive, interactive = false }: {
+export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = false, look, mood, frame = true, pet, alive, interactive = false, legacyPose = false }: {
   animal: string; equipped?: Equipped; seed?: string; gender?: Gender | null; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
   /** Yanında hayvanı göster (varsayılan: çerçeveli ve 96 piksel veya daha büyük). */ pet?: boolean
   /** Bakınma + göz kırpma + nefes (varsayılan: büyük avatarlarda; listelerde kapalı kalır). */ alive?: boolean
   /** Profil ve büyük ayna gibi kendi düğmesine yer olan sahneler. */ interactive?: boolean
+  /** Gallery comparison with the previous contact artwork. */ legacyPose?: boolean
 }) {
   const eq = equipped ?? {}
   const sd = seed ?? animal
@@ -275,9 +279,10 @@ export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = fal
   const cradle = p && pose === 'hug' ? cradleFor(p.id) : undefined
   const item = frame && pose !== 'hug' ? heldKind(eq.held) : undefined
   const held = item ? HELD_ART[item] : undefined
+  const pilot = p && !held && !legacyPose ? poseV2For(p.id, pose, currentId(eq, 'clothes', sd, gender)) : undefined
   const contact = p && !held && contactFor(p.id, pose)
-  const action = interactive && p && (contact || cradle) && COMPANION_ACTIONS[p.id]
-  const live = !cradle && (alive ?? size >= 100)
+  const action = interactive && p && (pilot?.reaction ?? ((contact || cradle) && COMPANION_ACTIONS[p.id]))
+  const live = !pilot && !cradle && (alive ?? size >= 100)
   const root = useRef<HTMLDivElement>(null)
   const [tap, setTap] = useState(0)
   const [playing, setPlaying] = useState<{ key: string; motion: boolean } | null>(null)
@@ -295,7 +300,13 @@ export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = fal
   }
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
-  const L = layers(eq, sd, (action && isPlaying) || heldPlaying ? 'happy' : mood, cradle, gender)
+  // The pilot reacts through its isolated detail; keep its composed body stable
+  // on tap so a cold smile composition cannot briefly reveal the old scene.
+  const L = layers(eq, sd, !pilot && ((action && isPlaying) || heldPlaying) ? 'happy' : mood, cradle, gender, pilot)
+  const uriPilotBase = useComp(L.pilot?.base ?? [], px, false)
+  const uriPilotDetail = useComp(L.pilot?.detail ?? [], px, false)
+  const uriPilotFront = useComp(L.pilot?.front ?? [], px, false)
+  const pilotReady = !!(pilot && uriPilotBase && uriPilotDetail && (!L.pilot?.front.length || uriPilotFront))
   const split = live && L.moving
   const uriCradle = useComp(cradle ? L.all : [], px)
   const uriAll = useComp(split || cradle ? [] : L.all, px)
@@ -372,17 +383,34 @@ export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = fal
     width: held.size * size,
   } : undefined
   const grounded = p && pose === 'side' && p.id !== 'chick'
+  const pilotRect = pilot?.garment.petRect
+  const pilotTarget = pilotReady && pilot ? {
+    inset: 'auto',
+    left: `${(pilotRect?.[0] ?? pilot.reaction.pivot[0] - 48) / 512 * 100}%`,
+    top: `${(pilotRect?.[1] ?? pilot.reaction.pivot[1] - 48) / 512 * 100}%`,
+    width: `${(pilotRect?.[2] ?? 96) / 512 * 100}%`,
+    height: `${(pilotRect?.[3] ?? 96) / 512 * 100}%`,
+  } : undefined
   const cls = [
     'avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '',
     live ? 'alive' : '', isPlaying && !action ? 'tap' : '', p ? 'with-pet' : '',
     p && `scene-${pose}`, contact || held ? 'scene-contact' : '', held ? 'scene-held' : '',
+    pilotReady ? 'scene-v2' : '',
   ].filter(Boolean).join(' ')
   const h = hash(sd)
   return (
     <div ref={root} className={cls} style={{ width: size, height: size, ['--breath-delay' as string]: `-${h % 3000}ms`, ...lookVars }} onPointerDown={action || (interactive && held) ? undefined : () => play(companionKey)}>
       {frame && <div className="av-bg" style={{ background: BG[eq.bg ?? 'none'] ?? BG.none }} />}
-      {cradle ? (
-        <div key={isPlaying ? tap : 0} className={`av-stage av-illustration${isPlaying && action ? ` av-react-${p?.id}` : ''}`}>
+      {pilotReady ? (
+        <div className="av-stage av-v2" role="img" aria-label={p ? `${p.name} tutan çocuk` : undefined}>
+          <img src={uriPilotBase} alt="" draggable={false} />
+          <img key={isPlaying ? tap : 0} src={uriPilotDetail} alt="" draggable={false}
+            className={isPlaying && playing?.motion && action ? `av-v2-${pilot.reaction.type}` : undefined}
+            style={{ transformOrigin: `${pilot.reaction.pivot[0] / 512 * 100}% ${pilot.reaction.pivot[1] / 512 * 100}%`, ['--av-nose-shift' as string]: `${1.5 / 512 * 100}%` }} />
+          {uriPilotFront && <img src={uriPilotFront} alt="" draggable={false} />}
+        </div>
+      ) : cradle ? (
+        <div key={isPlaying ? tap : 0} className={`av-stage av-illustration${isPlaying && playing?.motion && action ? ` av-react-${p?.id}` : ''}`}>
           {uriCradle && <img src={uriCradle} alt={p ? `Kucağında ${p.name.toLocaleLowerCase('tr-TR')} tutan çocuk` : ''} draggable={false} />}
         </div>
       ) : (
@@ -413,7 +441,7 @@ export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = fal
             {grounded && <span className="av-companion-ground" aria-hidden="true"
               style={{ left: '83%', bottom: contact ? '3.5%' : '7%' }} />}
             {contact ? (
-              uriContact && <img key={isPlaying ? tap : 0} className={`av-contact${isPlaying && action ? ` av-react-${p?.id}` : ''}`}
+              uriContact && <img key={isPlaying ? tap : 0} className={`av-contact${isPlaying && playing?.motion && action ? ` av-react-${p?.id}` : ''}`}
                 src={uriContact} style={contactStyle} alt={p?.name ?? ''} draggable={false} />
             ) : p && (
               <img className="av-pet pose-side" src={fx(p.id)} alt={p.name} title={p.name} draggable={false} style={petStyle} />
@@ -422,7 +450,7 @@ export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = fal
         </div>
       )}
       {action && <button type="button" className={`av-play-pet${pose === 'hug' ? ' av-play-pet-hug' : ''}`}
-        onClick={() => play(companionKey)} aria-label={action.label} title={action.label} />}
+        style={pilotTarget} onClick={() => play(companionKey)} aria-label={action.label} title={action.label} />}
       {interactive && held && item && <button type="button" className="av-play-held"
         style={heldStyle} onClick={() => play(item)} aria-label={HELD_ACTION[item]} title={HELD_ACTION[item]} />}
       {isPlaying && action && <span key={tap} className="av-companion-reply" role="status">{action.reply}</span>}

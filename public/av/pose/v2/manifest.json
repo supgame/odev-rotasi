@@ -1,0 +1,129 @@
+{
+  "poses": [
+    {
+      "animal": "chick",
+      "pose": "side",
+      "name": "palm",
+      "head": {
+        "scale": 1.18,
+        "dx": -58,
+        "dy": -30,
+        "clip": "M0 0H640V405H0Z"
+      },
+      "garments": {
+        "clothes_tshirt": {
+          "body": "pose/v2/palm-tshirt-body.webp",
+          "skinMask": "pose/v2/palm-tshirt-skin-mask.webp",
+          "clothMask": "pose/v2/palm-tshirt-cloth-mask.webp",
+          "skinRef": 182.0,
+          "clothRef": 68,
+          "front": "pose/v2/palm-tshirt-front.webp",
+          "pet": "pose/v2/palm-tshirt-pet.webp",
+          "detail": "pose/v2/palm-tshirt-detail.webp",
+          "petRect": [
+            387,
+            276,
+            90,
+            143
+          ],
+          "frontSkinMask": "pose/v2/palm-tshirt-skin-mask.webp",
+          "frontClothMask": "pose/v2/palm-tshirt-cloth-mask.webp"
+        },
+        "clothes_hoodie": {
+          "body": "pose/v2/palm-hoodie-body.webp",
+          "skinMask": "pose/v2/palm-hoodie-skin-mask.webp",
+          "clothMask": "pose/v2/palm-hoodie-cloth-mask.webp",
+          "skinRef": 188,
+          "clothRef": 91.0,
+          "front": "pose/v2/palm-hoodie-front.webp",
+          "pet": "pose/v2/palm-hoodie-pet.webp",
+          "detail": "pose/v2/palm-hoodie-detail.webp",
+          "petRect": [
+            381,
+            276,
+            90,
+            143
+          ],
+          "frontSkinMask": "pose/v2/palm-hoodie-skin-mask.webp",
+          "frontClothMask": "pose/v2/palm-hoodie-cloth-mask.webp",
+          "reaction": {
+            "type": "nod",
+            "pivot": [
+              414.146,
+              337.556
+            ],
+            "label": "Civcive dokun",
+            "reply": "Cik!"
+          }
+        }
+      },
+      "reaction": {
+        "type": "nod",
+        "pivot": [
+          420.146,
+          337.556
+        ],
+        "label": "Civcive dokun",
+        "reply": "Cik!"
+      }
+    },
+    {
+      "animal": "rabbit",
+      "pose": "hug",
+      "name": "cradle",
+      "head": {
+        "scale": 1.18,
+        "dx": -20,
+        "dy": -30,
+        "clip": "M0 0H640V405H0Z"
+      },
+      "garments": {
+        "clothes_tshirt": {
+          "body": "pose/v2/cradle-tshirt-body.webp",
+          "skinMask": "pose/v2/cradle-tshirt-skin-mask.webp",
+          "clothMask": "pose/v2/cradle-tshirt-cloth-mask.webp",
+          "skinRef": 174.0,
+          "clothRef": 81,
+          "front": "pose/v2/cradle-tshirt-front.webp",
+          "pet": "pose/v2/cradle-tshirt-pet.webp",
+          "detail": "pose/v2/cradle-tshirt-detail.webp",
+          "petRect": [
+            215,
+            236,
+            178,
+            234
+          ],
+          "frontSkinMask": "pose/v2/cradle-tshirt-skin-mask.webp",
+          "frontClothMask": "pose/v2/cradle-tshirt-cloth-mask.webp"
+        },
+        "clothes_hoodie": {
+          "body": "pose/v2/cradle-hoodie-body.webp",
+          "skinMask": "pose/v2/cradle-hoodie-skin-mask.webp",
+          "clothMask": "pose/v2/cradle-hoodie-cloth-mask.webp",
+          "skinRef": 184.0,
+          "clothRef": 85,
+          "front": "pose/v2/cradle-hoodie-front.webp",
+          "pet": "pose/v2/cradle-hoodie-pet.webp",
+          "detail": "pose/v2/cradle-hoodie-detail.webp",
+          "petRect": [
+            215,
+            236,
+            178,
+            234
+          ],
+          "frontSkinMask": "pose/v2/cradle-hoodie-skin-mask.webp",
+          "frontClothMask": "pose/v2/cradle-hoodie-cloth-mask.webp"
+        }
+      },
+      "reaction": {
+        "type": "nose",
+        "pivot": [
+          249.426,
+          322.667
+        ],
+        "label": "Tavşanın burnuna dokun",
+        "reply": "Pıt pıt!"
+      }
+    }
+  ]
+}
