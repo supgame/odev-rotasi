@@ -31,6 +31,8 @@ Toplam onaylı çizim tahmini: ~160-170 (4 poz + 56 kıyafet + 89 tür + 10-20 �
 2. **Kedi (ve eski temas sahneleri) hâlâ eski usul:** kol omuzdan yapıştırılmış, kedi gerçekçi stilde. Kedi ve köpeğin Yanımda/Kucağımda sahneleri v2 şablonuyla yeniden yapılacak (eski Faz 8 temas çizimleri emekliye). → 3. güne eklendi.
 3. **Hayvanlar dükkândakiyle aynı değil:** dükkân kartındaki hayvan görseli ile sahnedeki (poz) çizimi farklı stil/görünüm. Her tür için tek kanonik çizim: dükkân kartı, yanımda duruşu ve poz sahneleri aynı karakterden türetilecek. 89 türün stil birliği bu kapsamda. → 5.-6. gün partilerinin kabul ölçüsü.
 
+4. **Kombinasyon hataları (ekran `10_zirh_bere_tavsan.png`):** zırh + bere + tavşan kucak: kollar zırhın üstüne yapıştırılmış lacivert kumaş yamaları, zırh kesik, bere altından kısa saç iki yana kanat gibi taşıyor. Tek tek yamamak yerine **önce sistematik görsel denetim**: her kıyafet × poz × saç × şapka birleşimini otomatik çizen ızgara, hataları listele, öncelik sırala. Kural: düzgün çizimi olmayan birleşim gösterilmez (ör. v2 çizimi olmayan kıyafette Kucağımda yerine Yanımda'ya düş). → 3. günün başına, diğer işlerden önce.
+
 Kabul (ek): telefonda Elimde eşyası tutarken kol tek parça, eşya çocukla aynı çizgide; kedi/köpek sahnelerinde omuzdan kol çıkmıyor; dükkân kartındaki hayvan ile avatarın yanındaki hayvan aynı karakter.
 
 Her gün sonunda: Claude tarayıcıda bakar, sana 2-3 ekran görüntüsü atar, onaylarsan canlıya alır.
