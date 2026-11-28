@@ -33,3 +33,4 @@ Yerleşik ImageGen aracı, şeffaf PNG ve ikinci ekran görüntüsü referansıy
 - [x] Ortak kucak pozunda hayvanı ve elleri ağız çizgisinin altında tut. Küçük kartlarda ve dükkân aynasında kontrol et.
 - [x] Başımda pozunda 11 hayvanın temasını saç veya şapkaya hizala. Seçili arka planı hayvanın arkasına kadar uzat.
 - [x] Omzumda pozunda pati ve pençeleri kıyafetin omuz çizgisine hizala. Süzülen türleri omzun yanında göster.
+- [x] Kıyafet çizimlerini kartın boyutuna göre ölçekle. Dükkân kartı ile aynada aynı seçili rengi kullan.

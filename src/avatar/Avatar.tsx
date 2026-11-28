@@ -502,7 +502,7 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
     if (layer) return <ProductLayer layer={layer} kind={slot} />
   }
   if (slot === 'clothes' || slot === 'ccolor') {
-    const color = slot === 'ccolor' ? ITEM.get(id) : equipped.ccolor ? ITEM.get(equipped.ccolor) : ITEM.get('ccolor_blue')
+    const color = slot === 'ccolor' ? ITEM.get(id) : pick(equipped, 'ccolor', seed)
     const garment = slot === 'ccolor' ? ITEM.get('clothes_tshirt')?.raw : raw
     const layer = clothesPart(garment, color)
     if (layer && id === 'clothes_dinosaur') {
