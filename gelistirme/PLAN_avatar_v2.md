@@ -7,6 +7,14 @@ Sırayla:
 3. **Astra (Codex) çizimleri:** kedi ve köpek sahneleri v2 yöntemiyle; köpek (el uzanmış), papağan (omuz), fil (büyük hayvan). Tek Codex, arka planda; brief `gelistirme/avatar_uretim/BRIEF_v2_gun3.md`.
 4. Gün sonu: Claude tarayıcıda eski/yeni yan yana ekran görüntüsü atar, onaylanırsa canlıya.
 
+### Kalıcı ilkeler (kullanıcı, 28 Kas gece)
+- **İleride geliştirilebilir olsun:** animasyon vb. sonradan eklenebilmeli. Bunun için: poz/sahne verisi koddan ayrı manifestte (`public/av/pose/v2/manifest.json`); her sahnede oynayabilecek parçalar (baş, kuyruk, kol ucu, eşya) ayrı katman ve dönme noktasıyla tutulur; üretim betikleri ve istemler `gelistirme/avatar_uretim/` altında tekrar çalıştırılabilir; yeni eşya/poz eklemenin adımları README'de. İleride tam vücut iskeletli (rig) animasyona geçilirse katalog kimlikleri ve satın alımlar aynı kalacak şekilde.
+- **Bütün kombinler uyumlu olsun, her ihtimal değerlendirilsin.** Tam çarpım katrilyonlarca (renkler dahil) olduğundan tek tek gözle bakılamaz; yöntem:
+  1. Renkler (ten, saç rengi, kıyafet rengi, göz) maskeyle boyandığı için şekli değiştirmez: her maskede tüm renkler bir kez denetlenir (taşma/leke).
+  2. Şekli etkileyen eksenler birbiriyle çakıştığı ikili/üçlü gruplar halinde **eksiksiz** çizilir: saç × şapka (14×31), saç × gözlük × şapka, saç × kıyafet × poz, kıyafet × poz × hayvan sınıfı, Elimde × poz × hayvan, yüz şekli × kulak × saç × şapka, ifade × ağız × göz biçimi.
+  3. Otomatik piksel kontrolleri (şapka dışına taşan saç, kesik/boşluk, maske taşması, çift kontur, tuval dışına çıkan parça) şüphelileri işaretler; işaretlenenler + rastgele örnek ızgara Claude'un ve kullanıcının gözüne gider.
+  4. Sonuç tablosu `gelistirme/v3_denetim/` altında: her grup için kaç birleşim, kaçı temiz, kaçı bozuk, bozuklar ne yapılacak (düzelt / gizle / yeniden çiz). Tablo bitmeden "tamam" denmez; yeni eşya eklenince aynı denetim yeniden koşar.
+
 Sonraki günler (4-7) aşağıdaki tabloda; kullanıcının 28 Kas akşamı eklediği hedefler (Elimde, kedi, dükkân-sahne hayvan birliği, kombinasyon hataları) tabloya işlendi.
 
 Karar: **hibrit poz şablonu** (Opus ve GPT Astra bağımsız sorulunca ikisi de bunu seçti; ayrıntı `mimari_danisma/`).
