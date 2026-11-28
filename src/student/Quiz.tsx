@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { errText, type Equipped, type StudentHome } from '../data/types'
+import { errText, type Equipped, type Gender, type StudentHome } from '../data/types'
 import { Avatar, peekMetrics, skinColor, type Look, type Mood } from '../avatar/Avatar'
 import { Icon } from '../ui/Icon'
 import { Modal } from '../ui/Modal'
@@ -35,9 +35,9 @@ export function clearDraft(studentId: string, assignmentId: string) {
   try { localStorage.removeItem(draftKey(studentId, assignmentId)) } catch { /* boş */ }
 }
 
-export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }: {
+export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed, gender }: {
   assignment: A; onSubmit: (answers: Record<string, number>) => Promise<void>; onCancel: () => void
-  animal: string; equipped: Equipped; seed: string
+  animal: string; equipped: Equipped; seed: string; gender?: Gender | null
 }) {
   const qs = assignment.questions
   const [draft] = useState(() => loadDraft(seed, assignment))
@@ -79,7 +79,7 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
     setNod((v) => v + 1)
   }
   const pk = peekMetrics(PEEK)
-  const hand = skinColor(equipped, seed)
+  const hand = skinColor(equipped, seed, gender)
 
   function trySend() {
     if (blanks > 0) {
@@ -109,7 +109,7 @@ export function Quiz({ assignment, onSubmit, onCancel, animal, equipped, seed }:
       <div className="peek-wrap" style={{ marginTop: pk.room + 26 }}>
         <div className={'peeker' + (busy ? ' hop' : '')} key={'p' + i} style={{ top: -pk.offset }}>
           <div className={'peek-nod' + (nod ? ' n' + (nod % 2) : '')}>
-            <Avatar animal={animal} equipped={{ ...equipped, bg: undefined }} size={PEEK} seed={seed} frame={false} look={look} mood={busy ? 'happy' : mood} />
+            <Avatar animal={animal} equipped={{ ...equipped, bg: undefined }} size={PEEK} seed={seed} gender={gender} frame={false} look={look} mood={busy ? 'happy' : mood} />
           </div>
         </div>
         <span className="paw l" style={{ background: hand }} />

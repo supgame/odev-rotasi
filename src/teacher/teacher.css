@@ -28,3 +28,4 @@
 .lock-note p { margin: 0; }
 .lock-note .btn { justify-self: start; }
 textarea[readonly] { opacity: .7; cursor: not-allowed; }
+.t .mini-select { width: auto; min-width: 7.5rem; padding: .3rem .5rem; font-size: .9rem; }

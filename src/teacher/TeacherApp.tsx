@@ -3,7 +3,7 @@ import { Avatar } from '../avatar/Avatar'
 import { SPECIES, fx } from '../avatar/catalog'
 import { api } from '../data/api'
 import { resetDemo } from '../data/mock'
-import { errText, type TAssignment, type TClass, type TStudent, type TSubmission } from '../data/types'
+import { errText, type Gender, type TAssignment, type TClass, type TStudent, type TSubmission } from '../data/types'
 import { parseQuestions, questionsToText } from './questionText'
 import { Icon, Logo } from '../ui/Icon'
 import './teacher.css'
@@ -258,7 +258,7 @@ function Results() {
                 const sub = subs.find((x) => x.student_id === s.id)
                 return (
                   <tr key={s.id}>
-                    <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} size={34} /> {s.display_name}</span></td>
+                    <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} gender={s.gender} size={34} /> {s.display_name}</span></td>
                     <td>{sub ? (sub.source === 'kagit' ? <span className="status paper">Kâğıttan</span> : <span className="status open">Online</span>) : <span className="status">Yapmadı</span>}</td>
                     <td>{sub ? `${sub.correct}/${sub.total}` : ''}</td>
                     <td>{sub ? `+${sub.stars_earned}` : ''}</td>
@@ -307,7 +307,8 @@ function Results() {
 function Students() {
   const [list, setList] = useState<TStudent[]>([])
   const [show, setShow] = useState(false)
-  const [n, setN] = useState({ display_name: '', animal: ANIMALS[0].id, grade: 3 as 3 | 4 })
+  const [n, setN] = useState({ display_name: '', animal: ANIMALS[0].id, grade: 3 as 3 | 4, gender: null as Gender | null })
+  const [err, setErr] = useState('')
   const load = useCallback(() => { api.tStudents().then(setList) }, [])
   useEffect(load, [load])
   return (
@@ -315,12 +316,21 @@ function Students() {
       <p className="hint">Gerçek soyadı ve fotoğraf yazma. Ad ya da takma ad yeter.</p>
       <label className="check"><input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Şifreleri göster</label>
       <div className="tbl-wrap"><table className="tbl">
-        <thead><tr><th>Öğrenci</th><th>Sınıf</th><th>Şifre</th><th>Yıldız</th><th /></tr></thead>
+        <thead><tr><th>Öğrenci</th><th>Sınıf</th><th>Cinsiyet</th><th>Şifre</th><th>Yıldız</th><th /></tr></thead>
         <tbody>
           {list.map((s) => (
             <tr key={s.id}>
-              <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} size={34} /> {s.display_name}</span></td>
+              <td><span className="t-who"><Avatar animal={s.animal} seed={s.id} gender={s.gender} size={34} /> {s.display_name}</span></td>
               <td><span className={'grade-pill g' + s.grade}>{s.grade}</span></td>
+              <td>
+                <select className="mini-select" aria-label={`${s.display_name} cinsiyeti`} value={s.gender ?? ''} onChange={async (e) => {
+                  const g = (e.target.value || null) as Gender | null
+                  setErr('')
+                  try { await api.tSetGender(s.id, g); load() } catch (x) { setErr(errText(x)) }
+                }}>
+                  <option value="">Seçilmedi</option><option value="kiz">Kız</option><option value="erkek">Erkek</option>
+                </select>
+              </td>
               <td>{s.pin === null ? <span className="muted">Yok</span> : show ? s.pin : '••••'}</td>
               <td>{s.stars}</td>
               <td className="nowrap">
@@ -331,13 +341,16 @@ function Students() {
           ))}
         </tbody>
       </table></div>
+      {err && <p className="err">{err}</p>}
+      <p className="hint">Cinsiyet yalnız başlangıç saçını, kıyafetini ve dükkândaki önerileri belirler; hiçbir eşyayı kilitlemez. Değiştirince aldığı ve taktığı eşyalar aynen kalır. Boş bırakırsan çocuk ilk girişte kendisi seçer.</p>
       <h3>Öğrenci ekle</h3>
       <div className="row">
         <input placeholder="Ad" value={n.display_name} onChange={(e) => setN({ ...n, display_name: e.target.value })} />
         <select value={n.grade} onChange={(e) => setN({ ...n, grade: Number(e.target.value) as 3 | 4 })}><option value={3}>3. sınıf</option><option value={4}>4. sınıf</option></select>
+        <select title="Cinsiyet" value={n.gender ?? ''} onChange={(e) => setN({ ...n, gender: (e.target.value || null) as Gender | null })}><option value="">Cinsiyet: çocuk seçsin</option><option value="kiz">Kız</option><option value="erkek">Erkek</option></select>
         <select title="Hayvan arkadaşı" value={n.animal} onChange={(e) => setN({ ...n, animal: e.target.value })}>{ANIMALS.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
         <img src={fx(n.animal)} alt="" width={40} height={40} />
-        <button className="btn purple" disabled={!n.display_name.trim()} onClick={async () => { await api.tAddStudent({ ...n, display_name: n.display_name.trim() }); setN({ ...n, display_name: '' }); load() }}>Ekle</button>
+        <button className="btn purple" disabled={!n.display_name.trim()} onClick={async () => { setErr(''); try { await api.tAddStudent({ ...n, display_name: n.display_name.trim() }); setN({ ...n, display_name: '', gender: null }); load() } catch (x) { setErr(errText(x)) } }}>Ekle</button>
       </div>
     </section>
   )

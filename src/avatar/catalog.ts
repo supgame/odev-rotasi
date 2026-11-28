@@ -162,6 +162,12 @@ function eyeArt(shape: keyof typeof eyeRefs) {
     open: path + '_open.webp',
   }
 }
+/** Aynı göz, kirpikleri kırpılmış (gelistirme/avatar_uretim/kirpiksiz_goz.py). Maske, iris ve açıklık ortak. */
+function plainEyeArt(shape: keyof typeof eyeRefs) {
+  const art = eyeArt(shape)
+  const path = `features/eshape_${shape}_plain`
+  return { ...art, layer: path + '.webp', closed: path + '_closed.webp', empty: path + '_empty.webp' }
+}
 
 // Yüz çeşitleri: tek tabanın dönüşümleri (gelistirme/avatar_uretim/yuz_varyant.py). Hepsi bedava, ilk gün rastgele dağılır.
 export const FACE_ITEMS: CatalogItem[] = [
@@ -200,6 +206,8 @@ export const FACE_ITEMS: CatalogItem[] = [
     ['gentle', 'Yumuşak göz', 0, eyeArt('gentle')],
     ['sparkle', 'İri parlak göz', 0, eyeArt('bright')],
     ['upturned', 'Uçları yukarı göz', 0, eyeArt('upturn')],
+    ['plain', 'Sade göz', 0, plainEyeArt('round')],
+    ['plain_almond', 'Sade badem göz', 0, plainEyeArt('almond')],
   ]),
 ]
 

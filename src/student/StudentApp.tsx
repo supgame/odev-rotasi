@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, CLASS_CODE } from '../data/api'
-import { errText, type RosterStudent, type StudentHome, type SubmitResult } from '../data/types'
+import { errText, type Gender, type RosterStudent, type StudentHome, type SubmitResult } from '../data/types'
 import { Avatar } from '../avatar/Avatar'
 import { Icon, Logo, StarCount } from '../ui/Icon'
 import { Quiz, loadDraft } from './Quiz'
@@ -13,6 +13,13 @@ const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) } catch { 
 const setToken = (t: string | null) => {
   try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY) } catch { /* boş */ }
 }
+
+// İlk girişte (PIN yeni seçildiyse) cinsiyet sorulur; uygulama o arada kapanırsa bir dahaki girişte yine sorulsun.
+const ASK_KEY = (id: string) => 'odevrotasi_ask_gender_' + id
+const askLater = (id: string, on: boolean) => {
+  try { if (on) localStorage.setItem(ASK_KEY(id), '1'); else localStorage.removeItem(ASK_KEY(id)) } catch { /* boş */ }
+}
+const mustAsk = (id: string) => { try { return localStorage.getItem(ASK_KEY(id)) === '1' } catch { return false } }
 
 type Screen = 'pick' | 'pin' | 'home' | 'quiz' | 'result' | 'shop'
 
@@ -48,10 +55,19 @@ export function StudentApp() {
       <PinScreen
         student={chosen}
         onBack={() => setScreen('pick')}
-        onDone={(t) => { setToken(t); setTok(t); setScreen('home') }}
+        onDone={(t) => {
+          if (!chosen.has_pin && !chosen.gender) askLater(chosen.id, true)
+          setToken(t); setTok(t); setScreen('home')
+        }}
       />
     )
   if (!home) return <Loading text={err} />
+  if (!home.me.gender && mustAsk(home.me.id))
+    return <GenderPick home={home} onPick={async (g) => {
+      await api.setGender(token!, g)
+      askLater(home.me.id, false)
+      await refresh()
+    }} />
 
   if (screen === 'quiz' && home.assignment)
     return (
@@ -60,6 +76,7 @@ export function StudentApp() {
         animal={home.me.animal}
         equipped={home.me.equipped}
         seed={home.me.id}
+        gender={home.me.gender}
         onCancel={() => setScreen('home')}
         onSubmit={async (answers) => {
           const r = await api.submit(token!, home.assignment!.id, answers)
@@ -123,7 +140,7 @@ function PickName({ onPick }: { onPick: (s: RosterStudent) => void }) {
           <div className="name-grid">
             {list.filter((s) => s.grade === g).map((s, k) => (
               <button key={s.id} className="player-card" style={{ ['--pc' as string]: CARD_COLORS[(k + g) % CARD_COLORS.length] }} onClick={() => onPick(s)}>
-                <span className="pc-stage"><Avatar animal={s.animal} equipped={s.equipped} seed={s.id} size={74} /></span>
+                <span className="pc-stage"><Avatar animal={s.animal} equipped={s.equipped} seed={s.id} gender={s.gender} size={74} /></span>
                 <span className="pc-name">{s.display_name}</span>
               </button>
             ))}
@@ -182,7 +199,7 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
       </div>
       <section className={'panel pin-panel' + (shake ? ' shake' : '')} key={shake}>
         <span className="ribbon gold" style={{ left: '50%', transform: 'translateX(-50%)' }}><Icon name="lock" size={22} />Giriş</span>
-        <Avatar animal={student.animal} equipped={student.equipped} seed={student.id} size={82} pet={false} bounce />
+        <Avatar animal={student.animal} equipped={student.equipped} seed={student.id} gender={student.gender} size={82} pet={false} bounce />
         <h2>{student.display_name}</h2>
         <p className="say">{title}</p>
         <p className="hint pin-hint">
@@ -206,6 +223,36 @@ function PinScreen({ student, onBack, onDone }: { student: RosterStudent; onBack
   )
 }
 
+// ---------- 2b) İlk girişte: kız mı erkek mi ----------
+function GenderPick({ home, onPick }: { home: StudentHome; onPick: (g: Gender) => Promise<void> }) {
+  const [busy, setBusy] = useState<Gender | null>(null)
+  const [err, setErr] = useState('')
+  const { me } = home
+  const choose = async (g: Gender) => {
+    if (busy) return
+    setBusy(g); setErr('')
+    try { await onPick(g) } catch (e) { setErr(errText(e)); setBusy(null) }
+  }
+  return (
+    <div className="page narrow gender-page">
+      <header className="gender-head">
+        <h1 className="choose pop">Merhaba {me.display_name}!</h1>
+        <p className="say">Kız mısın, erkek mi? Kartına dokun.</p>
+      </header>
+      <div className="gender-cards">
+        {(['kiz', 'erkek'] as Gender[]).map((g) => (
+          <button key={g} type="button" className={'gender-card ' + g + (busy === g ? ' picked' : '')} disabled={!!busy} onClick={() => choose(g)}>
+            <span className="gender-stage"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} gender={g} size={132} pet={false} bounce={busy === g} /></span>
+            <span className="gender-name">{g === 'kiz' ? 'Kızım' : 'Erkeğim'}</span>
+          </button>
+        ))}
+      </div>
+      <p className="hint gender-hint">Sonra dükkândan saçını, kıyafetini, her şeyini istediğin gibi değiştirebilirsin.</p>
+      {err && <p className="err" aria-live="polite">{err}</p>}
+    </div>
+  )
+}
+
 // ---------- 3) Ana sayfa ----------
 function left(iso: string) {
   const ms = Date.parse(iso) - Date.now()
@@ -225,7 +272,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
   return (
     <div className="page student-home">
       <div className="hud">
-        <span className="hud-me"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={40} pet={false} alive={false} /><b>{me.display_name}</b></span>
+        <span className="hud-me"><Avatar animal={me.animal} equipped={me.equipped} seed={me.id} gender={me.gender} size={40} pet={false} alive={false} /><b>{me.display_name}</b></span>
         <span className="grow" />
         <StarCount n={me.stars} />
         <button className="icon-btn pink" onClick={onShop} aria-label="Dükkan"><Icon name="bag" size={30} /></button>
@@ -267,7 +314,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
             )}
           </section>
           <div className="student-profile">
-            <Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={240} pet interactive />
+            <Avatar animal={me.animal} equipped={me.equipped} seed={me.id} gender={me.gender} size={240} pet interactive />
           </div>
         </div>
 
@@ -280,7 +327,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
               <div className="mates">
                 {home.classmates.map((m) => (
                   <div key={m.id} className="mate">
-                    <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} size={62} />
+                    <Avatar animal={m.animal} equipped={m.equipped} seed={m.id} gender={m.gender} size={62} />
                     <span>{m.display_name}</span>
                   </div>
                 ))}
@@ -346,7 +393,7 @@ function Route({ home, onShowResult }: { home: StudentHome; onShowResult: () => 
               <Tag className={cls} style={{ left: x + '%', top: y }} onClick={click} aria-label={'title' in n ? n.title : n.kind === 'start' ? 'Başlangıç' : 'Kilitli'}>
                 {n.kind === 'locked' ? <Icon name="lock" size={34} />
                   : n.kind === 'start' ? <Icon name="flag" size={32} />
-                  : cur ? <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={56} pet={false} alive={false} />
+                  : cur ? <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} gender={home.me.gender} size={56} pet={false} alive={false} />
                   : <Icon name="check" size={32} />}
                 {'stars' in n && n.stars !== undefined && <MiniStars n={n.stars} size={14} />}
               </Tag>
@@ -403,7 +450,7 @@ function ResultScreen({ result, fresh, home, onHome, onShop }: {
         </div>
         <h1 className="result-score"><b>{result.correct}</b> / {result.total} doğru</h1>
         <p className="result-cheer">{msg}</p>
-        <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} size={120} mood="happy" />
+        <Avatar animal={home.me.animal} equipped={home.me.equipped} seed={home.me.id} gender={home.me.gender} size={120} mood="happy" />
         <div className="earned"><StarCount n={shown} big plus /></div>
         <p className="muted">yıldız kazandın</p>
         <div className="row result-actions">

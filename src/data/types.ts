@@ -1,5 +1,7 @@
 export type Slot = 'skin' | 'fshape' | 'ears' | 'eyes' | 'cheek' | 'hair' | 'hcolor' | 'hat' | 'glasses' | 'clothes' | 'ccolor' | 'face' | 'mouth' | 'nose' | 'brow' | 'eshape' | 'pet' | 'pose' | 'bg' | 'held'
 export type Equipped = Partial<Record<Slot, string>>
+/** Yalnız başlangıç görünümü ve dükkân önerisi için; eşya kilitlemez. null = eski kayıt, görünüm değişmez. */
+export type Gender = 'kiz' | 'erkek'
 
 export interface Question {
   id: string
@@ -17,6 +19,7 @@ export interface RosterStudent {
   grade: 3 | 4
   equipped: Equipped
   has_pin: boolean
+  gender?: Gender | null
 }
 
 export interface ResultItem {
@@ -35,12 +38,12 @@ export interface SubmitResult {
 }
 
 export interface StudentHome {
-  me: { id: string; display_name: string; animal: string; grade: 3 | 4; stars: number; equipped: Equipped }
+  me: { id: string; display_name: string; animal: string; grade: 3 | 4; stars: number; equipped: Equipped; gender?: Gender | null }
   owned: string[]
   assignment: null | { id: string; title: string; closes_at: string; questions: Question[] }
   my_result: SubmitResult | null
   past: { title: string; correct: number; total: number; stars_earned: number; created_at: string }[]
-  classmates: { id: string; display_name: string; animal: string; equipped: Equipped }[]
+  classmates: { id: string; display_name: string; animal: string; equipped: Equipped; gender?: Gender | null }[]
   goal: { target: number; reward: string; current: number }
 }
 
@@ -59,6 +62,7 @@ export interface TStudent {
   grade: 3 | 4
   pin: string | null
   stars: number
+  gender: Gender | null
 }
 export interface TAssignment {
   id: string
@@ -92,6 +96,7 @@ export interface Api {
   submit(token: string, assignmentId: string, answers: Record<string, number>): Promise<SubmitResult>
   buy(token: string, itemId: string): Promise<void>
   equip(token: string, slot: Slot, itemId: string | null): Promise<void>
+  setGender(token: string, gender: Gender): Promise<void>
   shop(): Promise<ShopItem[]>
 
   teacherLogin(email: string, password: string): Promise<void>
@@ -100,7 +105,8 @@ export interface Api {
   tClass(): Promise<TClass>
   tSaveClass(c: Partial<TClass>): Promise<void>
   tStudents(): Promise<TStudent[]>
-  tAddStudent(s: { display_name: string; animal: string; grade: 3 | 4 }): Promise<void>
+  tAddStudent(s: { display_name: string; animal: string; grade: 3 | 4; gender: Gender | null }): Promise<void>
+  tSetGender(id: string, gender: Gender | null): Promise<void>
   tDeleteStudent(id: string): Promise<void>
   tResetPin(id: string): Promise<void>
   tAssignments(): Promise<TAssignment[]>
@@ -117,6 +123,7 @@ export const ERR: Record<string, string> = {
   YETERSIZ_YILDIZ: 'Yıldızın yetmiyor. Biraz daha ödev çöz!',
   ZATEN_GONDERILDI: 'Bu ödevi zaten gönderdin.',
   SET_KAPALI: 'Bu ödevin süresi bitti.',
+  CINSIYET_GECERSIZ: 'Kız ya da erkek kartından birini seç.',
 }
 
 export function errText(e: unknown): string {

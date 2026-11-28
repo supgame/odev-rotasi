@@ -24,7 +24,7 @@ function seed(): DB {
   const opens = new Date(now - 3600e3).toISOString()
   const closes = new Date(now + 5 * 86400e3).toISOString()
   const s = (display_name: string, animal: string, grade: 3 | 4, equipped: Equipped = {}) => ({
-    id: uid(), display_name, animal, grade, pin: null, stars_bonus: 0, equipped,
+    id: uid(), display_name, animal, grade, pin: null, stars_bonus: 0, equipped, gender: null,
   })
   const q3: Question[] = [
     { id: 'q1', type: 'mc', text: '345 + 128 işleminin sonucu kaçtır?', options: ['463', '473', '483', '373'], answer: 1, explanation: 'Birler: 5+8=13, 3 yaz 1 elde. Onlar: 4+2+1=7. Yüzler: 3+1=4. Sonuç 473.' },
@@ -114,7 +114,7 @@ export const mockApi: Api = {
     const db = load()
     return wait({
       className: db.cls.name,
-      students: db.students.map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, grade: s.grade, equipped: s.equipped ?? {}, has_pin: !!s.pin })),
+      students: db.students.map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, grade: s.grade, equipped: s.equipped ?? {}, has_pin: !!s.pin, gender: s.gender ?? null })),
     })
   },
   async login(_code, studentId, pin) {
@@ -142,7 +142,7 @@ export const mockApi: Api = {
     const a = activeFor(db, st.grade)
     const sub = a && db.submissions.find((x) => x.assignment_id === a.id && x.student_id === st.id)
     const home: StudentHome = {
-      me: { id: st.id, display_name: st.display_name, animal: st.animal, grade: st.grade, stars: stars(db, st.id), equipped: st.equipped },
+      me: { id: st.id, display_name: st.display_name, animal: st.animal, grade: st.grade, stars: stars(db, st.id), equipped: st.equipped, gender: st.gender ?? null },
       owned: db.purchases.filter((p) => p.student_id === st.id).map((p) => p.item_id),
       assignment: a ? { id: a.id, title: a.title, closes_at: a.closes_at, questions: a.questions.map(({ answer: _a, explanation: _e, ...q }) => q) } : null,
       my_result: sub && a
@@ -154,7 +154,7 @@ export const mockApi: Api = {
         title: db.assignments.find((a2) => a2.id === x.assignment_id)?.title ?? '?',
         correct: x.correct, total: x.total, stars_earned: x.stars_earned, created_at: x.created_at,
       })),
-      classmates: db.students.filter((s) => s.id !== st.id).map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, equipped: s.equipped })),
+      classmates: db.students.filter((s) => s.id !== st.id).map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, equipped: s.equipped, gender: s.gender ?? null })),
       goal: {
         target: db.cls.goal_target,
         reward: db.cls.goal_reward,
@@ -205,6 +205,14 @@ export const mockApi: Api = {
     save(db)
     return wait(undefined)
   },
+  async setGender(token, gender) {
+    const db = load()
+    const st = bySession(db, token)
+    if (gender !== 'kiz' && gender !== 'erkek') throw new Error('CINSIYET_GECERSIZ')
+    st.gender = gender // takılı eşyalar ve alımlar olduğu gibi kalır
+    save(db)
+    return wait(undefined)
+  },
   async shop() {
     return wait(SHOP_ITEMS)
   },
@@ -226,10 +234,16 @@ export const mockApi: Api = {
   },
   async tStudents() {
     const db = load()
-    return wait(db.students.map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, grade: s.grade, pin: s.pin, stars: stars(db, s.id) })))
+    return wait(db.students.map((s) => ({ id: s.id, display_name: s.display_name, animal: s.animal, grade: s.grade, pin: s.pin, stars: stars(db, s.id), gender: s.gender ?? null })))
   },
   async tAddStudent(s) {
     const db = load(); db.students.push({ ...s, id: uid(), pin: null, stars_bonus: 0, equipped: {} }); save(db)
+  },
+  async tSetGender(id, gender) {
+    const db = load()
+    const st = db.students.find((s) => s.id === id)
+    if (st) st.gender = gender
+    save(db)
   },
   async tDeleteStudent(id) {
     const db = load()

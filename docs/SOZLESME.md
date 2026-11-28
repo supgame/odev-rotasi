@@ -12,7 +12,8 @@ Tek sabit link (WhatsApp grubuna sabitlenir). Cuma öğretmen seti yükler, link
 
 ## Tablolar
 - `classes(id uuid, name text, code text unique, teacher_id uuid -> auth.users, goal_target int default 300, goal_reward text)`
-- `students(id uuid, class_id, display_name text, animal text, grade int check 3|4, pin text null, stars_bonus int default 0, equipped jsonb default '{}', created_at)`
+- `students(id uuid, class_id, display_name text, animal text, grade int check 3|4, pin text null, stars_bonus int default 0, equipped jsonb default '{}', gender text null check 'kiz'|'erkek', created_at)`
+  - `gender` (0015): yalnız takılmamış yuvaların başlangıç görünümünü (saç, kıyafet rengi, kaş, göz biçimi/kirpik, yanak; `src/avatar/gender.ts`) ve dükkânda "Sana önerilen" sırasını belirler. Eşya kilitlemez, değişince alımlar ve takılılar korunur. null = eski kayıt, görünüm değişmez. Öğrenci ilk girişte (PIN'i yeni seçtiyse) iki kartla seçer; öğretmen ekleme sırasında ya da listeden değiştirir.
   - `pin` null ise öğrenci ilk girişte kendi PIN'ini koyar.
   - `equipped`: `{ "<yuva>": "<eşya id>" }`, yuvalar: skin, hair, hcolor, hat, glasses, clothes, ccolor, face, pet, bg. Boş yuva öğrenci id'sinden bedava varsayılan alır; `pet` yoksa `animal` (öğretmenin verdiği hayvan) gösterilir.
 - `assignments(id uuid, class_id, grade int, title text, opens_at timestamptz, closes_at timestamptz, questions jsonb, created_at)`
@@ -29,17 +30,17 @@ Yıldız bakiyesi = sum(submissions.stars_earned) + stars_bonus − sum(shop_ite
 ## Öğrenci RPC'leri (anon çağırır, SECURITY DEFINER, search_path sabit)
 Hepsi `jsonb` döner. Hata: `raise exception` ile kısa Türkçe mesaj kodu (`PIN_HATALI`, `KILITLI`, `OTURUM_YOK`, `YETERSIZ_YILDIZ`, `ZATEN_GONDERILDI`, `SET_KAPALI`).
 
-1. `roster(p_class_code text)` → `{ class: {name}, students: [{id, display_name, animal, grade, equipped, has_pin}] }`
+1. `roster(p_class_code text)` → `{ class: {name}, students: [{id, display_name, animal, grade, equipped, has_pin, gender}] }`
 2. `student_login(p_class_code text, p_student_id uuid, p_pin text)` → `{ token }`
    - pin null ise p_pin'i (4 hane) kaydeder ve girer.
 3. `student_home(p_token text)` → 
    ```
-   { me: {id, display_name, animal, grade, stars, equipped},
+   { me: {id, display_name, animal, grade, stars, equipped, gender},
      owned: [item_id],
      assignment: null | {id, title, closes_at, questions: [{id,type,text,options}]},   // cevapsız
      my_result: null | <submit_assignment çıktısı>,
      past: [{title, correct, total, stars_earned, created_at}],
-     classmates: [{id, display_name, animal, equipped}],      // yıldız YOK
+     classmates: [{id, display_name, animal, equipped, gender}],      // yıldız YOK
      goal: {target, reward, current} }                          // current = sınıfın toplam kazanılan yıldızı (harcama düşülmez)
    ```
    - `assignment`: öğrencinin sınıfı ve grade'i için now() between opens_at and closes_at olan en yeni set.
@@ -47,8 +48,9 @@ Hepsi `jsonb` döner. Hata: `raise exception` ile kısa Türkçe mesaj kodu (`PI
    `{ correct, total, stars_earned, items: [{id, given, answer, ok, explanation}] }`
 5. `buy_item(p_token, p_item_id text)` → `{ stars, owned }`
 6. `equip_item(p_token, p_slot text, p_item_id text|null)` → `{ equipped }` (sahip olmadığı eşyayı takamaz)
+7. `set_my_gender(p_token, p_gender 'kiz'|'erkek')` → `{ gender }` (hata: `CINSIYET_GECERSIZ`; eşyalara dokunmaz)
 
 ## Öğretmen
 Supabase Auth (e-posta + şifre). RLS: öğretmen yalnız `classes.teacher_id = auth.uid()` olan sınıfın satırlarını görür/yazar.
-- students CRUD (pin dahil görür), assignments CRUD, submissions okuma, kâğıt için `teacher_add_paper(p_assignment_id, p_student_id, p_correct int)` RPC (source='kagit', yıldız = 10 + correct).
+- students CRUD (pin ve gender dahil görür/değiştirir), assignments CRUD, submissions okuma, kâğıt için `teacher_add_paper(p_assignment_id, p_student_id, p_correct int)` RPC (source='kagit', yıldız = 10 + correct).
 - `teacher_reset_pin(p_student_id)` → pin = null.

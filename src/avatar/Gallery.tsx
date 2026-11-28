@@ -28,6 +28,13 @@ export function Gallery() {
       <div className="gallery">
         {seeds.map((s, k) => <div key={s.id} className="g-cell"><Avatar animal={s.id} seed={'ornek' + k} size={84} /><span>{s.name} ile</span></div>)}
       </div>
+      <h2>Aynı öğrenci: cinsiyetsiz (eski) · kız · erkek</h2>
+      <div className="gallery">
+        {seeds.slice(0, 8).map((s, k) => (['', 'kiz', 'erkek'] as const).map((g) => (
+          <div key={s.id + g} className="g-cell"><Avatar animal={s.id} seed={'ornek' + k} gender={g || null} size={84} pet={false} />
+            <span>{g === 'kiz' ? 'Kız' : g === 'erkek' ? 'Erkek' : 'Boş'}</span></div>
+        )))}
+      </div>
       {Object.keys(SLOT_NAMES).map((slot) => (
         <section key={slot}>
           <h2>{SLOT_NAMES[slot]}</h2>

@@ -56,6 +56,7 @@ create table public.students (
   pin text check (pin ~ '^[0-9]{4}$'),
   stars_bonus integer not null default 0 check (stars_bonus >= 0),
   equipped jsonb not null default '{}'::jsonb check (jsonb_typeof(equipped) = 'object'),
+  gender text constraint students_gender_check check (gender is null or gender in ('kiz', 'erkek')),
   created_at timestamptz not null default now()
 );
 create table public.assignments (
@@ -357,6 +358,8 @@ insert into public.shop_items (id, slot, name, price) values
   ('eshape_gentle', 'eshape', 'Yumuşak göz', 0),
   ('eshape_sparkle', 'eshape', 'İri parlak göz', 0),
   ('eshape_upturned', 'eshape', 'Uçları yukarı göz', 0),
+  ('eshape_plain', 'eshape', 'Sade göz', 0),
+  ('eshape_plain_almond', 'eshape', 'Sade badem göz', 0),
   ('held_football', 'held', 'Futbol topu', 15),
   ('held_book', 'held', 'Hikâye kitabı', 18),
   ('held_toycar', 'held', 'Tahta araba', 20),
@@ -529,7 +532,8 @@ begin
     'class', jsonb_build_object('name', v_class.name),
     'students', (select coalesce(jsonb_agg(jsonb_build_object(
       'id', s.id, 'display_name', s.display_name, 'animal', s.animal,
-      'grade', s.grade, 'equipped', s.equipped, 'has_pin', s.pin is not null
+      'grade', s.grade, 'equipped', s.equipped, 'has_pin', s.pin is not null,
+      'gender', s.gender
     ) order by s.display_name, s.id), '[]'::jsonb)
     from public.students s where s.class_id = v_class.id)
   );
@@ -578,7 +582,8 @@ begin
     'me', jsonb_build_object(
       'id', v_student.id, 'display_name', v_student.display_name,
       'animal', v_student.animal, 'grade', v_student.grade,
-      'stars', odev_private.balance(v_student_id), 'equipped', v_student.equipped
+      'stars', odev_private.balance(v_student_id), 'equipped', v_student.equipped,
+      'gender', v_student.gender
     ),
     'owned', odev_private.owned(v_student_id),
     'assignment', v_assignment_json,
@@ -590,7 +595,8 @@ begin
     from public.submissions s join public.assignments a on a.id = s.assignment_id
     where s.student_id = v_student_id and a.id is distinct from v_assignment.id),
     'classmates', (select coalesce(jsonb_agg(jsonb_build_object(
-      'id', s.id, 'display_name', s.display_name, 'animal', s.animal, 'equipped', s.equipped
+      'id', s.id, 'display_name', s.display_name, 'animal', s.animal, 'equipped', s.equipped,
+      'gender', s.gender
     ) order by s.display_name, s.id), '[]'::jsonb)
     from public.students s where s.class_id = v_student.class_id and s.id <> v_student_id),
     'goal', (select jsonb_build_object(
@@ -797,6 +803,21 @@ returns table(student_id uuid, stars bigint) language sql stable security define
   where s.class_id = p_class_id and c.teacher_id = auth.uid();
 $$;
 
+-- Öğrenci kendi cinsiyetini kaydeder (ilk girişte iki kart). Eşyalara dokunmaz.
+create or replace function public.set_my_gender(p_token text, p_gender text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  v_student public.students;
+begin
+  if p_gender is null or p_gender not in ('kiz', 'erkek') then
+    raise exception 'CINSIYET_GECERSIZ';
+  end if;
+  v_student := odev_private.lock_student(p_token);
+  update public.students set gender = p_gender where id = v_student.id;
+  return jsonb_build_object('gender', p_gender);
+end;
+$$;
+
 -- PostgreSQL grants EXECUTE to PUBLIC by default. Supabase can also grant it
 -- directly to API roles. Clear both forms before granting individual RPCs.
 revoke all on all functions in schema odev_private from public, anon, authenticated;
@@ -805,13 +826,13 @@ grant execute on function odev_private.valid_questions(jsonb) to authenticated;
 
 revoke all on function public.roster(text), public.student_login(text, uuid, text),
   public.student_home(text), public.submit_assignment(text, uuid, jsonb),
-  public.buy_item(text, text), public.equip_item(text, text, text),
+  public.buy_item(text, text), public.equip_item(text, text, text), public.set_my_gender(text, text),
   public.teacher_add_paper(uuid, uuid, integer), public.teacher_reset_pin(uuid),
   public.teacher_star_balances(uuid) from public, anon, authenticated;
 grant execute on function public.teacher_star_balances(uuid) to authenticated;
 grant execute on function public.roster(text), public.student_login(text, uuid, text),
   public.student_home(text), public.submit_assignment(text, uuid, jsonb),
-  public.buy_item(text, text), public.equip_item(text, text, text) to anon;
+  public.buy_item(text, text), public.equip_item(text, text, text), public.set_my_gender(text, text) to anon;
 grant execute on function public.teacher_add_paper(uuid, uuid, integer), public.teacher_reset_pin(uuid) to authenticated;
 
 commit;

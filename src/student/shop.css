@@ -104,3 +104,5 @@
   box-shadow: inset 0 0 0 2px var(--rc);
   background: color-mix(in srgb, var(--rc) 12%, #fffcf4);
 }
+/* Cinsiyete göre öneri: yalnız sıralama ve küçük etiket, kilit yok. */
+.shop-refresh .item-thumb .pick-tag { position: absolute; z-index: 5; bottom: 6px; left: 6px; display: inline-flex; align-items: center; gap: 2px; background: #fff4d1; color: var(--ink); border: 1px solid #c79a2b; border-radius: 9px; padding: 1px 6px; font-size: .72rem; font-weight: 800; }

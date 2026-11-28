@@ -80,3 +80,21 @@
   .bubble, .route-chest .chest-ic, .q-page .option, .answer-review.answer-highlight { animation: none !important; }
   .confetti { display: none; }
 }
+
+/* İlk girişte kız/erkek seçimi: iki büyük kart, avatar o cinsiyetin başlangıç görünümüyle. */
+.gender-page { display: flex; flex-direction: column; align-items: center; min-height: 100dvh; justify-content: center; padding-top: 1rem; padding-bottom: 1.5rem; }
+.gender-head { text-align: center; }
+.gender-head .choose { margin-top: 0; font-size: clamp(1.8rem, 7vw, 2.4rem); }
+.gender-head .say { font-size: 1.2rem; font-weight: 700; margin: .3rem 0 0; color: var(--ink-2); }
+.gender-cards { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.75rem, 4vw, 1.5rem); width: 100%; max-width: 520px; margin-top: 1.4rem; }
+.gender-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; background: #fff; border: var(--edge); border-radius: 26px; box-shadow: 0 6px 0 var(--ink); cursor: pointer; transition: transform .15s; font: inherit; color: inherit; }
+.gender-card.kiz { --gc: #ffd1e6; }
+.gender-card.erkek { --gc: #a9e2ff; }
+.gender-card:hover:not(:disabled) { transform: translateY(-4px) rotate(-1.5deg); }
+.gender-card.erkek:hover:not(:disabled) { transform: translateY(-4px) rotate(1.5deg); }
+.gender-card:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink); }
+.gender-card:disabled:not(.picked) { opacity: .45; }
+.gender-card.picked { outline: 5px solid var(--gold); outline-offset: 3px; }
+.gender-stage { background: var(--gc); display: grid; place-items: center; padding: 26px 0 12px; border-bottom: var(--edge); }
+.gender-name { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 6vw, 2rem); padding: .45rem .3rem .55rem; }
+.gender-hint { text-align: center; max-width: 30ch; margin-top: 1.2rem; }

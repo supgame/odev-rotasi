@@ -1,6 +1,6 @@
 // Avatar = ImageGen katmanları (saç arkası, temel, ifade, kıyafet, saç önü, şapka, gözlük) canvas'ta birleşir + yanında hayvan + arka plan.
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import type { Equipped } from '../data/types'
+import type { Equipped, Gender } from '../data/types'
 import { BG } from './bg'
 import { ITEMS, MANIFEST, SPECIES, fx, type CatalogItem, type ItemSlot, type Raw, type Species } from './catalog'
 import { compose, composed, type Part } from './render'
@@ -8,6 +8,7 @@ import { cradleFor, cradleParts, type CradleShape } from './companionCradle'
 import { COMPANION_ACTIONS, contactFor, contactParts, gripParts } from './companionContact'
 import { HELD_ACTION, HELD_ART, heldKind } from './held'
 import { HeldScene } from './HeldScene'
+import { GENDER_DEFAULTS } from './gender'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -37,22 +38,27 @@ const DEF: Partial<Record<ItemSlot, CatalogItem[]>> = {
   cheek: [...ONE('cheek_none'), ...FREE('cheek')],
   mouth: ONE('mouth_expression'), nose: ONE('nose_original'), brow: ONE('brow_expression'), eshape: ONE('eshape_expression'),
 }
+// Cinsiyetli havuzlar; cinsiyeti boş kayıt yalnız DEF'i görür (eski görünüm birebir kalır).
+const GDEF: Record<Gender, Partial<Record<ItemSlot, CatalogItem[]>>> = {
+  kiz: Object.fromEntries(Object.entries(GENDER_DEFAULTS.kiz).map(([k, ids]) => [k, ids.flatMap(ONE)])),
+  erkek: Object.fromEntries(Object.entries(GENDER_DEFAULTS.erkek).map(([k, ids]) => [k, ids.flatMap(ONE)])),
+}
 function hash(s: string) {
   let h = 2166136261
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619)
   return h >>> 0
 }
-function pick(eq: Equipped, slot: ItemSlot, seed: string): CatalogItem | undefined {
+function pick(eq: Equipped, slot: ItemSlot, seed: string, g?: Gender | null): CatalogItem | undefined {
   const it = eq[slot] ? ITEM.get(eq[slot]!) : undefined
   if (it && it.slot === slot) return it // katalogdan kalkmış eski eşya sayılmaz
-  const list = DEF[slot]
+  const list = (g && GDEF[g]?.[slot]?.length ? GDEF[g][slot] : undefined) ?? DEF[slot]
   return list?.length ? list[hash(seed + slot) % list.length] : undefined
 }
 
 /** Yuvada şu an görünen eşya id'si (takılı ya da varsayılan). */
-export const currentId = (eq: Equipped, slot: ItemSlot, seed: string) => pick(eq, slot, seed)?.id
+export const currentId = (eq: Equipped, slot: ItemSlot, seed: string, g?: Gender | null) => pick(eq, slot, seed, g)?.id
 
-export const skinColor = (eq: Equipped, seed: string) => '#' + (pick(eq, 'skin', seed)?.raw.color ?? 'e0ac80')
+export const skinColor = (eq: Equipped, seed: string, g?: Gender | null) => '#' + (pick(eq, 'skin', seed, g)?.raw.color ?? 'e0ac80')
 
 // Manifest alanları eşyadan eşyaya biraz farklı olabilir: layer | layers[k], mask (yol ya da {k: yol}), ref (sayı ya da {k: sayı}).
 const at = (v: unknown, k: string) => (v && typeof v === 'object' ? (v as Record<string, unknown>)[k] : v)
@@ -118,34 +124,34 @@ function clothesPart(cl: Raw | undefined, color: CatalogItem | undefined) {
 interface Layers { all: Part[]; lower: Part[]; iris: Part[]; blink: Part[]; upper: Part[]; moving: boolean; skin?: string; garment: Part | null; eyeOpen?: string }
 
 /** Katmanları sıraya koyar. Canlı avatar için ayrıca: alt (gözler boş), kayan iris, kırpma, üst (kıyafet, saç önü, şapka, gözlük). */
-function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): Layers {
-  const skin = pick(eq, 'skin', seed)?.raw.color as string | undefined
-  const hairItem = pick(eq, 'hair', seed)
+function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape, g?: Gender | null): Layers {
+  const skin = pick(eq, 'skin', seed, g)?.raw.color as string | undefined
+  const hairItem = pick(eq, 'hair', seed, g)
   const hair = hairItem?.raw
-  const hcol = pick(eq, 'hcolor', seed)?.raw.color as string | undefined
-  const hat = pick(eq, 'hat', seed)?.raw
+  const hcol = pick(eq, 'hcolor', seed, g)?.raw.color as string | undefined
+  const hat = pick(eq, 'hat', seed, g)?.raw
   const volume = hat && BRIMMED_HATS.has(hat.layer ?? '') ? VOLUME_HAIR[hairItem?.id ?? ''] : undefined
   const underHat = hat && !volume
-  const gl = pick(eq, 'glasses', seed)?.raw
-  const clothes = pick(eq, 'clothes', seed)
-  const ccol = pick(eq, 'ccolor', seed)
-  const faceIt = mood === 'happy' && HAPPY ? HAPPY : pick(eq, 'face', seed)
+  const gl = pick(eq, 'glasses', seed, g)?.raw
+  const clothes = pick(eq, 'clothes', seed, g)
+  const ccol = pick(eq, 'ccolor', seed, g)
+  const faceIt = mood === 'happy' && HAPPY ? HAPPY : pick(eq, 'face', seed, g)
   const face = (faceIt ?? STARTER_SMILES[hash(seed + 'smile') % STARTER_SMILES.length])?.raw
-  const mouth = pick(eq, 'mouth', seed)
+  const mouth = pick(eq, 'mouth', seed, g)
   const overrideMouth = mood !== 'happy' && mouth && mouth.id !== 'mouth_expression'
-  const shape = (pick(eq, 'fshape', seed)?.raw.key as string) ?? 'oval'
-  const ears = (pick(eq, 'ears', seed)?.raw.key as string) ?? 'small'
-  const eyes = pick(eq, 'eyes', seed)?.raw.color as string | undefined
-  const cheek = pick(eq, 'cheek', seed)?.raw.key as string | undefined
+  const shape = (pick(eq, 'fshape', seed, g)?.raw.key as string) ?? 'oval'
+  const ears = (pick(eq, 'ears', seed, g)?.raw.key as string) ?? 'small'
+  const eyes = pick(eq, 'eyes', seed, g)?.raw.color as string | undefined
+  const cheek = pick(eq, 'cheek', seed, g)?.raw.key as string | undefined
   const b = MANIFEST.base
   const sub = (t: string) => t.replace('{shape}', shape).replace('{ears}', ears)
   const back = part(hair, 'back', hcol)
   const dx = V?.hairBackDx?.[shape] ?? 0 // dar yüzde at kuyruğu yanağa yaklaşsın
-  const brow = part(pick(eq, 'brow', seed)?.raw, null)
-  const nose = part(pick(eq, 'nose', seed)?.raw, null)
+  const brow = part(pick(eq, 'brow', seed, g)?.raw, null)
+  const nose = part(pick(eq, 'nose', seed, g)?.raw, null)
   // Decorative eye expressions retain their own artwork. Every ordinary
   // expression uses the chosen registered open/closed pair, including default.
-  const eyeStyle = pick(eq, 'eshape', seed)?.raw
+  const eyeStyle = pick(eq, 'eshape', seed, g)?.raw
   const ownExpressionEyes = ['face_happy_closed', ...COLORED_EXPRESSIONS].includes(faceIt?.id ?? '')
   const openEye = ownExpressionEyes ? null : part(eyeStyle, null, eyes)
   const closedEye = openEye && eyeStyle?.closed ? { src: eyeStyle.closed as string } : null
@@ -180,7 +186,7 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   ] : [{ ...expression, sourceRows: [expressionTop, expressionBottom] }]
   const mouthLayer = overrideMouth && mouth.raw.sourceFace ? part(ITEM.get(mouth.raw.sourceFace)?.raw, null, skin) : null
   if (mouthLayer) mouthLayer.sourceRows = [MOUTH_TOP, 512]
-  const deeperSkin = ['skin_brown', 'skin_tan', 'skin_dark'].includes(currentId(eq, 'skin', seed) ?? '')
+  const deeperSkin = ['skin_brown', 'skin_tan', 'skin_dark'].includes(currentId(eq, 'skin', seed, g) ?? '')
   const mid = [
     ...P(V && cheek && V.cheek[cheek] ? { src: V.cheek[cheek], stronger: deeperSkin } : null),
     ...expressionLayers,
@@ -255,8 +261,8 @@ export function peekMetrics(size: number) {
 
 const EX = 0.62 // gözün en fazla kayması: görsel genişliğinin yüzdesi (512'de ~3 px)
 
-export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look, mood, frame = true, pet, alive, interactive = false }: {
-  animal: string; equipped?: Equipped; seed?: string; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
+export function Avatar({ animal, equipped, seed, gender, size = 96, bounce = false, look, mood, frame = true, pet, alive, interactive = false }: {
+  animal: string; equipped?: Equipped; seed?: string; gender?: Gender | null; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
   /** Yanında hayvanı göster (varsayılan: çerçeveli ve 96 piksel veya daha büyük). */ pet?: boolean
   /** Bakınma + göz kırpma + nefes (varsayılan: büyük avatarlarda; listelerde kapalı kalır). */ alive?: boolean
   /** Profil ve büyük ayna gibi kendi düğmesine yer olan sahneler. */ interactive?: boolean
@@ -289,7 +295,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   }
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
-  const L = layers(eq, sd, (action && isPlaying) || heldPlaying ? 'happy' : mood, cradle)
+  const L = layers(eq, sd, (action && isPlaying) || heldPlaying ? 'happy' : mood, cradle, gender)
   const split = live && L.moving
   const uriCradle = useComp(cradle ? L.all : [], px)
   const uriAll = useComp(split || cradle ? [] : L.all, px)
@@ -384,7 +390,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
           <div className="av-stage">
             <div className="av-body" key={tap ? 'b' + tap : 'b'}>
               <div className="av-head">
-                {frame && !(uriAll || uriLow) && <span className="av-placeholder" style={{ background: skinColor(eq, sd) }} />}
+                {frame && !(uriAll || uriLow) && <span className="av-placeholder" style={{ background: skinColor(eq, sd, gender) }} />}
                 {split ? (
                   <>
                     {uriLow && <img className="av-kid" src={uriLow} alt="" draggable={false} style={kidStyle} />}
@@ -433,7 +439,7 @@ function ProductLayer({ layer, kind }: { layer: Part; kind: 'hat' | 'clothes' | 
   </div>
 }
 
-export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; slot: string; animal: string; equipped: Equipped; seed: string }) {
+export function ItemPreview({ id, slot, animal, equipped, seed, gender }: { id: string; slot: string; animal: string; equipped: Equipped; seed: string; gender?: Gender | null }) {
   if (slot === 'pet') {
     const sp = BY_ID.get(id.replace(/^pet_/, '')) ?? SPECIES[0]
     return <div className="pet-preview"><img src={fx(sp.id)} alt="" /></div>
@@ -446,7 +452,7 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
     if (layer) return <ProductLayer layer={layer} kind={slot} />
   }
   if (slot === 'clothes' || slot === 'ccolor') {
-    const color = slot === 'ccolor' ? ITEM.get(id) : pick(equipped, 'ccolor', seed)
+    const color = slot === 'ccolor' ? ITEM.get(id) : pick(equipped, 'ccolor', seed, gender)
     const garment = slot === 'ccolor' ? ITEM.get('clothes_tshirt')?.raw : raw
     const layer = clothesPart(garment, color)
     if (layer && id === 'clothes_dinosaur') {
@@ -457,12 +463,12 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
     }
     if (layer) return <ProductLayer layer={layer} kind="clothes" />
   }
-  if (slot === 'held') return <Avatar animal={animal} equipped={eq} seed={seed} size={90} pet={false} alive={false} />
+  if (slot === 'held') return <Avatar animal={animal} equipped={eq} seed={seed} gender={gender} size={90} pet={false} alive={false} />
   if (slot === 'pose') {
     const pet = petOf(animal, eq)
-    return <Avatar animal={pet.id} equipped={eq} seed={seed} size={84} pet alive={false} />
+    return <Avatar animal={pet.id} equipped={eq} seed={seed} gender={gender} size={84} pet alive={false} />
   }
   const portrait = ['face', 'mouth', 'skin', 'ears', 'fshape', 'cheek', 'eyes', 'eshape', 'brow', 'nose'].includes(slot)
   const size = slot === 'fshape' ? 122 : portrait ? 112 : 84
-  return <Avatar animal={animal} equipped={eq} seed={seed} size={size} pet={false} alive={false} />
+  return <Avatar animal={animal} equipped={eq} seed={seed} gender={gender} size={size} pet={false} alive={false} />
 }

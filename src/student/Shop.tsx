@@ -5,6 +5,7 @@ import { errText, type Equipped, type ShopItem, type Slot, type StudentHome } fr
 import { Avatar, ItemPreview, availablePoses, currentId, petOf, poseOf, speciesOf } from '../avatar/Avatar'
 import { ITEMS, petItemId } from '../avatar/catalog'
 import { HERO_PETS } from '../avatar/companionContact'
+import { isRecommended } from '../avatar/gender'
 import { Icon, StarCount } from '../ui/Icon'
 import { Confetti } from './Confetti'
 import './shop.css'
@@ -82,14 +83,14 @@ export function Shop({ home, token, onBack, onChange }: {
     }
   }
 
-  const { animal, id: seed } = home.me
+  const { animal, id: seed, gender } = home.me
   const eq = home.me.equipped
   const previewEq = { ...eq, ...draft }
   const basePet = petItemId(speciesOf(animal).id)
   const slotId = (look: Equipped, s: Slot) => {
     if (s === 'pet') return petItemId(petOf(animal, look).id)
     if (s === 'pose') return 'pose_' + poseOf(look, petOf(animal, look).id)
-    return REMOVABLE.includes(s) ? look[s] : currentId(look, s, seed)
+    return REMOVABLE.includes(s) ? look[s] : currentId(look, s, seed, gender)
   }
   const wornId = (s: Slot) => slotId(eq, s)
   const owned = (it: ShopItem) => it.id === basePet || it.price === 0 || home.owned.includes(it.id)
@@ -102,7 +103,7 @@ export function Shop({ home, token, onBack, onChange }: {
     if (slot === 'pose') return poses.includes(it.id)
     if (slot === 'pet') return ownedPetIds.has(it.id)
     return true
-  }).sort((a, b) => a.price - b.price)
+  }).sort((a, b) => Number(isRecommended(b.id, gender)) - Number(isRecommended(a.id, gender)) || a.price - b.price)
   const colorSlot = slot === 'hair' ? 'hcolor' : slot === 'clothes' ? 'ccolor' : null
   const colors = colorSlot ? items.filter((it) => it.slot === colorSlot) : []
   const chosenColor = colorSlot ? colors.find((it) => it.id === slotId(previewEq, colorSlot)) : undefined
@@ -185,7 +186,7 @@ export function Shop({ home, token, onBack, onChange }: {
         </>}
       </dialog>
       <dialog ref={mirrorDialog} className="panel mirror-dialog" aria-label="Büyük ayna">
-        <Avatar animal={animal} equipped={previewEq} seed={seed} size={260} pet interactive />
+        <Avatar animal={animal} equipped={previewEq} seed={seed} gender={gender} size={260} pet interactive />
         {previewEq.held && handsFull && <p className="shop-caption">Ellerin kucaktaki arkadaşını tutuyor. Eşyanı görmek için Yanımda pozunu seç.</p>}
         <button className="btn ghost" onClick={() => mirrorDialog.current?.close()}>Kapat</button>
       </dialog>
@@ -200,7 +201,7 @@ export function Shop({ home, token, onBack, onChange }: {
         <div className="shop-editor">
           <aside className="panel mirror" aria-label="Kombin aynası">
             <button type="button" className="mirror-open" aria-label="Aynayı büyüt" onClick={() => mirrorDialog.current?.showModal()}>
-              <div className="stage"><Avatar animal={animal} equipped={previewEq} seed={seed} size={160} pet /></div>
+              <div className="stage"><Avatar animal={animal} equipped={previewEq} seed={seed} gender={gender} size={160} pet /></div>
               <span className="mirror-zoom"><Icon name="eye" size={18} /> Büyüt</span>
             </button>
             {trials.length > 0 && <div className="shop-trials" role="group" aria-label="Denenen parçalar">
@@ -236,9 +237,9 @@ export function Shop({ home, token, onBack, onChange }: {
             {colorChoices(colors, chosenColor.id, tryItem)}
             <div className="color-actions">{itemActions(chosenColor, false)}</div>
           </details>}
-          {slot === 'face' && currentId(previewEq, 'mouth', seed) !== 'mouth_expression' &&
+          {slot === 'face' && currentId(previewEq, 'mouth', seed, gender) !== 'mouth_expression' &&
             <p className="shop-caption">Seçtiğin ağız korunur. İfadenin kendi ağzını görmek için Ağız bölümünde <b>İfadeye göre</b> seç.</p>}
-          {slot === 'face' && (currentId(previewEq, 'brow', seed) !== 'brow_expression' || currentId(previewEq, 'eshape', seed) !== 'eshape_expression') &&
+          {slot === 'face' && (currentId(previewEq, 'brow', seed, gender) !== 'brow_expression' || currentId(previewEq, 'eshape', seed, gender) !== 'eshape_expression') &&
             <p className="shop-caption">Seçtiğin kaş ve göz biçimi ifadeden bağımsız kalır.</p>}
           {slot === 'pose' && <p className="shop-caption"><b>{previewPet.name} için duruşlar</b></p>}
           {slot === 'held' && <p className="shop-caption">{handsFull
@@ -252,8 +253,9 @@ export function Shop({ home, token, onBack, onChange }: {
               const tier = slot === 'held' ? (it.price >= 20 ? ' rare' : ' common') : ''
               return <article key={key} className={'item' + tier + (worn ? ' worn' : '')}>
                 <div className={'item-thumb slot-' + slot}>
-                  <ItemPreview id={it.id} slot={it.slot} animal={animal} equipped={previewEq} seed={seed} />
+                  <ItemPreview id={it.id} slot={it.slot} animal={animal} equipped={previewEq} seed={seed} gender={gender} />
                   {worn && <span className="worn-tag"><Icon name="check" size={14} />Takılı</span>}
+                  {!worn && group.some((item) => isRecommended(item.id, gender)) && <span className="pick-tag"><Icon name="star" size={12} />Sana önerilen</span>}
                 </div>
                 <span className="item-name">{it.name}</span>
                 {group.length > 1 && colorChoices(group, it.id, (item) => {
