@@ -1,5 +1,13 @@
 # Avatar v2 planı (28 Kas 2026 → 5 Ara 2026)
 
+## KARAR (28 Kas gece): yarın önce 3D denemesi
+Kullanıcı: Astra kullanmayalım, ekonomik olsun ama iş kötü olmasın. Yarın "devam" denince 3. gün yerine **bir günlük 3D denemesi**:
+- Yalnız görünüm katmanı değişir. Supabase, öğrenci/öğretmen akışı, ödev, yıldız, dükkân, satın alma ve eşya kimlikleri aynen kalır. Avatar `src/avatar/` içinde izole; `<Avatar>` bileşeninin dışarıya bakan arayüzü korunur, katalog kimlikleri 3D parçalara eşlenir.
+- Deneme ayrı dalda ve ayrı sayfada (`#/3d-deneme`), canlı site etkilenmez.
+- İçerik: serbest lisanslı (CC0 tercih), iskeletli, parçaları değiştirilebilen düşük poligonlu bir karakter seti bul, lisansını ve içeriğini doğrula (hayvan modelleri de); three.js ile tek karakter, 3-4 saç/şapka/kıyafet değişimi, renk değişimi, bekleme + top sektirme animasyonu.
+- Ölç: ucuz telefonda açılış süresi, dosya boyutu, akıcılık. Bugünkü 2D avatarla yan yana ekran görüntüsü.
+- Kullanıcı karar verir: 3D'ye geçiş (o zaman plan baştan yazılır) ya da 2D'de kalıp aşağıdaki 3. gün listesi (Astra'yı en aza indirerek).
+
 ## Yarın "3. güne başla" denince (29 Kas)
 Sırayla:
 1. **Görsel denetim ızgarası (Claude):** galeriye ya da ayrı bir sayfaya (`#/denetim`) her kıyafet (14) × poz (yanımda, kucak, avuç, Elimde) × saç (kısa, uzun, afro, başörtüsü) × şapka (yok, bere, kep) birleşimini otomatik çizen ızgara. Çıktı: bozuk birleşimlerin listesi + ekran görüntüleri (`gelistirme/v3_denetim/`). Kullanıcıya önce bu liste gösterilir.
