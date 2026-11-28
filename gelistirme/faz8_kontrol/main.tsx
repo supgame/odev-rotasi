@@ -11,7 +11,7 @@ const hats = ['', 'hat_cap_red', 'hat_pom_purple', 'hat_cowboy_brown']
 const label = (s: string) => s || 'şapkasız'
 const params = new URLSearchParams(location.search)
 const section = params.get('section') || '1'
-const size = Number(params.get('size') || 70)
+const size = Number(params.get('size') || (section === 'mirror' ? 250 : section === '3' || section === '4' ? 90 : 70))
 const box = (face: string, ear: string, hair: string, hat: string) => ({
   fshape: `fshape_${face}`, ears: `ears_${ear}`, hair,
   ...(hat ? { hat } : {}),
@@ -61,7 +61,7 @@ function App() { return <><header><b>Faz 8 · Bölüm {section}</b><span>{sectio
 const eyeShapes = ['round','almond','gentle','sparkle','upturned']
 function Eyes(){return <main className="eye-grid">{eyeShapes.map(eye=><article key={eye}><Avatar animal="" seed="faz8-eyes" equipped={{eshape:`eshape_${eye}`}} size={size || 90} pet={false}/><b>{eye}</b></article>)}</main>}
 const pets=['chick','cat','dog','rabbit','parrot','owl','turtle','fox','panda','bear','hedgehog','lion']
-function Pets(){return <main className="pet-grid">{pets.map(pet=><article key={pet}><h2>{pet}</h2><div className="pet-pair">{['hug','shoulder'].map(pose=><div key={pose}><Avatar animal="" seed="faz8-pet" equipped={{pet:`pet_${pet}`,pose:`pose_${pose}`}} size={size || 90}/><small>{pose}</small></div>)}</div></article>)}</main>}
+function Pets(){return <main className="pet-grid">{['cat','dog','rabbit','chick'].map(pet=><article key={pet}><h2>{pet}</h2><div className="pet-pair">{['side','hug'].map(pose=><div key={pose}><Avatar animal={pet} seed={`faz8-${pet}`} equipped={{pose:`pose_${pose}`}} size={size || 90} interactive/><small>{pose === 'side' ? 'temas' : 'kucak'}</small></div>)}</div></article>)}</main>}
 function Items(){return <main className="mirror-grid">{['football','basketball','book','balloon','kite','icecream','toycar','flower'].map(item=><article key={item}><h2>{item}</h2><Avatar animal="" seed="faz8-item" equipped={{}} size={size || 250}/></article>)}</main>}
 
 createRoot(document.getElementById('root')!).render(<App />)

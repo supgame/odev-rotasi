@@ -105,21 +105,6 @@ function sleeveParts(sleeves: Sleeve[], garment: Part | null): Part[] {
   }))
 }
 
-const HUG_WRISTS: [Sleeve, Sleeve] = [
-  { clip: 'M225 608 Q257 615 290 608 Q282 622 281 640 H214 Z', center: [252, 623], width: 78, length: 38, angle: 180 },
-  { clip: 'M346 608 Q377 615 412 608 L421 640 H356 Z', center: [384, 623], width: 78, length: 38, angle: 180 },
-]
-
-export const hugSleeves = (garment: Part | null) => sleeveParts(HUG_WRISTS, garment)
-
-// Papağan katmanında bilek sağ alt köşeye doğru uzanır.
-const PARROT_WRIST: Sleeve = {
-  clip: 'M477 613 Q504 622 531 607 L565 640 H498 Q492 625 477 613 Z',
-  center: [520, 625], width: 88, length: 60, angle: 141,
-}
-
-export const parrotGripSleeve = (garment: Part | null) => sleeveParts([PARROT_WRIST], garment)
-
 function atHead(part: Part): Part {
   const scale = 0.95
   // Sivri şapkanın ucu tuvalde kalsın, siperlik aynı yükseklikte dursun.

@@ -594,3 +594,34 @@ input.mini { width: 74px; padding: .25rem .4rem; }
 .buy-dialog { position: fixed; margin: auto; width: min(380px, calc(100% - 2rem)); text-align: center; color: var(--ink); }
 .buy-dialog::backdrop { background: rgba(35,33,77,.55); }
 .buy-dialog .row { justify-content: center; }
+
+/* Petting and hand contact move together at the sleeve seam. */
+.av-contact { position: absolute; height: auto; pointer-events: none; user-select: none; z-index: 2; transform-origin: 7% 62%; }
+.avatar.scene-contact .av-body { animation: none; }
+.avatar.scene-contact .av-head { transform: none; }
+.av-companion-ground {
+  position: absolute; width: 28%; height: 5%; transform: translate(-50%, 50%);
+  background: radial-gradient(ellipse, #573a254c, transparent 72%); pointer-events: none;
+}
+.av-pet.pose-side { filter: none; }
+.av-play-pet {
+  position: absolute; z-index: 3; inset: 48% 0 0 62%;
+  border: 0; border-radius: 20px; padding: 0; background: transparent; cursor: pointer;
+}
+.av-play-pet-hug { inset: 53% 18% 0; }
+.av-play-pet:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+.av-companion-reply {
+  position: absolute; z-index: 4; inset: 46% 2% auto auto; pointer-events: none;
+  padding: .22em .55em; border: 1.5px solid #5a3b29; border-radius: 1em;
+  background: #fff8df; color: #55351f; font-size: .86rem; font-weight: 800;
+}
+.av-illustration[class*='av-react-'] { transform-origin: 50% 89%; }
+.av-react-cat { animation: companion-purr 720ms ease-out both; }
+.av-react-dog { animation: companion-shake 660ms ease-in-out both; }
+.av-react-chick { animation: companion-peep 580ms ease-out both; }
+.av-react-rabbit { animation: companion-sniff 690ms ease-in-out both; }
+
+@keyframes companion-purr { 28%, 65% { transform: rotate(-2deg) scaleY(.985); } 46% { transform: rotate(-1deg); } }
+@keyframes companion-shake { 20%, 58% { transform: rotate(-4deg); } 39%, 77% { transform: rotate(2deg); } }
+@keyframes companion-peep { 28%, 60% { transform: scaleY(1.07) rotate(-2deg); } 44%, 78% { transform: scaleY(.97); } }
+@keyframes companion-sniff { 21%, 57% { transform: scaleX(.97); } 40%, 75% { transform: scaleX(1.013); } }

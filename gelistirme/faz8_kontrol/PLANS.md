@@ -10,3 +10,5 @@ Her aşamanın commitini çalışma alanıyla aynı başlangıçtaki yerel main 
 Bölüm 1 tamamlandı. Beş saçın kulak boşluğu kapatıldı. 288 birleşimde 216 şapkalı karşılaştırmanın çene bandında değişen piksel sayısı sıfır. Ölçüm ve kartlar çevrimdışı üretildi.
 
 Bölüm 2 tamamlandı. Göz biçimleri, açık ve kapalı katmanlar, iris ve eski eşya kimlikleri doğrulandı. `0013_goz_bicimleri.sql` iki yeni biçimi kataloğa ekler.
+
+Bölüm 3 tamamlandı. Dört türün oyun ve kucak görünümü, tür başına tepki ve eski pozlardan geri dönüş doğrulandı. Çevrimdışı iki boyut görseli hazır.

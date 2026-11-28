@@ -1,6 +1,7 @@
-import { Avatar, ItemPreview } from './Avatar'
+import { Avatar, ItemPreview, availablePoses } from './Avatar'
 import { SHOP_ITEMS, SLOT_NAMES } from '../data/shopItems'
 import { RABBIT_CRADLE, SPECIES } from './catalog'
+import { HERO_PETS } from './companionContact'
 import { Icon } from '../ui/Icon'
 
 // #/galeri: bütün eşyaların vitrini (öğretmen kontrolü için).
@@ -16,7 +17,12 @@ export function Gallery() {
       </div>
       <h2>Canlı hâli (dokun)</h2>
       <div className="gallery gallery-live">
-        {['side', 'shoulder', 'hug', 'peek', 'head'].map((p, k) => <div key={p} className="g-cell"><Avatar animal={['giraffe', 'frog', 'fox', 'elephant', 'hedgehog'][k]} seed={'canli' + k} equipped={{ pose: 'pose_' + p, fshape: 'fshape_' + ['round', 'long', 'square', 'heart', 'wide'][k] }} size={130} /><span>{SHOP_ITEMS.find((item) => item.id === 'pose_' + p)?.name}</span></div>)}
+        {HERO_PETS.map((animal) => (
+          <div key={animal} className="g-cell">
+            <Avatar animal={animal} seed={'canli-' + animal} size={130} interactive />
+            <span>{SPECIES.find((species) => species.id === animal)?.name}</span>
+          </div>
+        ))}
       </div>
       <h2>Başlangıç görünümleri</h2>
       <div className="gallery">
@@ -26,9 +32,9 @@ export function Gallery() {
         <section key={slot}>
           <h2>{SLOT_NAMES[slot]}</h2>
           <div className="gallery">
-            {SHOP_ITEMS.filter((i) => i.slot === slot).map((i) => (
+            {SHOP_ITEMS.filter((i) => i.slot === slot && (slot !== 'pose' || availablePoses('rabbit').includes(i.id))).map((i) => (
               <div key={i.id} className="g-cell">
-                <ItemPreview id={i.id} slot={slot} animal="fox" equipped={{}} seed="galeri" />
+                <ItemPreview id={i.id} slot={slot} animal="rabbit" equipped={{}} seed="galeri" />
                 <span>{i.name}</span><small>{i.price ? <><Icon name="star" size={14} /> {i.price}</> : 'Bedava'}</small>
               </div>
             ))}

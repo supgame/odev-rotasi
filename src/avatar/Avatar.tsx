@@ -4,7 +4,8 @@ import type { Equipped } from '../data/types'
 import { BG } from './bg'
 import { ITEMS, MANIFEST, SPECIES, fx, type CatalogItem, type ItemSlot, type Raw, type Species } from './catalog'
 import { compose, composed, type Part } from './render'
-import { cradleFor, cradleParts, hugSleeves, parrotGripSleeve, type CradleShape } from './companionCradle'
+import { cradleFor, cradleParts, type CradleShape } from './companionCradle'
+import { COMPANION_ACTIONS, contactFor, contactParts } from './companionContact'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -71,27 +72,18 @@ const NO_BLINK = ['face_wink', 'face_happy_closed']
 const COLORED_EXPRESSIONS = new Set(['face_surprised', 'face_hearts', 'face_stars'])
 const MOUTH_TOP = 251 // Ortak 512 px yüz tuvalinde göz katmanlarının bittiği çizgi.
 const EYES_TOP = 188
-const HUG_FACE_BOTTOM = 312 // Ortak yüz tuvalinde kucak çiziminin üst sınırı.
-const HUG_BOTTOM = 0.975
 const BASE_URL = import.meta.env.BASE_URL
 
 const SIDE_PETS = new Set(['giraffe', 'elephant', 'flamingo', 'llama', 'camel', 'mammoth', 'sauropod', 'moose', 'whale'])
 const BULKY_PETS = new Set(['dragon', 'trex', 'unicorn', 'phoenix', 'rhino', 'hippo', 'bison', 'croc', 'shark', 'peacock'])
 
-// Pati veya gövdenin saça dayandığı yer, 256 px hayvan tuvalinde.
-const HEAD_CONTACT: Partial<Record<string, [x: number, y: number]>> = {
-  hedgehog: [128, 239], snail: [134, 239], bee: [145, 239], ladybug: [128, 239],
-  butterfly: [128, 222], chick: [109, 236], frog: [128, 239], mouse: [128, 239],
-  hamster: [110, 239], turtle: [122, 238], owl: [120, 232],
-}
-
 export function availablePoses(petId: string): string[] {
-  if (SIDE_PETS.has(petId) || BULKY_PETS.has(petId)) return ['pose_side', 'pose_peek']
-  if (petId === 'rabbit') return ['pose_hug', 'pose_side', 'pose_peek']
-  return ['pose_side', 'pose_hug', 'pose_shoulder', 'pose_peek', ...(Object.hasOwn(HEAD_CONTACT, petId) ? ['pose_head'] : [])]
+  return cradleFor(petId) || contactFor(petId, 'hug')
+    ? ['pose_side', 'pose_hug']
+    : ['pose_side']
 }
 
-/** Arkadaşın duruşu (side | shoulder | peek | head | hug). */
+/** Eski, çizimi bulunmayan pozlar Yanımda olarak görünür. */
 export const poseOf = (eq: Equipped, petId: string) => {
   const poses = availablePoses(petId)
   const chosen = eq.pose && poses.includes(eq.pose) ? eq.pose : poses[0]
@@ -259,81 +251,38 @@ export function peekMetrics(size: number) {
   return { offset: Math.round(0.66 * size), room: Math.round(0.56 * size) }
 }
 
-// Temas çizgisi kaynağın 512 px tuvalinde, başın orta 64 pikselindeki opak tepeye denk gelir.
-const HAIR_TOP: Record<string, number> = {
-  hair_short: 87, hair_ponytail: 92, hair_curly: 87, hair_afro: 20, hair_straight_long: 90, hair_bob: 80, hair_bun: 29,
-  hair_braids: 91, hair_space_buns: 94, hair_wavy_long: 90, hair_bangs_long: 90, hair_spiky: 56,
-  hair_side_part: 78, hair_headscarf: 90,
-}
-const HAT_TOP: Record<string, number> = {
-  cap: 48, pom: 37, earflap: 43, cat: 71, bucket: 57, cowboy: 37, wizard: 12, pirate: 18, crown: 40, pilot: 81, bear: 87,
-}
-// Sivri veya asimetrik tepelerde temas orta eksenden ayrılır.
-const HEAD_HAT_SURFACE: Partial<Record<string, [x: number, y: number]>> = {
-  wizard: [304, 8], cowboy: [216, 37],
-}
-
-// Koordinatlar sahnenin genişliğine göre. Peek x'i çocuğun tuvaline göre ölçülür.
-const POSES: Record<string, { x: number; bottom: number; width: number; kid: number; gaze: number; ey: number }> = {
-  side: { x: 0.79, bottom: 0.94, width: 0.42, kid: -0.13, gaze: 1, ey: 0.45 },
-  shoulder: { x: 0.79, bottom: 0.79, width: 0.30, kid: -0.10, gaze: 1, ey: 0.20 },
-  peek: { x: 338 / 512, bottom: 0.90, width: 0.42, kid: -0.14, gaze: 1, ey: 0.15 },
-  hug: { x: 0.56, bottom: 0.91, width: 0.35, kid: -0.025, gaze: 0, ey: 1 },
-  head: { x: 0.50, bottom: 0.31, width: 0.30, kid: 0, gaze: 0, ey: -1 },
-}
-
-// Omza değen pençe veya pati, hayvanın 256 px tuvalindeki konumuyla sabitlenir.
-const SHOULDER_CONTACT: Partial<Record<string, { x: number; y: number; width: number; angle?: number; faceChild?: boolean }>> = {
-  owl: { x: 120, y: 230, width: 0.30, faceChild: true },
-  parrot: { x: 91, y: 224, width: 0.30 },
-  dove: { x: 148, y: 229, width: 0.29, faceChild: true },
-  chick: { x: 104, y: 232, width: 0.26, faceChild: true },
-  eagle: { x: 142, y: 233, width: 0.32, faceChild: true },
-  lion: { x: 117, y: 239, width: 0.27, angle: 7 },
-  tiger: { x: 120, y: 241, width: 0.27, angle: 8 },
-  leopard: { x: 211, y: 239, width: 0.31, angle: 8 },
-  wolf: { x: 74, y: 239, width: 0.27, angle: 8 },
-  blackcat: { x: 135, y: 240, width: 0.28, angle: 7, faceChild: true },
-  poodle: { x: 78, y: 240, width: 0.28, angle: 7 },
-  crab: { x: 72, y: 238, width: 0.25, angle: 7 },
-}
-
-// Standart hayvan katmanları aynı taban çizgisine hizalı. Uçan ve yüzenler omuz yanında süzülür.
-const DEFAULT_SHOULDER_CONTACT = { x: 128, y: 237, width: 0.28, angle: 7, faceChild: false }
-const FLOATING_PETS = new Set(['bat', 'bee', 'butterfly', 'fish', 'blowfish', 'dolphin', 'octopus', 'jelly', 'ghost', 'sun', 'moon'])
-
-// 512 px kıyafet katmanında kumaşın ilk opak sırası. Dinozorda kol, kapüşonun dışındadır.
-const SHOULDER_SURFACE: Partial<Record<string, [x: number, y: number]>> = {
-  clothes_tshirt: [368, 367],
-  clothes_hoodie: [368, 349],
-  clothes_knight: [368, 347],
-  clothes_dinosaur: [376, 374],
-  clothes_astronaut: [368, 362],
-  clothes_blazer: [368, 363],
-  clothes_superhero: [368, 362],
-  clothes_winter_coat: [368, 363],
-}
-
 const EX = 0.62 // gözün en fazla kayması: görsel genişliğinin yüzdesi (512'de ~3 px)
 
-export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look, mood, frame = true, pet, alive }: {
+export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look, mood, frame = true, pet, alive, interactive = false }: {
   animal: string; equipped?: Equipped; seed?: string; size?: number; bounce?: boolean; look?: Look; mood?: Mood; frame?: boolean
   /** Yanında hayvanı göster (varsayılan: çerçeveli ve 96 piksel veya daha büyük). */ pet?: boolean
   /** Bakınma + göz kırpma + nefes (varsayılan: büyük avatarlarda; listelerde kapalı kalır). */ alive?: boolean
+  /** Profil ve büyük ayna gibi kendi düğmesine yer olan sahneler. */ interactive?: boolean
 }) {
   const eq = equipped ?? {}
   const sd = seed ?? animal
   const showPet = (pet ?? size >= 96) && frame
   const p = showPet ? petOf(animal, eq) : null
   const pose = p ? poseOf(eq, p.id) : 'side'
-  const pz = POSES[pose]
   const cradle = p && pose === 'hug' ? cradleFor(p.id) : undefined
-  const fingerPerch = p?.id === 'parrot' && pose === 'hug' ? V?.parrotGrip : undefined
-  const sharedHug = !!p && pose === 'hug' && !cradle && !fingerPerch
+  const contact = p && contactFor(p.id, pose)
+  const action = interactive && p && (contact || cradle) && COMPANION_ACTIONS[p.id]
   const live = !cradle && (alive ?? size >= 100)
+  const root = useRef<HTMLDivElement>(null)
+  const [tap, setTap] = useState(0)
+  const [playing, setPlaying] = useState('')
+  const timer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+  const isPlaying = tap > 0 && playing === p?.id + ':' + pose
+  const poke = () => {
+    setPlaying(p?.id + ':' + pose)
+    setTap((t) => t + 1)
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => setTap(0), 1000)
+  }
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
-  const L = layers(eq, sd, mood, cradle)
+  const L = layers(eq, sd, action && isPlaying ? 'happy' : mood, cradle)
   const split = live && L.moving
   const uriCradle = useComp(cradle ? L.all : [], px)
   const uriAll = useComp(split || cradle ? [] : L.all, px)
@@ -341,25 +290,9 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const uriIris = useComp(split ? L.iris : [], px)
   const uriUp = useComp(split ? L.upper : [], px)
   const uriBlink = useComp(live ? L.blink : [], px)
-  const hands = sharedHug && V?.hands
-    ? [{ src: V.hands.layer, mask: V.hands.mask, ref: V.hands.ref, color: L.skin }, ...hugSleeves(L.garment)]
-    : []
-  const uriHands = useComp(hands, px)
-  const uriGrip = useComp(fingerPerch ? [
-    { src: fingerPerch.layer, mask: fingerPerch.mask, ref: fingerPerch.ref, color: L.skin },
-    ...parrotGripSleeve(L.garment),
-  ] : [], px)
-  const root = useRef<HTMLDivElement>(null)
-  const [tap, setTap] = useState(0)
-  const timer = useRef<number | undefined>(undefined)
-  useEffect(() => () => window.clearTimeout(timer.current), [])
-  const poke = () => {
-    setTap((t) => t + 1)
-    window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setTap(0), 900)
-  }
+  const uriContact = useComp(contact ? contactParts(contact, L.skin, L.garment) : [], px)
 
-  // Bakınma ve göz kırpma: React'i yeniden çizdirmeden CSS değişkenleriyle.
+  // Bakış çocukta kalır. Temas katmanı, elle temas noktasını korur.
   const hasLook = !!look
   useEffect(() => {
     const el = root.current
@@ -385,11 +318,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
         blink(r < 0.2)
       } else if (r < 0.22) gaze(-1, (Math.random() - 0.5) * 0.6)
       else if (r < 0.44) gaze(1, (Math.random() - 0.5) * 0.6)
-      else if (r < 0.62 && p && pz.gaze !== 0) { // arkadaşına bakar, arkadaşı da sevinir
-        gaze(pz.gaze, pz.ey * 0.8)
-        later(() => el.classList.add('pet-hi'), 250)
-        later(() => el.classList.remove('pet-hi'), 1100)
-      } else if (r < 0.72 && p && pose === 'hug') { gaze(0, 1); later(() => blink(), 600) }
+      else if (r < 0.64 && p) { gaze(pose === 'hug' ? 0 : 1, 0.7); later(() => blink(), 500) }
       else if (r < 0.9) { gaze(0); blink(r > 0.84) }
       else blink()
       if (!hasLook && Math.random() < 0.35) later(() => blink(), 300 + Math.random() * 500)
@@ -398,33 +327,15 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     gaze(0)
     t = window.setTimeout(step, 600 + Math.random() * 1200)
     return () => { window.clearTimeout(t); ts.forEach((x) => window.clearTimeout(x)) }
-  }, [live, hasLook, pose, p, pz.gaze, pz.ey])
+  }, [live, hasLook, pose, p])
 
   const lookVars: CSSProperties = look
     ? ({ ['--ex' as string]: `${look.x * EX}%`, ['--ey' as string]: `${look.y * EX * 0.5}%`, ['--tl' as string]: `${look.x * 4}deg`, ['--tx' as string]: '0%' } as CSSProperties)
     : {}
-  const hairId = currentId(eq, 'hair', sd) ?? 'hair_short'
-  const hatName = String(pick(eq, 'hat', sd)?.raw.layer ?? '').split('/').at(-1)?.replace('.webp', '') ?? ''
-  const wideHair = hairId === 'hair_afro' || hairId === 'hair_headscarf'
   const broadPet = p && (SIDE_PETS.has(p.id) || BULKY_PETS.has(p.id))
-  const scale = p ? (pose === 'head' || wideHair || broadPet ? 1.03 : 1.16) : SOLO_SCALE
-  const hatPart = floorHat(part(pick(eq, 'hat', sd)?.raw, null))
-  const hatTransform: Partial<Part> | null = hairId === 'hair_afro' && hatName === 'cap' ? AFRO_CAP : hatPart
-  const hatSurface = (x: number, y: number): [number, number] => [
-    256 + (x - 256) * (hatTransform?.scale ?? 1) + (hatTransform?.dx ?? 0),
-    256 + (y - 256) * (hatTransform?.scale ?? 1) + (hatTransform?.dy ?? 0),
-  ]
-  const crownRow = HAIR_TOP[hairId] ?? 88
-  const headContact = p && pose === 'head' ? HEAD_CONTACT[p.id] : undefined
-  const [headSurfaceX, headSurfaceY] = hatName
-    ? hatSurface(...(HEAD_HAT_SURFACE[hatName] ?? [256, HAT_TOP[hatName] ?? crownRow]))
-    : [256, hairId === 'hair_spiky' ? 65 : crownRow]
-  // Scene framing belongs to the child, not the currently equipped hat.
-  const crownTop = crownRow / 512 * scale
-  const kidTop = p
-    ? Math.max(pose === 'hug' ? -0.015 : 0, (pose === 'head' ? pz.bottom - 0.014 : 0.055) - crownTop)
-    : SOLO_TOP
-  const kidOffset = p ? pz.kid * (wideHair ? 0.8 : 1) : 0
+  const scale = p ? (broadPet ? 1.02 : 1.16) : SOLO_SCALE
+  const kidTop = p ? 0.035 : SOLO_TOP
+  const kidOffset = p ? (pose === 'hug' ? -0.018 : -0.145) : 0
   const kidLeft = (1 - scale) / 2 + kidOffset
   const kidStyle: CSSProperties | undefined = frame
     ? { top: kidTop * size, left: kidLeft * size, width: scale * size }
@@ -435,51 +346,26 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     const m = `url(${import.meta.env?.BASE_URL ?? '/'}av/${opening})`
     eyeBox.maskImage = m; eyeBox.WebkitMaskImage = m; eyeBox.maskSize = '100% 100%'; eyeBox.WebkitMaskSize = '100% 100%'
   }
-  const perch = p && pose === 'shoulder' && !FLOATING_PETS.has(p.id) ? SHOULDER_CONTACT[p.id] ?? DEFAULT_SHOULDER_CONTACT : undefined
-  const [shoulderX, shoulderY] = SHOULDER_SURFACE[currentId(eq, 'clothes', sd) ?? ''] ?? [368, 364]
-  const perchX = kidLeft + shoulderX / 512 * scale
-  const perchY = kidTop + (shoulderY + 3) / 512 * scale
-  const headRestX = kidLeft + headSurfaceX / 512 * scale
-  const headRestY = kidTop + headSurfaceY / 512 * scale + 0.008
-  // Hayvan yüzün altına sığacak kadar küçülür. Eller aynı oranda ve bilek tabana sabit kalacak biçimde oturur.
-  const petBottom = sharedHug ? HUG_BOTTOM : pz.bottom
-  const hugWidth = Math.min(pz.width, (HUG_BOTTOM - kidTop - HUG_FACE_BOTTOM / 512 * scale) / 0.95)
-  const petWidth = perch?.width ?? (sharedHug ? hugWidth : p?.id === 'giraffe' ? 0.51 : pz.width)
-  const handScale = hugWidth / pz.width
-  // Arkadaki hayvan başını dışa eğerken ağırlığı omuzun arkasında kalır.
-  const peek = pose === 'peek'
-  const petX = peek ? kidLeft + pz.x * scale : pz.x
-  const petStyle: CSSProperties = perch ? {
-    left: (perchX - perch.x / 256 * petWidth) * size,
-    top: (perchY - perch.y / 256 * petWidth) * size,
-    width: petWidth * size,
-    transformOrigin: `${perch.x / 2.56}% ${perch.y / 2.56}%`,
-    transform: `rotate(${perch.angle ?? 12}deg)${perch.faceChild ? ' scaleX(-1)' : ''}`,
-  } : headContact ? {
-    left: (headRestX - headContact[0] / 256 * petWidth) * size,
-    top: (headRestY - headContact[1] / 256 * petWidth) * size,
-    width: petWidth * size,
-  } : {
-    left: (petX - petWidth / 2) * size, top: (petBottom - petWidth * 0.95) * size, width: petWidth * size,
-    ...(peek ? { transform: 'rotate(24deg)', transformOrigin: '50% 95%' } : {}),
-  }
-  const petImg = p && (
-    <img key={'pet' + (tap ? 'x' + tap : '')} className={`av-pet pose-${pose}${perch ? ' av-perched' : ''}`}
-      src={fx(p.id)} alt={p.name} title={p.name} draggable={false} style={petStyle} />
-  )
-  const cls = ['avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '', live ? 'alive' : '', tap ? 'tap' : '', p ? 'with-pet' : '', p && `scene-${pose}`].filter(Boolean).join(' ')
+  const petWidth = broadPet ? 0.34 : 0.33
+  const petStyle = { left: (0.81 - petWidth / 2) * size, bottom: size * 0.065, width: petWidth * size }
+  const contactStyle = contact ? { left: contact.x * size, top: contact.y * size, width: contact.size * size } : undefined
+  const grounded = p && pose === 'side' && p.id !== 'chick'
+  const cls = [
+    'avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '',
+    live ? 'alive' : '', isPlaying && !action ? 'tap' : '', p ? 'with-pet' : '',
+    p && `scene-${pose}`, contact ? 'scene-contact' : '',
+  ].filter(Boolean).join(' ')
   const h = hash(sd)
   return (
-    <div ref={root} className={cls} style={{ width: size, height: size, ['--breath-delay' as string]: `-${h % 3000}ms`, ...lookVars }} onPointerDown={poke}>
+    <div ref={root} className={cls} style={{ width: size, height: size, ['--breath-delay' as string]: `-${h % 3000}ms`, ...lookVars }} onPointerDown={interactive ? undefined : poke}>
       {frame && <div className="av-bg" style={{ background: BG[eq.bg ?? 'none'] ?? BG.none }} />}
       {cradle ? (
-        <div className="av-stage av-illustration">
+        <div key={isPlaying ? tap : 0} className={`av-stage av-illustration${isPlaying && action ? ` av-react-${p?.id}` : ''}`}>
           {uriCradle && <img src={uriCradle} alt={p ? `Kucağında ${p.name.toLocaleLowerCase('tr-TR')} tutan çocuk` : ''} draggable={false} />}
         </div>
       ) : (
         <div className={frame ? 'av-clip' : 'av-free'}>
           <div className="av-stage">
-            {pose === 'peek' && petImg}
             <div className="av-body" key={tap ? 'b' + tap : 'b'}>
               <div className="av-head">
                 {frame && !(uriAll || uriLow) && <span className="av-placeholder" style={{ background: skinColor(eq, sd) }} />}
@@ -498,17 +384,21 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
                 )}
               </div>
             </div>
-            {perch && <span className="av-perch-shadow" aria-hidden="true" style={{ left: perchX * size, top: perchY * size }} />}
-            {headContact && <span className="av-perch-shadow" aria-hidden="true" style={{ left: headRestX * size, top: headRestY * size }} />}
-            {pose !== 'peek' && !uriGrip && petImg}
-            {uriGrip && <img className="av-kid av-hands" src={uriGrip} alt="Parmağa tutunan papağan" draggable={false}
-              style={{ left: 0, top: 0, width: '100%' }} />}
-            {uriHands && <img className="av-kid av-hands" src={uriHands} alt="" draggable={false}
-              style={{ left: (pz.x + (0.10 - pz.x) * handScale) * size, bottom: 0, width: 0.90 * handScale * size }} />}
+            {grounded && <span className="av-companion-ground" aria-hidden="true"
+              style={{ left: '83%', bottom: contact ? '3.5%' : '7%' }} />}
+            {contact ? (
+              uriContact && <img key={isPlaying ? tap : 0} className={`av-contact${isPlaying && action ? ` av-react-${p?.id}` : ''}`}
+                src={uriContact} style={contactStyle} alt={p?.name ?? ''} draggable={false} />
+            ) : p && (
+              <img className="av-pet pose-side" src={fx(p.id)} alt={p.name} title={p.name} draggable={false} style={petStyle} />
+            )}
           </div>
         </div>
       )}
-      {tap > 0 && <span className="av-hearts" key={'h' + tap} aria-hidden><i>💖</i><i>✨</i><i>💛</i></span>}
+      {action && <button type="button" className={`av-play-pet${pose === 'hug' ? ' av-play-pet-hug' : ''}`}
+        onClick={poke} aria-label={action.label} title={action.label} />}
+      {isPlaying && action && <span key={tap} className="av-companion-reply" role="status">{action.reply}</span>}
+      {isPlaying && !action && <span className="av-hearts" key={tap} aria-hidden><i>💖</i><i>✨</i><i>💛</i></span>}
     </div>
   )
 }
@@ -547,8 +437,7 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
   }
   if (slot === 'pose') {
     const pet = petOf(animal, eq)
-    const samplePet = availablePoses(pet.id).includes(id) ? pet.id : id === 'pose_head' ? 'hedgehog' : 'fox'
-    return <Avatar animal={samplePet} equipped={{ ...eq, pet: undefined }} seed={seed} size={84} pet alive={false} />
+    return <Avatar animal={pet.id} equipped={eq} seed={seed} size={84} pet alive={false} />
   }
   const portrait = ['face', 'mouth', 'skin', 'ears', 'fshape', 'cheek', 'eyes', 'eshape', 'brow', 'nose'].includes(slot)
   const size = slot === 'fshape' ? 122 : portrait ? 112 : 84

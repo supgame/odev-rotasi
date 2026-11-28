@@ -4,6 +4,7 @@ import { SLOT_NAMES } from '../data/shopItems'
 import { errText, type Equipped, type ShopItem, type Slot, type StudentHome } from '../data/types'
 import { Avatar, ItemPreview, availablePoses, currentId, petOf, poseOf, speciesOf } from '../avatar/Avatar'
 import { ITEMS, petItemId } from '../avatar/catalog'
+import { HERO_PETS } from '../avatar/companionContact'
 import { Icon, StarCount } from '../ui/Icon'
 import { Confetti } from './Confetti'
 import './shop.css'
@@ -92,8 +93,14 @@ export function Shop({ home, token, onBack, onChange }: {
   }
   const wornId = (s: Slot) => slotId(eq, s)
   const owned = (it: ShopItem) => it.id === basePet || it.price === 0 || home.owned.includes(it.id)
+  const ownedPetIds = new Set([...HERO_PETS.map(petItemId), ...home.owned, basePet, petItemId(petOf(animal, eq).id)])
   const poses = availablePoses(petOf(animal, previewEq).id)
-  const list = items.filter((it) => it.slot === slot && (slot !== 'pose' || poses.includes(it.id))).sort((a, b) => a.price - b.price)
+  const list = items.filter((it) => {
+    if (it.slot !== slot) return false
+    if (slot === 'pose') return poses.includes(it.id)
+    if (slot === 'pet') return ownedPetIds.has(it.id)
+    return true
+  }).sort((a, b) => a.price - b.price)
   const colorSlot = slot === 'hair' ? 'hcolor' : slot === 'clothes' ? 'ccolor' : null
   const colors = colorSlot ? items.filter((it) => it.slot === colorSlot) : []
   const chosenColor = colorSlot ? colors.find((it) => it.id === slotId(previewEq, colorSlot)) : undefined
@@ -176,7 +183,7 @@ export function Shop({ home, token, onBack, onChange }: {
         </>}
       </dialog>
       <dialog ref={mirrorDialog} className="panel mirror-dialog" aria-label="Büyük ayna">
-        <Avatar animal={animal} equipped={previewEq} seed={seed} size={260} pet />
+        <Avatar animal={animal} equipped={previewEq} seed={seed} size={260} pet interactive />
         <button className="btn ghost" onClick={() => mirrorDialog.current?.close()}>Kapat</button>
       </dialog>
       {party > 0 && <Confetti key={party} n={16} />}

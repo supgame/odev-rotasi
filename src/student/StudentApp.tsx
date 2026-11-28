@@ -267,7 +267,7 @@ function HomeScreen({ home, onStart, onShowResult, onShop, onLogout }: {
             )}
           </section>
           <div className="student-profile">
-            <Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={240} pet />
+            <Avatar animal={me.animal} equipped={me.equipped} seed={me.id} size={240} pet interactive />
           </div>
         </div>
 

@@ -1,0 +1,52 @@
+{
+  "cat-side": {
+    "x": 0.54,
+    "y": 0.54,
+    "size": 0.43,
+    "skinRef": 163.0,
+    "sleeveRef": 75.0,
+    "pet": "pose/hero/cat-side-pet.webp",
+    "hand": "pose/hero/cat-side-hand.webp",
+    "sleeve": "pose/hero/cat-side-sleeve.webp"
+  },
+  "dog-side": {
+    "x": 0.54,
+    "y": 0.54,
+    "size": 0.43,
+    "skinRef": 154.0,
+    "sleeveRef": 70.0,
+    "pet": "pose/hero/dog-side-pet.webp",
+    "hand": "pose/hero/dog-side-hand.webp",
+    "sleeve": "pose/hero/dog-side-sleeve.webp"
+  },
+  "chick-side": {
+    "x": 0.535,
+    "y": 0.51,
+    "size": 0.43,
+    "skinRef": 158.0,
+    "sleeveRef": 75.0,
+    "pet": "pose/hero/chick-side-pet.webp",
+    "hand": "pose/hero/chick-side-hand.webp",
+    "sleeve": "pose/hero/chick-side-sleeve.webp"
+  },
+  "rabbit-side": {
+    "x": 0.54,
+    "y": 0.54,
+    "size": 0.43,
+    "skinRef": 163.0,
+    "sleeveRef": 71.0,
+    "pet": "pose/hero/rabbit-side-pet.webp",
+    "hand": "pose/hero/rabbit-side-hand.webp",
+    "sleeve": "pose/hero/rabbit-side-sleeve.webp"
+  },
+  "chick-hug": {
+    "x": 0.27,
+    "y": 0.58,
+    "size": 0.43,
+    "skinRef": 177.0,
+    "sleeveRef": 100.0,
+    "pet": "pose/hero/chick-hug-pet.webp",
+    "hand": "pose/hero/chick-hug-hand.webp",
+    "sleeve": "pose/hero/chick-hug-sleeve.webp"
+  }
+}
