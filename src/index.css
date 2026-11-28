@@ -421,13 +421,15 @@ label.check input { width: 20px; height: 20px; accent-color: var(--purple); }
 @keyframes heartup { 0% { opacity: 0; transform: translateY(10px) scale(.5); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-34px) scale(1.15); } }
 .pet-preview { width: 84px; height: 84px; border-radius: 50%; background: #fff6e0; display: grid; place-items: center; }
 .pet-preview img { width: 70%; height: auto; }
-.av-product { position: relative; width: 100%; height: 100%; min-height: 82px; overflow: hidden; pointer-events: none; }
-.av-product img { position: absolute; width: 134px; height: 134px; max-width: none; left: 50%; top: 50%; transform: translate(-50%, -50%); object-fit: contain; }
-.av-product-hat img { width: 170px; height: 170px; translate: 0 35px; }
-.av-product-glasses img { width: 168px; height: 168px; translate: 0 10px; }
-.av-product-clothes, .av-product-costume { height: auto; min-height: 0; aspect-ratio: 1; }
-.av-product-clothes img { width: 135%; height: 135%; transform: translate(-50%, -80%); }
-.av-product-costume img { width: 100%; height: 100%; }
+.av-product { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; pointer-events: none; }
+.av-product img {
+  position: absolute; left: 50%; top: 50%; max-width: none;
+  width: var(--product-scale, 100%); height: var(--product-scale, 100%);
+  transform: translate(-50%, var(--product-y, -50%)); object-fit: contain;
+}
+.av-product-hat { --product-scale: 155%; --product-y: -27%; }
+.av-product-glasses { --product-scale: 190%; --product-y: -43%; }
+.av-product-clothes { --product-scale: 135%; --product-y: -80%; }
 .av-background-preview { width: 100%; height: 100%; min-height: 82px; border-radius: inherit; }
 @keyframes petbob { 50% { transform: translateY(-5%) rotate(-4deg); } }
 .avatar.happy .av-stage { animation: hop .45s ease-in-out infinite alternate; }
