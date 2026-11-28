@@ -146,7 +146,8 @@ export function compose(parts: Part[], n: number): Promise<string> {
         }
         if (clipped) x.restore()
       }
-      const uri = c.toDataURL('image/webp', 0.92)
+      // Lossless composition keeps the registered cheeks identical when only a hat changes.
+      const uri = c.toDataURL('image/png')
       done.set(key, uri)
       pending.delete(key)
       return uri

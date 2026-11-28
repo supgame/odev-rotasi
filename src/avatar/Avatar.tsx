@@ -109,6 +109,12 @@ const VOLUME_HAIR: Partial<Record<string, number>> = {
   hair_afro: 0.76, hair_bun: 0.78, hair_spiky: 0.84, hair_space_buns: 0.92, hair_curly: 0.96,
 }
 const AFRO_CAP = { scale: 1.12, dy: -8 }
+// These styles cover the original ears; their restored locks form one continuous silhouette.
+const COVERED_EARS = new Set(['hair_straight_long', 'hair_bob', 'hair_wavy_long', 'hair_bangs_long', 'hair_braids', 'hair_headscarf'])
+const HAT_HAIR_JOIN = 190
+// Reserve the same head box for every hat, including the wizard's 6px tip.
+const SOLO_SCALE = 1.2
+const SOLO_TOP = 0.045 - 6 / 512 * SOLO_SCALE
 
 function clothesPart(cl: Raw | undefined, color: CatalogItem | undefined) {
   const layer = part(cl, null, cl?.tintable === false ? undefined : color?.raw.color)
@@ -139,7 +145,7 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   const cheek = pick(eq, 'cheek', seed)?.raw.key as string | undefined
   const b = MANIFEST.base
   const sub = (t: string) => t.replace('{shape}', shape).replace('{ears}', ears)
-  const back = part(hair, underHat ? 'backUnderHat' : 'back', hcol)
+  const back = part(hair, 'back', hcol)
   const dx = V?.hairBackDx?.[shape] ?? 0 // dar yüzde at kuyruğu yanağa yaklaşsın
   const brow = part(pick(eq, 'brow', seed)?.raw, null)
   const nose = part(pick(eq, 'nose', seed)?.raw, null)
@@ -154,8 +160,10 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
   const P = (x: Part | null | undefined) => (x && x.src ? [x] : [])
   const backHair = [
     ...P(back && dx ? { ...back, dx } : back),
-    ...P(part(hair, underHat ? 'fillUnderHat' : 'fill', hcol)), // yüzün arkasındaki saç (dar yüzde boşluk kalmasın)
+    ...P(part(hair, 'fill', hcol)), // yüzün arkasındaki saç (dar yüzde boşluk kalmasın)
   ]
+  const ear = V?.ears && !COVERED_EARS.has(hairItem?.id ?? '')
+    ? { src: sub(V.ears.layer), mask: sub(V.ears.mask), ref: V.ears.ref, color: skin } : null
   const head = [
     { src: V ? sub(V.base) : b.layer, mask: V ? sub(V.mask) : b.skinMask, ref: b.skinRef, color: skin },
     ...P(V && eyes && !openEye ? { src: V.iris.layer, mask: V.iris.mask, ref: V.iris.ref, color: eyes } : null),
@@ -184,11 +192,17 @@ function layers(eq: Equipped, seed: string, mood?: Mood, cradle?: CradleShape): 
     ...P(mouthLayer),
   ]
   const glasses = part(gl, null, gl?.color)
-  const hairFront = part(hair, underHat ? 'frontUnderHat' : 'front', hcol)
+  const hairFront = part(hair, 'front', hcol)
+  const fittedTop = part(hair, underHat ? 'frontUnderHat' : 'front', hcol)
   const headwear = floorHat(part(hat, null, hat?.color))
   const front = [
-    // Saç uçlarının yerini koruyarak tepeyi siperin içine al, şakaklardaki bukleler dışarıda kalsın.
-    ...P(hairFront && volume ? { ...hairFront, scaleY: volume, dy: -12 * (1 - volume) } : hairFront),
+    // Fit only the crown. Side locks, temples and the jaw keep their exact
+    // registration when headwear changes; fitting the whole sprite moved them.
+    ...P(hat && fittedTop ? { ...fittedTop, ...(volume ? { scaleY: volume, dy: -12 * (1 - volume) } : {}), sourceRows: [0, HAT_HAIR_JOIN], clip: `M0 0H640V${HAT_HAIR_JOIN * 640 / 512}H0Z` } : hairFront),
+    ...P(hat && hairFront ? { ...hairFront, sourceRows: [HAT_HAIR_JOIN, 512] } : null),
+    // Short styles expose the ears in front of the hair; covered styles omit
+    // them so the original extraction cannot punch holes through the locks.
+    ...P(ear),
     ...P(headwear?.src === 'hat/cap.webp' && hairItem?.id === 'hair_afro' ? { ...headwear, ...AFRO_CAP } : headwear),
     ...P(glasses && { ...glasses, scale: 0.92, dy: -4 }),
   ]
@@ -382,17 +396,23 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const hatName = String(pick(eq, 'hat', sd)?.raw.layer ?? '').split('/').at(-1)?.replace('.webp', '') ?? ''
   const wideHair = hairId === 'hair_afro' || hairId === 'hair_headscarf'
   const broadPet = p && (SIDE_PETS.has(p.id) || BULKY_PETS.has(p.id))
-  const scale = p ? (pose === 'head' || wideHair || broadPet ? 1.03 : 1.16) : (wideHair || hatName === 'wizard' ? 1.29 : 1.48)
-  const hatTop = hairId === 'hair_afro' && hatName === 'cap'
-    ? 256 + (HAT_TOP.cap - 256) * AFRO_CAP.scale + AFRO_CAP.dy
-    : HAT_TOP[hatName]
-  const crownRow = hatTop ?? HAIR_TOP[hairId] ?? 88
+  const scale = p ? (pose === 'head' || wideHair || broadPet ? 1.03 : 1.16) : SOLO_SCALE
+  const hatPart = floorHat(part(pick(eq, 'hat', sd)?.raw, null))
+  const hatTransform: Partial<Part> | null = hairId === 'hair_afro' && hatName === 'cap' ? AFRO_CAP : hatPart
+  const hatSurface = (x: number, y: number): [number, number] => [
+    256 + (x - 256) * (hatTransform?.scale ?? 1) + (hatTransform?.dx ?? 0),
+    256 + (y - 256) * (hatTransform?.scale ?? 1) + (hatTransform?.dy ?? 0),
+  ]
+  const crownRow = HAIR_TOP[hairId] ?? 88
   const headContact = p && pose === 'head' ? HEAD_CONTACT[p.id] : undefined
-  const [headSurfaceX, headSurfaceY] = HEAD_HAT_SURFACE[hatName] ?? [256, !hatName && hairId === 'hair_spiky' ? 65 : crownRow]
-  const crownTop = (headContact ? headSurfaceY : crownRow) / 512 * scale
+  const [headSurfaceX, headSurfaceY] = hatName
+    ? hatSurface(...(HEAD_HAT_SURFACE[hatName] ?? [256, HAT_TOP[hatName] ?? crownRow]))
+    : [256, hairId === 'hair_spiky' ? 65 : crownRow]
+  // Scene framing belongs to the child, not the currently equipped hat.
+  const crownTop = crownRow / 512 * scale
   const kidTop = p
     ? Math.max(pose === 'hug' ? -0.015 : 0, (pose === 'head' ? pz.bottom - 0.014 : 0.055) - crownTop)
-    : Math.max(-0.15, 0.045 - crownTop)
+    : SOLO_TOP
   const kidOffset = p ? pz.kid * (wideHair ? 0.8 : 1) : 0
   const kidLeft = (1 - scale) / 2 + kidOffset
   const kidStyle: CSSProperties | undefined = frame
@@ -408,7 +428,7 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const perchX = kidLeft + shoulderX / 512 * scale
   const perchY = kidTop + (shoulderY + 3) / 512 * scale
   const headRestX = kidLeft + headSurfaceX / 512 * scale
-  const headRestY = kidTop + crownTop + 0.008
+  const headRestY = kidTop + headSurfaceY / 512 * scale + 0.008
   // Hayvan yüzün altına sığacak kadar küçülür. Eller aynı oranda ve bilek tabana sabit kalacak biçimde oturur.
   const petBottom = sharedHug ? HUG_BOTTOM : pz.bottom
   const hugWidth = Math.min(pz.width, (HUG_BOTTOM - kidTop - HUG_FACE_BOTTOM / 512 * scale) / 0.95)

@@ -127,6 +127,7 @@ export const MANIFEST = M as unknown as {
   slots: Record<string, { items: Raw[] }>
   variants: {
     base: string; mask: string
+    ears: { layer: string; mask: string; ref: number }
     iris: { layer: string; mask: string; ref: number }
     cheek: Record<string, string>
     blink: { layer: string; mask: string; ref: number }

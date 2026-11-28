@@ -1931,8 +1931,8 @@
   ],
   "notes": "Faz 1 saç katmanları: şapka takıldığında frontUnderHat ve varsa backUnderHat kullanılır. Tüm şapkalar ortak şapka bölgesinde hizalanır. Başörtüsü kumaş katmanıdır ve şapkanın altında kalır. Ten ve saç katmanlarında gri ton ile maske kullanılır; ref değerleri yayımlanan katmanlardan hesaplanır.",
   "variants": {
-    "base": "base/base_{shape}_{ears}.webp",
-    "mask": "base/base_{shape}_{ears}_mask.webp",
+    "base": "base/base_{shape}.webp",
+    "mask": "base/base_{shape}_mask.webp",
     "iris": {
       "layer": "base/iris.webp",
       "mask": "base/iris_mask.webp",
@@ -1981,6 +1981,11 @@
       "layer": "pose/parrot-grip.webp",
       "mask": "pose/parrot-grip_mask.webp",
       "ref": 136.8906
+    },
+    "ears": {
+      "layer": "ears/{ears}_{shape}.webp",
+      "mask": "ears/{ears}_{shape}_mask.webp",
+      "ref": 163.7334
     }
   }
 }
