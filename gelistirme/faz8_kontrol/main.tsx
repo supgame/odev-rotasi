@@ -17,11 +17,14 @@ const box = (face: string, ear: string, hair: string, hat: string) => ({
   ...(hat ? { hat } : {}),
 })
 
+const combos = faces.flatMap((face) => ears.flatMap((ear) =>
+  hairs.flatMap((hair) => hats.map((hat) => ({ face, ear, hair, hat })))))
+
 function Factorial() {
-  const combos = faces.flatMap(face => ears.flatMap(ear => hairs.flatMap(hair => hats.map(hat => ({face,ear,hair,hat})))) )
   React.useEffect(() => {
     let cancelled = false
     const run = async () => {
+      if (cancelled) return
       const imgs = [...document.querySelectorAll<HTMLImageElement>('.tile img.av-kid')]
       if (imgs.length < combos.length || imgs.some(im => !im.complete || !im.naturalWidth)) { window.setTimeout(run, 300); return }
       const decode = (im: HTMLImageElement) => createImageBitmap(im)
@@ -33,8 +36,8 @@ function Factorial() {
           const j=combos.findIndex(x=>x.face===c.face&&x.ear===c.ear&&x.hair===c.hair&&x.hat===hat)
           const other=await decode(imgs[j]); const n=Math.min(base.width,base.height,other.width,other.height)
           const a=document.createElement('canvas');a.width=a.height=n;const x=a.getContext('2d',{willReadFrequently:true})!
-          x.drawImage(base,0,0,n,n);const d1=x.getImageData(n*.25,n*.36,n*.5,n*.35).data
-          x.clearRect(0,0,n,n);x.drawImage(other,0,0,n,n);const d2=x.getImageData(n*.25,n*.36,n*.5,n*.35).data
+          x.drawImage(base,0,0,n,n);const d1=x.getImageData(0, Math.ceil(n * 245 / 512), n, Math.floor(n * 90 / 512)).data
+          x.clearRect(0,0,n,n);x.drawImage(other,0,0,n,n);const d2=x.getImageData(0, Math.ceil(n * 245 / 512), n, Math.floor(n * 90 / 512)).data
           let diff=0;for(let k=0;k<d1.length;k++)if(d1[k]!==d2[k])diff++
           if(diff)changed++;comparisons++;other.close()
         }
@@ -52,7 +55,7 @@ function Factorial() {
 function Mirrors() {
   return <main className="mirrors">{faces.map(face => hairs.map(hair => <section className="mirror" key={face+hair}>
     <h2>{face} · {hair}</h2><div className="pair">
-      {[ '', 'cap', 'pom', 'cowboy'].map(hat => <div key={hat}><Avatar animal="" seed="faz8-face" equipped={box(face,'small',hair,hat)} size={250} pet={false}/><small>{label(hat)}</small></div>)}
+      {hats.map(hat => <div key={hat}><Avatar animal="" seed="faz8-face" equipped={box(face,'small',hair,hat)} size={250} pet={false}/><small>{label(hat)}</small></div>)}
     </div></section>))}</main>
 }
 
@@ -60,8 +63,7 @@ function App() { return <><header><b>Faz 8 · Bölüm {section}</b><span>{sectio
 
 const eyeShapes = ['round','almond','gentle','sparkle','upturned']
 function Eyes(){return <main className="eye-grid">{eyeShapes.map(eye=><article key={eye}><Avatar animal="" seed="faz8-eyes" equipped={{eshape:`eshape_${eye}`}} size={size || 90} pet={false}/><b>{eye}</b></article>)}</main>}
-const pets=['chick','cat','dog','rabbit','parrot','owl','turtle','fox','panda','bear','hedgehog','lion']
-function Pets(){return <main className="pet-grid">{['cat','dog','rabbit','chick'].map(pet=><article key={pet}><h2>{pet}</h2><div className="pet-pair">{['side','hug'].map(pose=><div key={pose}><Avatar animal={pet} seed={`faz8-${pet}`} equipped={{pose:`pose_${pose}`}} size={size || 90} interactive/><small>{pose === 'side' ? 'temas' : 'kucak'}</small></div>)}</div></article>)}</main>}
-function Items(){return <main className="mirror-grid">{['football','basketball','book','balloon','kite','icecream','toycar','flower'].map(item=><article key={item}><h2>{item}</h2><Avatar animal="" seed="faz8-item" equipped={{}} size={size || 250}/></article>)}</main>}
+function Pets(){return <main className="pet-grid">{['cat','dog','rabbit','chick'].map(pet=><article key={pet}><h2>{pet}</h2><div className="pet-pair">{['side','hug'].map(pose=><div key={pose}><Avatar animal={pet} seed={`faz8-${pet}`} equipped={{pose:`pose_${pose}`}} size={size || 90} pet interactive/><small>{pose === 'side' ? 'temas' : 'kucak'}</small></div>)}</div></article>)}</main>}
+function Items(){return <main className={size>210?'held-grid held-large':'held-grid'}>{['football','kite','book','toycar','flower'].map(item=><article key={item}><h2>{item}</h2><p>Dokunup animasyonu dene</p><Avatar animal="chick" seed={`faz8-held-${item}`} equipped={{held:`held_${item}`}} size={size || 90} pet interactive/></article>)}</main>}
 
 createRoot(document.getElementById('root')!).render(<App />)

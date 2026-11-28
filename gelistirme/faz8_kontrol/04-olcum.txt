@@ -1,0 +1,7 @@
+Bölüm 4 · elde tutulan eşya katmanları
+Çevrimdışı Pillow karşılaştırması; render.ts tint ve held/art.json yerleşimi kullanıldı.
+Futbol topu: 90 px kartta 745 piksel 8/255 üstü değişti; x=0.195, y=0.575, boyut=0.40.
+Uçurtma: 90 px kartta 761 piksel 8/255 üstü değişti; x=0.275, y=0.230, boyut=0.62.
+Kitap: 90 px kartta 845 piksel 8/255 üstü değişti; x=0.165, y=0.570, boyut=0.44.
+Oyuncak araba: 90 px kartta 720 piksel 8/255 üstü değişti; x=0.240, y=0.590, boyut=0.41.
+Çiçek: 90 px kartta 632 piksel 8/255 üstü değişti; x=0.220, y=0.570, boyut=0.43.

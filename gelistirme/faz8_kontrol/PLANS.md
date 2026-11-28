@@ -12,3 +12,5 @@ Bölüm 1 tamamlandı. Beş saçın kulak boşluğu kapatıldı. 288 birleşimde
 Bölüm 2 tamamlandı. Göz biçimleri, açık ve kapalı katmanlar, iris ve eski eşya kimlikleri doğrulandı. `0013_goz_bicimleri.sql` iki yeni biçimi kataloğa ekler.
 
 Bölüm 3 tamamlandı. Dört türün oyun ve kucak görünümü, tür başına tepki ve eski pozlardan geri dönüş doğrulandı. Çevrimdışı iki boyut görseli hazır.
+
+Bölüm 4 tamamlandı. Beş eşyanın fiyatları, varlık yolları, satın alma, takma, çıkarma ve kucak pozunda gizlenme doğrulandı. `0014_elde_esyalar.sql` yeni yuvayı açar. Vite derlemesi uyarısız geçti.

@@ -212,6 +212,13 @@ export const ITEMS: CatalogItem[] = [
   ...(['skin', 'hair', 'hcolor', 'hat', 'glasses', 'clothes', 'ccolor', 'face'] as ItemSlot[]).flatMap(fromManifest),
   ...FACE_ITEMS,
   ...POSE_ITEMS,
+  ...I('held', [
+    ['football', 'Futbol topu', 15],
+    ['book', 'Hikâye kitabı', 18],
+    ['toycar', 'Tahta araba', 20],
+    ['flower', 'Papatya demeti', 22],
+    ['kite', 'Uçurtma', 25],
+  ]),
   ...I('bg', [
     ['polka', 'Puantiye', 10], ['checker', 'Damalı', 10], ['sky', 'Gökyüzü', 10], ['grass', 'Çimen', 15],
     ['sunset', 'Gün batımı', 15], ['sea', 'Deniz', 15], ['board', 'Kara tahta', 15], ['forest', 'Orman', 20],

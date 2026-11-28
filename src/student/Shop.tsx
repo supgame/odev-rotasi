@@ -9,12 +9,12 @@ import { Icon, StarCount } from '../ui/Icon'
 import { Confetti } from './Confetti'
 import './shop.css'
 
-const REMOVABLE: Slot[] = ['hat', 'glasses', 'bg', 'pet']
+const REMOVABLE: Slot[] = ['hat', 'glasses', 'bg', 'pet', 'held']
 const FACE_SLOTS: Slot[] = ['fshape', 'face', 'mouth', 'nose', 'brow', 'eshape', 'eyes', 'ears', 'cheek']
 const BACKEND_GATED_FACE_SLOTS: Slot[] = ['mouth', 'nose', 'brow', 'eshape']
 const SECTIONS: { name: string; categories: { label: string; slot: Slot }[] }[] = [
   { name: 'Giyin', categories: [
-    { label: 'Şapka', slot: 'hat' }, { label: 'Gözlük', slot: 'glasses' }, { label: 'Kıyafet', slot: 'clothes' },
+    { label: 'Şapka', slot: 'hat' }, { label: 'Gözlük', slot: 'glasses' }, { label: 'Kıyafet', slot: 'clothes' }, { label: 'Elimde', slot: 'held' },
   ] },
   { name: 'Görünüşüm', categories: [
     { label: 'Saç', slot: 'hair' }, { label: 'Ten', slot: 'skin' }, { label: 'Yüz', slot: 'fshape' },
@@ -94,7 +94,9 @@ export function Shop({ home, token, onBack, onChange }: {
   const wornId = (s: Slot) => slotId(eq, s)
   const owned = (it: ShopItem) => it.id === basePet || it.price === 0 || home.owned.includes(it.id)
   const ownedPetIds = new Set([...HERO_PETS.map(petItemId), ...home.owned, basePet, petItemId(petOf(animal, eq).id)])
-  const poses = availablePoses(petOf(animal, previewEq).id)
+  const previewPet = petOf(animal, previewEq)
+  const poses = availablePoses(previewPet.id)
+  const handsFull = poseOf(previewEq, previewPet.id) === 'hug'
   const list = items.filter((it) => {
     if (it.slot !== slot) return false
     if (slot === 'pose') return poses.includes(it.id)
@@ -184,6 +186,7 @@ export function Shop({ home, token, onBack, onChange }: {
       </dialog>
       <dialog ref={mirrorDialog} className="panel mirror-dialog" aria-label="Büyük ayna">
         <Avatar animal={animal} equipped={previewEq} seed={seed} size={260} pet interactive />
+        {previewEq.held && handsFull && <p className="shop-caption">Ellerin kucaktaki arkadaşını tutuyor. Eşyanı görmek için Yanımda pozunu seç.</p>}
         <button className="btn ghost" onClick={() => mirrorDialog.current?.close()}>Kapat</button>
       </dialog>
       {party > 0 && <Confetti key={party} n={16} />}
@@ -237,13 +240,17 @@ export function Shop({ home, token, onBack, onChange }: {
             <p className="shop-caption">Seçtiğin ağız korunur. İfadenin kendi ağzını görmek için Ağız bölümünde <b>İfadeye göre</b> seç.</p>}
           {slot === 'face' && (currentId(previewEq, 'brow', seed) !== 'brow_expression' || currentId(previewEq, 'eshape', seed) !== 'eshape_expression') &&
             <p className="shop-caption">Seçtiğin kaş ve göz biçimi ifadeden bağımsız kalır.</p>}
-          {slot === 'pose' && <p className="shop-caption"><b>{petOf(animal, previewEq).name} için duruşlar</b></p>}
+          {slot === 'pose' && <p className="shop-caption"><b>{previewPet.name} için duruşlar</b></p>}
+          {slot === 'held' && <p className="shop-caption">{handsFull
+            ? 'Eşyanı aynada görmek için Yanımda pozunu seç.'
+            : 'Dene, aynayı büyüt ve eşyana dokun.'}</p>}
           {!items.length && <p className="center-text loading">Raflar diziliyor…</p>}
           <div className="shop-grid">
             {productGroups(list).map(([key, group]) => {
               const it = group.find((item) => item.id === variants[key]) ?? group.find((item) => wornId(slot) === item.id) ?? group[0]
               const worn = wornId(slot) === it.id
-              return <article key={key} className={'item' + (worn ? ' worn' : '')}>
+              const tier = slot === 'held' ? (it.price >= 20 ? ' rare' : ' common') : ''
+              return <article key={key} className={'item' + tier + (worn ? ' worn' : '')}>
                 <div className={'item-thumb slot-' + slot}>
                   <ItemPreview id={it.id} slot={it.slot} animal={animal} equipped={previewEq} seed={seed} />
                   {worn && <span className="worn-tag"><Icon name="check" size={14} />Takılı</span>}

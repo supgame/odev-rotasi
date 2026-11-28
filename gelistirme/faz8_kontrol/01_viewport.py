@@ -32,7 +32,7 @@ def mobile():
             x=22+ki*84;y=422+hi*92
             im.paste(avatar('oval','medium',hair,hat,70),(x,y))
             hair_short=mx.ITEM[hair]['name'].replace('düz','').replace('Saç','').strip()
-            d=ImageDraw.Draw(im);d.text((x,y+71),f'{hair_short} · {mx.H_NAMES[ki]}',font=SMALL,fill=INK)
+            d=ImageDraw.Draw(im);d.text((x,y+70),hair_short,font=SMALL,fill=INK);d.text((x,y+80),mx.H_NAMES[ki],font=SMALL,fill=INK)
     d=ImageDraw.Draw(im);d.text((12,786),'Gerçek public/av katmanları + render.ts tint; tarayıcı ekran görüntüsü değildir.',font=SMALL,fill='#695949')
     im.save(HERE/'01-mobil-375x812.png')
 

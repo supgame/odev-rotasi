@@ -1,0 +1,55 @@
+{
+  "football": {
+    "x": 0.195,
+    "y": 0.575,
+    "size": 0.4,
+    "skinRef": 137.0,
+    "sleeveRef": 60.0,
+    "hand": "held/football-hand.webp",
+    "sleeve": "held/football-sleeve.webp",
+    "item": "held/football-item.webp",
+    "motion": "held/football-motion.webp"
+  },
+  "book": {
+    "x": 0.165,
+    "y": 0.57,
+    "size": 0.44,
+    "skinRef": 152.0,
+    "sleeveRef": 60.0,
+    "hand": "held/book-hand.webp",
+    "sleeve": "held/book-sleeve.webp",
+    "page": "held/book-page.webp",
+    "item": "held/book-item.webp"
+  },
+  "kite": {
+    "x": 0.275,
+    "y": 0.23,
+    "size": 0.62,
+    "skinRef": 155.0,
+    "sleeveRef": 65.0,
+    "hand": "held/kite-hand.webp",
+    "sleeve": "held/kite-sleeve.webp",
+    "fixed": "held/kite-reel.webp",
+    "item": "held/kite-item.webp"
+  },
+  "toycar": {
+    "x": 0.24,
+    "y": 0.59,
+    "size": 0.41,
+    "skinRef": 150.0,
+    "sleeveRef": 59.0,
+    "hand": "held/toycar-hand.webp",
+    "sleeve": "held/toycar-sleeve.webp",
+    "item": "held/toycar-item.webp"
+  },
+  "flower": {
+    "x": 0.22,
+    "y": 0.57,
+    "size": 0.43,
+    "skinRef": 146.0,
+    "sleeveRef": 58.0,
+    "hand": "held/flower-hand.webp",
+    "sleeve": "held/flower-sleeve.webp",
+    "item": "held/flower-item.webp"
+  }
+}

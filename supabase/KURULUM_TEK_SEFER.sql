@@ -84,7 +84,7 @@ create table public.submissions (
 );
 create table public.shop_items (
   id text primary key check (length(btrim(id)) > 0),
-  slot text not null check (slot in ('skin', 'hair', 'hcolor', 'hat', 'glasses', 'clothes', 'ccolor', 'face', 'fshape', 'ears', 'eyes', 'cheek', 'mouth', 'nose', 'brow', 'eshape', 'pose', 'bg', 'pet')),
+  slot text not null check (slot in ('skin', 'hair', 'hcolor', 'hat', 'glasses', 'clothes', 'ccolor', 'face', 'fshape', 'ears', 'eyes', 'cheek', 'mouth', 'nose', 'brow', 'eshape', 'pose', 'bg', 'pet', 'held')),
   name text not null check (length(btrim(name)) > 0),
   price integer not null check (price >= 0)
 );
@@ -357,6 +357,11 @@ insert into public.shop_items (id, slot, name, price) values
   ('eshape_gentle', 'eshape', 'Yumuşak göz', 0),
   ('eshape_sparkle', 'eshape', 'İri parlak göz', 0),
   ('eshape_upturned', 'eshape', 'Uçları yukarı göz', 0),
+  ('held_football', 'held', 'Futbol topu', 15),
+  ('held_book', 'held', 'Hikâye kitabı', 18),
+  ('held_toycar', 'held', 'Tahta araba', 20),
+  ('held_flower', 'held', 'Papatya demeti', 22),
+  ('held_kite', 'held', 'Uçurtma', 25),
   ('pose_side', 'pose', 'Yanımda', 0),
   ('pose_shoulder', 'pose', 'Omzumda', 0),
   ('pose_hug', 'pose', 'Kucağımda', 0),
@@ -735,7 +740,7 @@ declare
   v_equipped jsonb;
 begin
   v_student := odev_private.lock_student(p_token);
-  if p_slot is null or p_slot not in ('skin', 'hair', 'hcolor', 'hat', 'glasses', 'clothes', 'ccolor', 'face', 'fshape', 'ears', 'eyes', 'cheek', 'mouth', 'nose', 'brow', 'eshape', 'pose', 'bg', 'pet') then
+  if p_slot is null or p_slot not in ('skin', 'hair', 'hcolor', 'hat', 'glasses', 'clothes', 'ccolor', 'face', 'fshape', 'ears', 'eyes', 'cheek', 'mouth', 'nose', 'brow', 'eshape', 'pose', 'bg', 'pet', 'held') then
     raise exception 'YUVA_GECERSIZ';
   end if;
   if p_item_id is null then

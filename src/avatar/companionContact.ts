@@ -35,11 +35,14 @@ const FIXED_SLEEVE: Partial<Record<string, string>> = {
   'clothes/overalls.webp': '597694',
 }
 
-export function contactParts(art: ContactArt, skin: string | undefined, garment: Part | null): Part[] {
+export function gripParts(art: Pick<ContactArt, 'sleeve' | 'hand' | 'skinRef' | 'sleeveRef'>, skin: string | undefined, garment: Part | null): Part[] {
   const cloth = garment?.color ?? FIXED_SLEEVE[garment?.src ?? ''] ?? '665565'
   return [
-    { src: art.pet },
     { src: art.sleeve, color: cloth, ref: art.sleeveRef },
     { src: art.hand, color: skin, ref: art.skinRef },
   ]
+}
+
+export function contactParts(art: ContactArt, skin: string | undefined, garment: Part | null): Part[] {
+  return [{ src: art.pet }, ...gripParts(art, skin, garment)]
 }

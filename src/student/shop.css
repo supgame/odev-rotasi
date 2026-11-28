@@ -99,3 +99,8 @@
   .shop-refresh .shop-editor { position: static; }
   .shop-refresh .shop-products :is(button, summary) { scroll-margin-top: 70px; }
 }
+
+.shop-refresh .item:is(.common, .rare) .slot-held {
+  box-shadow: inset 0 0 0 2px var(--rc);
+  background: color-mix(in srgb, var(--rc) 12%, #fffcf4);
+}

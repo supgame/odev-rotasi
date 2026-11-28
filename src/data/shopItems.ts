@@ -13,6 +13,7 @@ export const SLOT_NAMES: Record<string, string> = {
   hat: 'Şapka',
   glasses: 'Gözlük',
   clothes: 'Kıyafet',
+  held: 'Elimde',
   ccolor: 'Kıyafet rengi',
   hair: 'Saç',
   hcolor: 'Saç rengi',

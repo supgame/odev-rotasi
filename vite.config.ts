@@ -5,4 +5,13 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: './',
   plugins: [react()],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [{ name: 'supabase', test: /node_modules[/]@supabase[/]/ }],
+        },
+      },
+    },
+  },
 })

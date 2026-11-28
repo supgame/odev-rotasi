@@ -625,3 +625,40 @@ input.mini { width: 74px; padding: .25rem .4rem; }
 @keyframes companion-shake { 20%, 58% { transform: rotate(-4deg); } 39%, 77% { transform: rotate(2deg); } }
 @keyframes companion-peep { 28%, 60% { transform: scaleY(1.07) rotate(-2deg); } 44%, 78% { transform: scaleY(.97); } }
 @keyframes companion-sniff { 21%, 57% { transform: scaleX(.97); } 40%, 75% { transform: scaleX(1.013); } }
+
+.av-held { position: absolute; z-index: 2; aspect-ratio: 1; pointer-events: none; perspective: 420px; }
+.av-held > img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; }
+.av-play-held {
+  position: absolute; z-index: 3; aspect-ratio: 1; border: 0; border-radius: 24%;
+  padding: 0; background: transparent; cursor: pointer;
+}
+.av-play-held:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+.av-held-playing.av-held-kite .av-held-object {
+  transform-origin: 43% 59%; animation: held-kite 980ms ease-in-out both;
+}
+.av-held .av-book-leaf { transform-origin: 50% 56%; animation: held-book 900ms ease-in-out both; }
+.av-held-playing.av-held-toycar .av-held-object { animation: held-car 820ms ease-in-out both; }
+.av-held-playing.av-held-flower { transform-origin: 84% 89%; animation: held-flower 900ms ease-in-out both; }
+.av-held > .av-held-flight {
+  display: none; inset: 8% auto auto 16%; width: 68%; height: 68%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .av-held-playing.av-held-football .av-held-object { visibility: hidden; }
+  .av-held-playing.av-held-football .av-held-flight { display: block; animation: held-ball 1280ms ease-out both; }
+  .av-held-playing.av-held-football .av-held-grip { animation: held-catch 1280ms ease-in-out both; }
+}
+@keyframes held-ball {
+  0%, 53%, 100% { transform: none; animation-timing-function: ease-out; }
+  24% { transform: translate(9%, -51%) rotate(36deg); animation-timing-function: ease-in; }
+  77% { transform: translate(-5%, -31%) rotate(-23deg); animation-timing-function: ease-in; }
+}
+@keyframes held-catch { 12%, 60% { transform: translateY(-2%); } 52%, 96% { transform: translateY(2%); } }
+@keyframes held-kite { 24% { transform: rotate(-13deg) scale(1.07); } 62% { transform: rotate(10deg) scale(1.13); } }
+@keyframes held-book {
+  0% { transform: rotateY(0); }
+  25% { transform: rotateY(-42deg); }
+  58% { transform: rotateY(-146deg); opacity: .95; }
+  80%, 100% { transform: rotateY(-180deg); opacity: 0; }
+}
+@keyframes held-car { 30% { transform: translateX(4%) rotate(2deg); } 60% { transform: translateX(-2%) rotate(-1deg); } }
+@keyframes held-flower { 32% { transform: rotate(-11deg) translateY(-2%); } 68% { transform: rotate(3deg); } }

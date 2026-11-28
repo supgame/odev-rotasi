@@ -16,6 +16,7 @@ interface DB {
 }
 
 const KEY = 'odevrotasi_demo_v1'
+const CATALOG = new Map(SHOP_ITEMS.map((item) => [item.id, item]))
 const uid = () => Math.random().toString(36).slice(2, 10)
 
 function seed(): DB {
@@ -76,7 +77,7 @@ function stars(db: DB, sid: string) {
   const st = db.students.find((x) => x.id === sid)!
   const earned = db.submissions.filter((x) => x.student_id === sid).reduce((a, b) => a + b.stars_earned, 0)
   const spent = db.purchases.filter((p) => p.student_id === sid)
-    .reduce((a, p) => a + (SHOP_ITEMS.find((i) => i.id === p.item_id)?.price ?? 0), 0)
+    .reduce((a, p) => a + (CATALOG.get(p.item_id)?.price ?? 0), 0)
   return earned + st.stars_bonus - spent
 }
 
@@ -179,7 +180,7 @@ export const mockApi: Api = {
   async buy(token, itemId) {
     const db = load()
     const st = bySession(db, token)
-    const item = SHOP_ITEMS.find((i) => i.id === itemId)
+    const item = CATALOG.get(itemId)
     if (!item) throw new Error('YOK')
     if (db.purchases.some((p) => p.student_id === st.id && p.item_id === itemId)) return wait(undefined)
     if (stars(db, st.id) < item.price) throw new Error('YETERSIZ_YILDIZ')
@@ -192,7 +193,7 @@ export const mockApi: Api = {
     const st = bySession(db, token)
     if (!SHOP_ITEMS.some((item) => item.slot === slot)) throw new Error('YUVA_GECERSIZ')
     if (itemId) {
-      const item = SHOP_ITEMS.find((i) => i.id === itemId)
+      const item = CATALOG.get(itemId)
       if (!item || item.slot !== slot || !db.purchases.some((p) => p.student_id === st.id && p.item_id === itemId)) {
         throw new Error('ESYA_TAKILAMAZ')
       }

@@ -5,7 +5,9 @@ import { BG } from './bg'
 import { ITEMS, MANIFEST, SPECIES, fx, type CatalogItem, type ItemSlot, type Raw, type Species } from './catalog'
 import { compose, composed, type Part } from './render'
 import { cradleFor, cradleParts, type CradleShape } from './companionCradle'
-import { COMPANION_ACTIONS, contactFor, contactParts } from './companionContact'
+import { COMPANION_ACTIONS, contactFor, contactParts, gripParts } from './companionContact'
+import { HELD_ACTION, HELD_ART, heldKind } from './held'
+import { HeldScene } from './HeldScene'
 
 export type Mood = 'idle' | 'happy'
 export interface Look { x: number; y: number } // -1..1
@@ -265,24 +267,29 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const p = showPet ? petOf(animal, eq) : null
   const pose = p ? poseOf(eq, p.id) : 'side'
   const cradle = p && pose === 'hug' ? cradleFor(p.id) : undefined
-  const contact = p && contactFor(p.id, pose)
+  const item = frame && pose !== 'hug' ? heldKind(eq.held) : undefined
+  const held = item ? HELD_ART[item] : undefined
+  const contact = p && !held && contactFor(p.id, pose)
   const action = interactive && p && (contact || cradle) && COMPANION_ACTIONS[p.id]
   const live = !cradle && (alive ?? size >= 100)
   const root = useRef<HTMLDivElement>(null)
   const [tap, setTap] = useState(0)
-  const [playing, setPlaying] = useState('')
+  const [playing, setPlaying] = useState<{ key: string; motion: boolean } | null>(null)
   const timer = useRef<number | undefined>(undefined)
   useEffect(() => () => window.clearTimeout(timer.current), [])
-  const isPlaying = tap > 0 && playing === p?.id + ':' + pose
-  const poke = () => {
-    setPlaying(p?.id + ':' + pose)
+  const companionKey = (p?.id ?? '') + ':' + pose
+  const isPlaying = tap > 0 && playing?.key === companionKey
+  const heldPlaying = tap > 0 && item !== undefined && playing?.key === item
+  const play = (key: string) => {
+    const motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setPlaying({ key, motion })
     setTap((t) => t + 1)
     window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setTap(0), 1000)
+    timer.current = window.setTimeout(() => setTap(0), key === 'football' ? 1350 : 1000)
   }
   const dpr = typeof devicePixelRatio === 'number' ? Math.min(devicePixelRatio, 3) : 2
   const px = (frame ? 1.6 : 1) * size * dpr
-  const L = layers(eq, sd, action && isPlaying ? 'happy' : mood, cradle)
+  const L = layers(eq, sd, (action && isPlaying) || heldPlaying ? 'happy' : mood, cradle)
   const split = live && L.moving
   const uriCradle = useComp(cradle ? L.all : [], px)
   const uriAll = useComp(split || cradle ? [] : L.all, px)
@@ -291,6 +298,10 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const uriUp = useComp(split ? L.upper : [], px)
   const uriBlink = useComp(live ? L.blink : [], px)
   const uriContact = useComp(contact ? contactParts(contact, L.skin, L.garment) : [], px)
+  const uriHeldGrip = useComp(held ? [
+    ...(held.fixed ? [{ src: held.fixed }] : []),
+    ...gripParts(held, L.skin, L.garment),
+  ] : [], px)
 
   // Bakış çocukta kalır. Temas katmanı, elle temas noktasını korur.
   const hasLook = !!look
@@ -333,9 +344,9 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
     ? ({ ['--ex' as string]: `${look.x * EX}%`, ['--ey' as string]: `${look.y * EX * 0.5}%`, ['--tl' as string]: `${look.x * 4}deg`, ['--tx' as string]: '0%' } as CSSProperties)
     : {}
   const broadPet = p && (SIDE_PETS.has(p.id) || BULKY_PETS.has(p.id))
-  const scale = p ? (broadPet ? 1.02 : 1.16) : SOLO_SCALE
-  const kidTop = p ? 0.035 : SOLO_TOP
-  const kidOffset = p ? (pose === 'hug' ? -0.018 : -0.145) : 0
+  const scale = held ? 0.98 : p ? (broadPet ? 1.02 : 1.16) : SOLO_SCALE
+  const kidTop = held ? -0.015 : p ? 0.035 : SOLO_TOP
+  const kidOffset = p ? (held ? -0.11 : pose === 'hug' ? -0.018 : -0.145) : 0
   const kidLeft = (1 - scale) / 2 + kidOffset
   const kidStyle: CSSProperties | undefined = frame
     ? { top: kidTop * size, left: kidLeft * size, width: scale * size }
@@ -349,15 +360,20 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
   const petWidth = broadPet ? 0.34 : 0.33
   const petStyle = { left: (0.81 - petWidth / 2) * size, bottom: size * 0.065, width: petWidth * size }
   const contactStyle = contact ? { left: contact.x * size, top: contact.y * size, width: contact.size * size } : undefined
+  const heldStyle = held ? {
+    left: (held.x + (p ? 0 : 0.11)) * size,
+    top: held.y * size,
+    width: held.size * size,
+  } : undefined
   const grounded = p && pose === 'side' && p.id !== 'chick'
   const cls = [
     'avatar', frame ? '' : 'bare', bounce ? 'bounce' : '', mood === 'happy' ? 'happy' : '',
     live ? 'alive' : '', isPlaying && !action ? 'tap' : '', p ? 'with-pet' : '',
-    p && `scene-${pose}`, contact ? 'scene-contact' : '',
+    p && `scene-${pose}`, contact || held ? 'scene-contact' : '', held ? 'scene-held' : '',
   ].filter(Boolean).join(' ')
   const h = hash(sd)
   return (
-    <div ref={root} className={cls} style={{ width: size, height: size, ['--breath-delay' as string]: `-${h % 3000}ms`, ...lookVars }} onPointerDown={interactive ? undefined : poke}>
+    <div ref={root} className={cls} style={{ width: size, height: size, ['--breath-delay' as string]: `-${h % 3000}ms`, ...lookVars }} onPointerDown={action || (interactive && held) ? undefined : () => play(companionKey)}>
       {frame && <div className="av-bg" style={{ background: BG[eq.bg ?? 'none'] ?? BG.none }} />}
       {cradle ? (
         <div key={isPlaying ? tap : 0} className={`av-stage av-illustration${isPlaying && action ? ` av-react-${p?.id}` : ''}`}>
@@ -384,6 +400,10 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
                 )}
               </div>
             </div>
+            {held && item && heldStyle && (
+              <HeldScene key={heldPlaying ? tap : 0} art={held} kind={item} grip={uriHeldGrip}
+                style={heldStyle} playing={!!(heldPlaying && playing?.motion)} />
+            )}
             {grounded && <span className="av-companion-ground" aria-hidden="true"
               style={{ left: '83%', bottom: contact ? '3.5%' : '7%' }} />}
             {contact ? (
@@ -396,7 +416,9 @@ export function Avatar({ animal, equipped, seed, size = 96, bounce = false, look
         </div>
       )}
       {action && <button type="button" className={`av-play-pet${pose === 'hug' ? ' av-play-pet-hug' : ''}`}
-        onClick={poke} aria-label={action.label} title={action.label} />}
+        onClick={() => play(companionKey)} aria-label={action.label} title={action.label} />}
+      {interactive && held && item && <button type="button" className="av-play-held"
+        style={heldStyle} onClick={() => play(item)} aria-label={HELD_ACTION[item]} title={HELD_ACTION[item]} />}
       {isPlaying && action && <span key={tap} className="av-companion-reply" role="status">{action.reply}</span>}
       {isPlaying && !action && <span className="av-hearts" key={tap} aria-hidden><i>💖</i><i>✨</i><i>💛</i></span>}
     </div>
@@ -435,6 +457,7 @@ export function ItemPreview({ id, slot, animal, equipped, seed }: { id: string; 
     }
     if (layer) return <ProductLayer layer={layer} kind="clothes" />
   }
+  if (slot === 'held') return <Avatar animal={animal} equipped={eq} seed={seed} size={90} pet={false} alive={false} />
   if (slot === 'pose') {
     const pet = petOf(animal, eq)
     return <Avatar animal={pet.id} equipped={eq} seed={seed} size={84} pet alive={false} />
